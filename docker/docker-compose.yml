@@ -10,6 +10,7 @@ services:
         X_URL: ${X_URL}
         YT_URL: ${YT_URL}
         TW_URL: ${TW_URL}
+    image: ania_nginx:latest
     env_file:
       - .env
     container_name: ania_nginx
