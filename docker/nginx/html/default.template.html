@@ -1,0 +1,301 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Error {{http_code}}</title>
+    <style>
+        :root {
+            color-scheme: dark;
+            --bg-overlay: rgba(0, 0, 0, 0.6);
+            --text-main: #ffffff;
+            --text-muted: #c3c7d1;
+            --accent: #ffb347;
+            --shadow-soft: 0 24px 60px rgba(0, 0, 0, 0.6);
+        }
+
+        * {
+            box-sizing: border-box;
+        }
+
+        html, body {
+            margin: 0;
+            padding: 0;
+            height: 100%;
+        }
+
+        body {
+            font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", sans-serif;
+            color: var(--text-main);
+            background:
+                linear-gradient(135deg, rgba(10, 10, 20, 0.9), rgba(10, 10, 10, 0.95)),
+                url("/assets/disorder.jpg") center center / cover no-repeat fixed;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .overlay {
+            position: fixed;
+            inset: 0;
+            background: radial-gradient(circle at top, rgba(255, 255, 255, 0.06), transparent 55%),
+                        radial-gradient(circle at bottom, rgba(0, 0, 0, 0.85), transparent 55%);
+            pointer-events: none;
+            z-index: 0;
+        }
+
+        .page {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            max-width: 960px;
+            padding: 24px;
+        }
+
+        .card {
+            backdrop-filter: blur(18px);
+            -webkit-backdrop-filter: blur(18px);
+            background: linear-gradient(135deg, rgba(5, 5, 15, 0.9), rgba(20, 20, 40, 0.9));
+            border-radius: 18px;
+            border: 1px solid rgba(255, 255, 255, 0.08);
+            padding: clamp(24px, 5vw, 40px);
+            box-shadow: var(--shadow-soft);
+            display: grid;
+            grid-template-columns: minmax(0, 1.2fr) minmax(0, 1fr);
+            gap: clamp(20px, 4vw, 32px);
+            align-items: center;
+        }
+
+        .brand {
+            display: flex;
+            align-items: center;
+            gap: 12px;
+            margin-bottom: 16px;
+        }
+
+        .brand-logo {
+            width: 40px;
+            height: 40px;
+            border-radius: 10px;
+            overflow: hidden;
+            background: rgba(0, 0, 0, 0.4);
+            display: flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .brand-logo img {
+            max-width: 100%;
+            max-height: 100%;
+            object-fit: contain;
+        }
+
+        .brand-name {
+            font-size: 0.85rem;
+            letter-spacing: 0.14em;
+            text-transform: uppercase;
+            color: rgba(255, 255, 255, 0.7);
+        }
+
+        .code {
+            font-weight: 700;
+            font-size: clamp(2.8rem, 7vw, 4.2rem);
+            letter-spacing: 0.18em;
+            text-transform: uppercase;
+            color: var(--accent);
+            text-shadow: 0 0 38px rgba(255, 179, 71, 0.55);
+        }
+
+        .title {
+            margin-top: 6px;
+            font-size: clamp(1.4rem, 3vw, 1.9rem);
+            font-weight: 600;
+        }
+
+        .message {
+            margin-top: 10px;
+            font-size: clamp(0.95rem, 1.9vw, 1.05rem);
+            line-height: 1.6;
+            color: var(--text-muted);
+        }
+
+        .hint {
+            margin-top: 16px;
+            font-size: 0.9rem;
+            opacity: 0.85;
+        }
+
+        .actions {
+            display: flex;
+            flex-wrap: wrap;
+            gap: 10px;
+            margin-top: 22px;
+        }
+
+        .side-visual {
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: 14px;
+            text-align: center;
+        }
+
+        .side-visual img {
+            width: min(350px, 80%);
+            max-width: 100%;
+            height: auto;
+            object-fit: contain;
+            filter: drop-shadow(0 18px 40px rgba(0, 0, 0, 0.85));
+        }
+
+        .side-text {
+            font-size: 0.85rem;
+            color: var(--text-muted);
+        }
+
+        .side-chip {
+            display: inline-flex;
+            align-items: center;
+            gap: 8px;
+            padding: 6px 11px;
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.14);
+            background: rgba(0, 0, 0, 0.5);
+            font-size: 0.75rem;
+            text-transform: uppercase;
+            letter-spacing: 0.12em;
+            color: rgba(255, 255, 255, 0.72);
+        }
+
+        .side-dot {
+            width: 7px;
+            height: 7px;
+            border-radius: 999px;
+            background: #4ade80;
+            box-shadow: 0 0 16px rgba(74, 222, 128, 0.9);
+        }
+
+        .btn-social {
+            border-radius: 999px;
+            border: 1px solid rgba(255, 255, 255, 0.18);
+            background: rgba(0, 0, 0, 0.65);
+            padding: 9px;
+            font-size: 0.85rem;
+            letter-spacing: 0.08em;
+            text-transform: uppercase;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            gap: 8px;
+        }
+
+        .btn-social:hover {
+            background: rgba(0, 0, 0, 0.9);
+            border-color: rgba(255, 255, 255, 0.35);
+        }
+
+        .btn-social-icon {
+            width: 40px;
+            height: 40px;
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+        }
+
+        .btn-social-icon svg {
+            width: 100%;
+            height: 100%;
+            display: block;
+        }
+
+        @media (max-width: 720px) {
+            body {
+                background-attachment: scroll;
+            }
+
+            .card {
+                grid-template-columns: minmax(0, 1fr);
+            }
+
+            .side-visual {
+                order: -1;
+            }
+
+            .page {
+                padding: 16px;
+            }
+        }
+    </style>
+</head>
+<body>
+    <div class="overlay" aria-hidden="true"></div>
+
+    <div class="page">
+        <div class="card">
+            <div class="content">
+                <div class="brand">
+                    <div class="brand-logo">
+                        <img src="/assets/logo.png" alt="Site logo">
+                    </div>
+                    <div class="brand-name">Ania</div>
+                </div>
+
+                <div class="code">{{http_code}}</div>
+                <div class="title">{{message}}</div>
+                <p class="message">
+                    Estamos trabajando para levantar el sitio. Por ahora, esta página es todo lo que verás.
+                </p>
+                <p class="hint">
+                    Tu visita llegó antes de tiempo. El sitio está en construcción y pronto estará disponible.
+                    Si necesitas contactar con nosotros, ve a la comunidad de Discord.
+                </p>
+
+                <div class="actions">
+                    <a href="${tw_url}" class="btn-social" rel="noreferrer noopener" target="_blank">
+                        <span class="btn-social-icon" aria-hidden="true">
+                            <svg role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M11.571 4.714h1.715v5.143H11.57zm4.715 0H18v5.143h-1.714zM6 0L1.714 4.286v15.428h5.143V24l4.286-4.286h3.428L22.286 12V0zm14.571 11.143l-3.428 3.428h-3.429l-3 3v-3H6.857V1.714h13.714Z"/>                                
+                            </svg>
+                        </span>
+                    </a>
+                    <a href="${discord_url}" class="btn-social" rel="noreferrer noopener" target="_blank">
+                        <span class="btn-social-icon" aria-hidden="true">
+                            <svg role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M19.73 4.87a18.2 18.2 0 0 0-4.6-1.44c-.21.4-.4.8-.58 1.21-1.69-.25-3.4-.25-5.1 0-.18-.41-.37-.82-.59-1.2-1.6.27-3.14.75-4.6 1.43A19.04 19.04 0 0 0 .96 17.7a18.43 18.43 0 0 0 5.63 2.87c.46-.62.86-1.28 1.2-1.98-.65-.25-1.29-.55-1.9-.92.17-.12.32-.24.47-.37 3.58 1.7 7.7 1.7 11.28 0l.46.37c-.6.36-1.25.67-1.9.92.35.7.75 1.35 1.2 1.98 2.03-.63 3.94-1.6 5.64-2.87.47-4.87-.78-9.09-3.3-12.83ZM8.3 15.12c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.89 2.27-2 2.27Zm7.4 0c-1.1 0-2-1.02-2-2.27 0-1.24.88-2.26 2-2.26s2.02 1.02 2 2.26c0 1.25-.88 2.27-2 2.27Z"/>
+                            </svg>
+                        </span>
+                    </a>
+                    <a href="${x_url}" class="btn-social" rel="noreferrer noopener" target="_blank">
+                        <span class="btn-social-icon" aria-hidden="true">
+                            <svg role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <g>
+                                    <path fill="currentColor" d="M21.742 21.75l-7.563-11.179 7.056-8.321h-2.456l-5.691 6.714-4.54-6.714H2.359l7.29 10.776L2.25 21.75h2.456l6.035-7.118 4.818 7.118h6.191-.008zM7.739 3.818L18.81 20.182h-2.447L5.29 3.818h2.447z" />
+                                </g>
+                            </svg>
+
+                        </span>
+                    </a>
+                    <a href="${yt_url}" class="btn-social" rel="noreferrer noopener" target="_blank">
+                        <span class="btn-social-icon" aria-hidden="true">
+                            <svg role="img" xmlns="http://www.w3.org/2000/svg" width="24" height="24" fill="none" viewBox="0 0 24 24">
+                                <path fill="currentColor" d="M23.498 6.186a3.016 3.016 0 0 0-2.122-2.136C19.505 3.545 12 3.545 12 3.545s-7.505 0-9.377.505A3.017 3.017 0 0 0 .502 6.186C0 8.07 0 12 0 12s0 3.93.502 5.814a3.016 3.016 0 0 0 2.122 2.136c1.871.505 9.376.505 9.376.505s7.505 0 9.377-.505a3.015 3.015 0 0 0 2.122-2.136C24 15.93 24 12 24 12s0-3.93-.502-5.814zM9.545 15.568V8.432L15.818 12l-6.273 3.568z"/>
+                            </svg>
+                        </span>
+                    </a>
+                </div>
+            </div>
+
+            <div class="side-visual">
+                <div class="side-chip">
+                    <span class="side-dot"></span>
+                    Empty Page
+                </div>
+                <img src="/assets/under_construction.webp" alt="Background illustration">
+                <div class="side-text">
+                    Puedes volver más tarde para ver los avances.
+                </div>
+            </div>
+        </div>
+    </div>
+</body>
+</html>

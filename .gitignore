@@ -1,0 +1,3 @@
+docker/nginx/assets/
+docker/data/
+docker/.env

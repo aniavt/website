@@ -1,0 +1,24 @@
+services:
+  nginx:
+    build:
+      context: ./nginx
+      dockerfile: Dockerfile
+      args:
+        DOMAIN: ${DOMAIN}
+        PORT: ${PORT}
+        DISCORD_URL: ${DISCORD_URL}
+        X_URL: ${X_URL}
+        YT_URL: ${YT_URL}
+        TW_URL: ${TW_URL}
+    env_file:
+      - .env
+    container_name: ania_nginx
+    restart: unless-stopped
+    expose:
+      - "${PORT}"
+    network_mode: host
+    volumes:
+      - ./data/nginx/assets:/usr/share/nginx/assets
+      - ./data/nginx/log:/var/log/nginx
+
+  
