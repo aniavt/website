@@ -10,6 +10,7 @@ services:
         X_URL: ${X_URL}
         YT_URL: ${YT_URL}
         TW_URL: ${TW_URL}
+        API_URL: http://172.20.0.101:${SERVER_PORT}
     image: ania_nginx:latest
     env_file:
       - .env
@@ -22,4 +23,47 @@ services:
       - ./data/nginx/assets:/usr/share/nginx/assets
       - ./data/nginx/log:/var/log/nginx
 
+  db:
+    image: mongo:8.0
+    container_name: ania_db_mongo
+    env_file: 
+      - .env
+    expose:
+      - "27017"
+    volumes:
+      - ./data/db:/data/db
+    environment:
+      MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
+      MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
+    networks:
+      ania_network:
+        ipv4_address: 172.20.0.100
+
+  server:
+    build:
+      context: ..
+      dockerfile: docker/server/Dockerfile
+    container_name: ania_server
+    env_file:
+      - .env
+    expose:
+      - "${SERVER_PORT}"
+    environment:
+      PORT: ${SERVER_PORT}
+      HOSTNAME: ${SERVER_HOSTNAME}
+      MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@172.20.0.100:27017/${MONGO_INITDB_DATABASE}?authSource=admin"
+    networks:
+      ania_network:
+        ipv4_address: 172.20.0.101
+    depends_on:
+      - db
+
+networks:
+  ania_network:
+    driver: bridge
+    ipam:
+      driver: default
+      config:
+        - subnet: 172.20.0.0/16
+          gateway: 172.20.0.1
   

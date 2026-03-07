@@ -2,6 +2,7 @@ FROM nginx:1.29.5-alpine
 
 ARG DOMAIN
 ARG PORT
+ARG API_URL
 
 # Social URLs
 ARG DISCORD_URL
@@ -60,9 +61,10 @@ RUN chmod 644 /etc/logrotate.d/nginx
 RUN echo "0 0 * * * /usr/sbin/logrotate /etc/logrotate.d/nginx" > /etc/crontabs/root
 
 # Replace environment variables in configuration files
-RUN DOMAIN=${DOMAIN} \
-    PORT=${PORT}     \
-    envsubst '$DOMAIN $PORT' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+RUN DOMAIN=${DOMAIN}   \
+    PORT=${PORT}       \
+    API_URL=${API_URL} \
+    envsubst '$DOMAIN $PORT $API_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 
 EXPOSE ${PORT}
