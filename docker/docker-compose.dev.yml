@@ -5,3 +5,13 @@ services:
       dockerfile: docker/server/Dockerfile.dev
     volumes:
       - ../server:/app
+
+  web_admin:
+    build:
+      context: ..
+      dockerfile: docker/admin-website/Dockerfile.dev
+    volumes:
+      - ../admin-website:/app
+    environment:
+      - NODE_ENV=development
+      - VITE_API_NODE_ENV=development

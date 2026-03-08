@@ -12,6 +12,7 @@ services:
         TW_URL: ${TW_URL}
         API_URL: http://172.20.0.101:${SERVER_PORT}
         WEB_URL: http://172.20.0.103
+        WEB_ADMIN_URL: http://172.20.0.102:80
     image: ania_nginx:latest
     env_file:
       - .env
@@ -72,6 +73,21 @@ services:
         ipv4_address: 172.20.0.101
     depends_on:
       - db
+
+  web_admin:
+    build:
+      context: ..
+      dockerfile: docker/admin-website/Dockerfile
+    container_name: ania_web_admin
+    restart: unless-stopped
+    expose:
+      - "80"
+    environment:
+      - NODE_ENV=production
+      - VITE_API_NODE_ENV=production
+    networks:
+      ania_network:
+        ipv4_address: 172.20.0.102
 
 networks:
   ania_network:

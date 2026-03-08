@@ -4,6 +4,7 @@ ARG DOMAIN
 ARG PORT
 ARG API_URL
 ARG WEB_URL
+ARG WEB_ADMIN_URL
 
 # Social URLs
 ARG DISCORD_URL
@@ -66,7 +67,8 @@ RUN DOMAIN=${DOMAIN}   \
     PORT=${PORT}       \
     API_URL=${API_URL} \
     WEB_URL=${WEB_URL} \
-    envsubst '$DOMAIN $PORT $API_URL $WEB_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+    WEB_ADMIN_URL=${WEB_ADMIN_URL} \
+    envsubst '$DOMAIN $PORT $API_URL $WEB_URL $WEB_ADMIN_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 
 EXPOSE ${PORT}
