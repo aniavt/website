@@ -45,6 +45,7 @@ services:
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
+    image: ania_web:latest
     container_name: ania_web
     restart: unless-stopped
     expose:
