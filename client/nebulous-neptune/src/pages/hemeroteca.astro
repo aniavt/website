@@ -1,0 +1,58 @@
+---
+// src/pages/hemeroteca.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import HemeCard from '../components/HemeCard.astro';
+import VideoModal from '../components/VideoModal.astro';
+import { hemeroteca } from '../data/hemeroteca';
+---
+
+<BaseLayout title="Hemeroteca — Ania Starlight">
+  <section class="section-pad" style="padding-top: calc(var(--nav-h) + 60px)">
+    <div class="container">
+      <div class="section-label">Archivo audiovisual</div>
+      <h2 class="section-title">Heme<span class="accent-c">roteca</span></h2>
+      <p style="color:var(--text-dim);margin-bottom:32px;max-width:600px;line-height:1.7;font-size:.95rem">
+        Galería de reacciones, películas y contenido especial. Cada tarjeta abre el
+        reproductor de video o redirige al Drive correspondiente.
+      </p>
+
+      <!-- Filtros -->
+      <div class="filters" id="hemeFilters">
+        <button class="filter-btn active" data-hfilter="all">Todo</button>
+        <button class="filter-btn" data-hfilter="reaccion">Reacciones</button>
+        <button class="filter-btn" data-hfilter="pelicula">Películas</button>
+        <button class="filter-btn" data-hfilter="especial">Especiales</button>
+      </div>
+
+      <!-- Grid -->
+      <div class="heme-grid" id="hemeGrid">
+        {hemeroteca.map((item) => (
+          <div data-category={item.category}>
+            <HemeCard item={item} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+
+  <!-- Modal de video -->
+  <VideoModal />
+</BaseLayout>
+
+<script>
+  // Filtro de categorías
+  const btns  = document.querySelectorAll<HTMLButtonElement>('#hemeFilters .filter-btn');
+  const items = document.querySelectorAll<HTMLElement>('#hemeGrid [data-category]');
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.hfilter ?? 'all';
+      items.forEach((item) => {
+        item.style.display =
+          filter === 'all' || item.dataset.category === filter ? '' : 'none';
+      });
+    });
+  });
+</script>

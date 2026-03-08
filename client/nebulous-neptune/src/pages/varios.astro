@@ -1,0 +1,78 @@
+---
+// src/pages/varios.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { varios } from '../data/varios';
+---
+
+<BaseLayout title="Animes Varios — Ania Starlight">
+  <section class="section-pad" style="padding-top: calc(var(--nav-h) + 60px)">
+    <div class="container">
+      <div class="section-label">Fuera de temporada</div>
+      <h2 class="section-title">Animes <span class="accent-c">Varios</span></h2>
+
+      {varios.map((sec) => (
+        <div>
+          <div class="sec-title">
+            <span class="dot"></span>
+            {sec.section}
+          </div>
+          <div class="anime-grid" style="margin-bottom: 48px">
+            {sec.items.map((item) => (
+              <a href={`/varios/${item.id}`} class="anime-card varios-card">
+                <div class="anime-thumb">
+                  {item.image
+                    ? <img src={item.image} alt={item.title} loading="lazy" />
+                    : <span class="emoji-placeholder">{item.emoji}</span>
+                  }
+                  <div class={`anime-status status-${item.status}`}>
+                    {item.status === 'completed' ? 'Completado' : 'Próximo'}
+                  </div>
+                  <div class="card-hover-overlay">
+                    <span class="view-label">VER EPISODIOS →</span>
+                  </div>
+                </div>
+                <div class="anime-body">
+                  <h3>{item.title}</h3>
+                  <div class="meta">{item.genre}</div>
+                  <div class="ep-count">
+                    <span class="ep-num-c">{item.episodes.length}</span>
+                    <span class="ep-lbl">episodio{item.episodes.length !== 1 ? 's' : ''}</span>
+                  </div>
+                </div>
+              </a>
+            ))}
+          </div>
+        </div>
+      ))}
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .sec-title {
+    font-family: 'Orbitron', sans-serif; font-size: .95rem; letter-spacing: .08em;
+    color: #fff; margin: 0 0 18px; padding-bottom: 10px;
+    border-bottom: 1px solid var(--border-c);
+    display: flex; align-items: center; gap: 12px;
+  }
+  .dot { width: 8px; height: 8px; border-radius: 50%; background: var(--cyan); box-shadow: 0 0 8px var(--cyan); flex-shrink: 0; }
+
+  .varios-card { text-decoration: none; display: block; }
+  .card-hover-overlay {
+    position: absolute; inset: 0;
+    background: rgba(255,45,138,.1);
+    display: flex; align-items: center; justify-content: center;
+    opacity: 0; transition: opacity .3s;
+  }
+  .varios-card:hover .card-hover-overlay { opacity: 1; }
+  .view-label {
+    font-family: 'Orbitron', sans-serif; font-size: .65rem;
+    letter-spacing: .18em; color: var(--pink);
+    background: rgba(4,6,14,.8); padding: 8px 16px;
+    border: 1px solid var(--pink); border-radius: 4px;
+    box-shadow: var(--glow-p);
+  }
+  .ep-count { display: flex; align-items: baseline; gap: 5px; margin-top: 10px; }
+  .ep-num-c { font-family: 'Orbitron', sans-serif; font-size: 1.1rem; font-weight: 900; color: var(--pink); }
+  .ep-lbl   { font-size: .75rem; color: var(--text-dim); }
+</style>

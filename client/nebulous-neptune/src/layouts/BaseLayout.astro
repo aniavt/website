@@ -1,0 +1,52 @@
+---
+// src/layouts/BaseLayout.astro
+import '../styles/global.css';
+import Navbar from '../components/Navbar.astro';
+import Footer from '../components/Footer.astro';
+
+interface Props {
+  title?: string;
+  description?: string;
+}
+
+const {
+  title = 'Ania Starlight',
+  description = 'VTuber Cyber Hikikomori — Reacciones, anime y comunidad',
+} = Astro.props;
+---
+
+<!doctype html>
+<html lang="es">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content={description} />
+    <title>{title}</title>
+    <link rel="icon" type="image/svg+xml" href="/favicon.svg" />
+  </head>
+  <body>
+    <Navbar />
+    <main>
+      <slot />
+    </main>
+    <Footer />
+    <button class="up-btn" id="upBtn" aria-label="Volver arriba">↑</button>
+
+    <script>
+      // Reveal on scroll
+      function initReveal() {
+        const obs = new IntersectionObserver(
+          (entries) => entries.forEach((e) => { if (e.isIntersecting) { e.target.classList.add('shown'); obs.unobserve(e.target); } }),
+          { threshold: 0.08 }
+        );
+        document.querySelectorAll('.reveal:not(.shown)').forEach((el) => obs.observe(el));
+      }
+      document.addEventListener('DOMContentLoaded', initReveal);
+
+      // Up button
+      document.getElementById('upBtn')?.addEventListener('click', () =>
+        window.scrollTo({ top: 0, behavior: 'smooth' })
+      );
+    </script>
+  </body>
+</html>
