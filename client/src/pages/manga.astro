@@ -1,0 +1,42 @@
+---
+// src/pages/manga.astro
+// ✏️ Cuando esté listo el MVP, agregar datos en src/data/manga.ts
+//    y reemplazar la pantalla "Próximamente" por el grid de manga.
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="Manga — Ania Starlight">
+  <section class="section-pad" style="padding-top: calc(var(--nav-h) + 60px)">
+    <div class="container">
+      <div class="section-label">Xtremo + Ania</div>
+      <h2 class="section-title">Manga <span class="accent-p">&amp; OSTs</span></h2>
+
+      <div class="coming-screen">
+        <div class="coming-icon">📚</div>
+        <h3>PRÓXIMAMENTE</h3>
+        <p>
+          El apartado de Manga &amp; OSTs está en desarrollo.<br />
+          Xtremo y Ania están preparando algo especial: visualizador de manga
+          con banda sonora configurable por capítulo. ✦
+        </p>
+        <a href="/" class="btn btn-pink" style="margin-top: 8px">Volver al inicio</a>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .coming-screen {
+    display: flex; flex-direction: column; align-items: center;
+    justify-content: center; min-height: 55vh; gap: 20px; text-align: center;
+  }
+  .coming-icon { font-size: 5rem; animation: float-icon 3s ease infinite; }
+  @keyframes float-icon { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-14px)} }
+  .coming-screen h3 {
+    font-family: 'Orbitron', sans-serif; font-size: 1.5rem;
+    font-weight: 900; color: var(--pink); letter-spacing: .15em;
+  }
+  .coming-screen p {
+    color: var(--text-dim); max-width: 420px; line-height: 1.75; font-size: .97rem;
+  }
+</style>

@@ -1,0 +1,49 @@
+---
+// src/pages/temporada.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import AnimeCard from '../components/AnimeCard.astro';
+import { animes } from '../data/animes';
+---
+
+<BaseLayout title="Temporada — Ania Starlight">
+  <section class="section-pad" style="padding-top: calc(var(--nav-h) + 60px)">
+    <div class="container">
+      <div class="section-label">Animes en curso</div>
+      <h2 class="section-title">Temporada <span class="accent-c">Actual</span></h2>
+
+      <!-- Filtros (client-side) -->
+      <div class="filters" id="animeFilters">
+        <button class="filter-btn active" data-filter="all">Todos</button>
+        <button class="filter-btn" data-filter="watching">Viendo</button>
+        <button class="filter-btn" data-filter="completed">Completados</button>
+        <button class="filter-btn" data-filter="upcoming">Próximamente</button>
+      </div>
+
+      <!-- Grid — renderizado en servidor, filtrado en cliente -->
+      <div class="anime-grid" id="animeGrid">
+        {animes.map((anime) => (
+          <div data-status={anime.status}>
+            <AnimeCard anime={anime} />
+          </div>
+        ))}
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<script>
+  const btns = document.querySelectorAll<HTMLButtonElement>('#animeFilters .filter-btn');
+  const items = document.querySelectorAll<HTMLElement>('#animeGrid [data-status]');
+
+  btns.forEach((btn) => {
+    btn.addEventListener('click', () => {
+      btns.forEach((b) => b.classList.remove('active'));
+      btn.classList.add('active');
+      const filter = btn.dataset.filter ?? 'all';
+      items.forEach((item) => {
+        item.style.display =
+          filter === 'all' || item.dataset.status === filter ? '' : 'none';
+      });
+    });
+  });
+</script>

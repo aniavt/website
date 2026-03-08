@@ -1,0 +1,72 @@
+---
+// src/components/VideoModal.astro
+// Modal de video — se activa por JS desde HemeCard
+---
+
+<div class="modal-overlay" id="videoModal">
+  <div class="modal-box">
+    <button class="modal-close" id="modalClose">✕</button>
+    <div class="modal-title" id="modalTitle">Cargando...</div>
+    <div class="video-container" id="videoContainer"></div>
+    <div class="video-meta" id="videoMeta"></div>
+  </div>
+</div>
+
+<script>
+  // Abrir modal
+  function openMedia(card: HTMLElement) {
+    const type     = card.dataset.type  ?? '';
+    const url      = card.dataset.url   ?? '';
+    const drive    = card.dataset.drive ?? '';
+    const title    = card.dataset.title ?? '';
+    const desc     = card.dataset.desc  ?? '';
+    const date     = card.dataset.date  ?? '';
+
+    // Drive sin video embebido → abre directo en nueva pestaña
+    if (type === 'drive' && drive) {
+      window.open(drive, '_blank');
+      return;
+    }
+
+    const modal     = document.getElementById('videoModal')!;
+    const container = document.getElementById('videoContainer')!;
+    const meta      = document.getElementById('videoMeta')!;
+
+    document.getElementById('modalTitle')!.textContent = title;
+
+    if (type === 'youtube' && url) {
+      container.innerHTML = `<iframe src="https://www.youtube.com/embed/${url}?autoplay=1" allow="autoplay; fullscreen" allowfullscreen></iframe>`;
+    } else if (type === 'video' && url) {
+      container.innerHTML = `<video controls autoplay src="${url}"></video>`;
+    } else {
+      container.innerHTML = `<div style="display:flex;align-items:center;justify-content:center;height:300px;color:var(--text-dim)">Sin video disponible</div>`;
+    }
+
+    meta.innerHTML = `
+      <span style="font-size:.85rem;color:var(--text-dim)">${desc} · ${date}</span>
+      ${drive ? `<a class="drive-link-btn" href="${drive}" target="_blank">📁 Abrir en Drive</a>` : ''}
+    `;
+
+    modal.classList.add('open');
+  }
+
+  // Cerrar modal
+  function closeModal() {
+    const modal = document.getElementById('videoModal')!;
+    modal.classList.remove('open');
+    document.getElementById('videoContainer')!.innerHTML = '';
+  }
+
+  // Eventos
+  document.addEventListener('DOMContentLoaded', () => {
+    document.getElementById('modalClose')?.addEventListener('click', closeModal);
+    document.getElementById('videoModal')?.addEventListener('click', (e) => {
+      if (e.target === document.getElementById('videoModal')) closeModal();
+    });
+
+    // Delegación en todas las heme-cards
+    document.querySelectorAll<HTMLElement>('.heme-card').forEach((card) => {
+      card.addEventListener('click', () => openMedia(card));
+    });
+  });
+</script>

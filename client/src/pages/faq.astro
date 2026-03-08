@@ -1,0 +1,115 @@
+---
+// src/pages/faq.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+import { faq } from '../data/config';
+---
+
+<BaseLayout title="FAQ & Staff — Ania Starlight">
+  <section class="section-pad" style="padding-top: calc(var(--nav-h) + 60px)">
+    <div class="container">
+      <div class="section-label">Staff & Comunidad</div>
+      <h2 class="section-title">FAQ <span class="accent-p">&amp; Comentarios</span></h2>
+
+      <div class="faq-layout">
+        <!-- FAQ accordion -->
+        <div>
+          <h3 class="sub-heading">PREGUNTAS FRECUENTES</h3>
+          <div class="faq-list" id="faqList">
+            {faq.map((item, i) => (
+              <div class="faq-item" id={`faq-${i}`}>
+                <div class="faq-q" data-index={i}>
+                  <span>{item.q}</span>
+                  <span class="arrow">+</span>
+                </div>
+                <div class="faq-a">{item.a}</div>
+              </div>
+            ))}
+          </div>
+        </div>
+
+        <!-- Comentarios (en memoria - sin backend) -->
+        <div class="comment-box">
+          <h3 class="sub-heading">DEJA UN COMENTARIO</h3>
+          <p style="font-size:.88rem;color:var(--text-dim);margin-bottom:16px;line-height:1.65">
+            Zona para que el staff y la comunidad dejen cositas. ¡Pregunten lo que quieran! 💜
+          </p>
+          <input
+            class="comment-input"
+            type="text"
+            id="commentName"
+            placeholder="Tu nombre / alias"
+            style="height:44px;resize:none;margin-bottom:10px"
+          />
+          <textarea
+            class="comment-input"
+            id="commentText"
+            rows="4"
+            placeholder="Escribe tu comentario o pregunta..."
+            style="margin-bottom:10px"
+          ></textarea>
+          <button class="btn btn-pink" id="submitComment" style="align-self:flex-start">
+            Enviar
+          </button>
+
+          <h3 class="sub-heading" style="margin-top:28px">COMENTARIOS RECIENTES</h3>
+          <div class="comments-display" id="commentsDisplay"></div>
+        </div>
+      </div>
+    </div>
+  </section>
+</BaseLayout>
+
+<style>
+  .faq-layout { display: grid; grid-template-columns: 1fr 1fr; gap: 48px; align-items: start; }
+  .faq-list   { display: flex; flex-direction: column; gap: 14px; }
+  .sub-heading {
+    font-family: 'Orbitron', sans-serif; font-size: .75rem;
+    letter-spacing: .2em; color: var(--cyan); margin-bottom: 18px;
+  }
+  .comment-box { display: flex; flex-direction: column; }
+  .comments-display { display: flex; flex-direction: column; gap: 12px; max-height: 360px; overflow-y: auto; padding-right: 4px; }
+
+  @media(max-width:700px) { .faq-layout { grid-template-columns: 1fr; } }
+</style>
+
+<script>
+  // ── FAQ accordion ───────────────────────────────────────
+  document.querySelectorAll<HTMLElement>('.faq-q').forEach((q) => {
+    q.addEventListener('click', () => {
+      const idx  = q.dataset.index!;
+      const item = document.getElementById(`faq-${idx}`)!;
+      const open = item.classList.contains('open');
+      document.querySelectorAll('.faq-item').forEach((x) => x.classList.remove('open'));
+      if (!open) item.classList.add('open');
+    });
+  });
+
+  // ── Comments ────────────────────────────────────────────
+  type Comment = { name: string; text: string; time: string };
+  const COMMENTS: Comment[] = [
+    { name: 'Ania ✦',  text: '¡Bienvenidos a la página! Aquí pueden dejar sus preguntas 💜', time: 'Hoy' },
+    { name: 'Xtremo',  text: 'El manga viewer estará listo pronto, ¡aguanten!', time: 'Hoy' },
+  ];
+
+  function renderComments() {
+    const disp = document.getElementById('commentsDisplay')!;
+    disp.innerHTML = COMMENTS.map((c) => `
+      <div class="comment-bubble">
+        <div class="comment-meta"><span class="name">${c.name}</span>${c.time}</div>
+        <div class="comment-text">${c.text}</div>
+      </div>
+    `).join('');
+    disp.scrollTop = disp.scrollHeight;
+  }
+
+  document.getElementById('submitComment')?.addEventListener('click', () => {
+    const name = (document.getElementById('commentName') as HTMLInputElement).value.trim() || 'Anónimo';
+    const text = (document.getElementById('commentText') as HTMLTextAreaElement).value.trim();
+    if (!text) return;
+    COMMENTS.push({ name, text, time: 'Ahora' });
+    (document.getElementById('commentText') as HTMLTextAreaElement).value = '';
+    renderComments();
+  });
+
+  renderComments();
+</script>
