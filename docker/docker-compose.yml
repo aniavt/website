@@ -11,8 +11,8 @@ services:
         YT_URL: ${YT_URL}
         TW_URL: ${TW_URL}
         API_URL: http://172.20.0.101:${SERVER_PORT}
-        WEB_URL: http://172.20.0.103
         WEB_ADMIN_URL: http://172.20.0.102:80
+        WEB_URL: http://172.20.0.103
     image: ania_nginx:latest
     env_file:
       - .env
