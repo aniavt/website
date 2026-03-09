@@ -140,7 +140,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (request.query.all === "true") {
             await userUseCases.incrementSessionVersion.execute(request.user!.id);
         }
-        return reply.send({ message: "Logged out successfully" });
+        return reply.send({ message: "logout_success" });
     });
 
 
@@ -150,7 +150,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "Password updated successfully" });
+        return reply.send({ message: "password_updated" });
     });
 
     app.post(prefixUrl("/refresh-token"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -164,7 +164,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
             return sendErrorResponse(reply, result.error);
         }
         clearAuthCookie(reply);
-        return reply.send({ message: "User deactivated successfully" });
+        return reply.send({ message: "user_deactivated" });
     });
 
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/activate/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -172,7 +172,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "User activated successfully" });
+        return reply.send({ message: "user_activated" });
     });
 
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/grant-admin/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -180,7 +180,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "Admin granted successfully" });
+        return reply.send({ message: "admin_granted" });
     });
 
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/revoke-admin/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -188,7 +188,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "Admin revoked successfully" });
+        return reply.send({ message: "admin_revoked" });
     });
 
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/grant-root/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -196,7 +196,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "Root granted successfully" });
+        return reply.send({ message: "root_granted" });
     });
 
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/revoke-root/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -204,7 +204,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "Root revoked successfully" });
+        return reply.send({ message: "root_revoked" });
     });
 
     app.get<{Querystring: {

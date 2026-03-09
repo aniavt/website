@@ -23,6 +23,11 @@ export class GetFaqHistoryUseCase {
         if (!item) return err("faq_item_not_found");
 
         const entries = await this.faqHistoryRepository.findByFaqId(faqId);
-        return ok(entries.map(toFaqHistoryEntryDto));
+
+        const userIds = [...new Set(entries.map((e) => e.by))];
+        const users = await Promise.all(userIds.map((id) => this.userRepository.findById(id)));
+        const usernameMap = new Map(userIds.map((id, i) => [id, users[i]?.username ?? id]));
+
+        return ok(entries.map((e) => toFaqHistoryEntryDto(e, usernameMap.get(e.by)!)));
     }
 }

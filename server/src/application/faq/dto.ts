@@ -33,6 +33,7 @@ export interface FaqHistoryEntryDto {
     readonly answerId: string;
     readonly action: string;
     readonly by: string;
+    readonly byUsername: string;
     readonly timestamp: Date;
 }
 
@@ -60,7 +61,7 @@ export function toFaqItemPublicDto(item: FaqItem, queryValue: string, answerValu
     };
 }
 
-export function toFaqHistoryEntryDto(entity: FaqHistoryEntry): FaqHistoryEntryDto {
+export function toFaqHistoryEntryDto(entity: FaqHistoryEntry, byUsername: string): FaqHistoryEntryDto {
     return {
         id: entity.id,
         faqId: entity.faqId,
@@ -68,6 +69,7 @@ export function toFaqHistoryEntryDto(entity: FaqHistoryEntry): FaqHistoryEntryDt
         answerId: entity.answerId,
         action: entity.action,
         by: entity.by,
+        byUsername,
         timestamp: entity.timestamp,
     };
 }

@@ -22,6 +22,10 @@ export class DeactivateUserUseCase {
             return err("user_not_authorized");
         }
 
+        if (user.isRoot) {
+            return err("user_cannot_deactivate_root");
+        }
+
         if (!user.isActive) return ok(void 0);
 
         try {

@@ -12,4 +12,5 @@ export type UserError =
     | "password_week_symbol"
     | "password_verify_failed"
     | "user_save_failed"
-    | "user_repo_error";
+    | "user_repo_error"
+    | "user_cannot_deactivate_root";
