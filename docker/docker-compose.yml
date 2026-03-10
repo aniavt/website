@@ -22,8 +22,8 @@ services:
       - "${PORT}"
     network_mode: host
     volumes:
-      - ./data/nginx/assets:/usr/share/nginx/assets
-      - ./data/nginx/log:/var/log/nginx
+      - ../data/nginx/assets:/usr/share/nginx/assets
+      - ../data/nginx/log:/var/log/nginx
 
   db:
     image: mongo:8.0
@@ -33,7 +33,7 @@ services:
     expose:
       - "27017"
     volumes:
-      - ./data/db:/data/db
+      - ../data/db:/data/db
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
