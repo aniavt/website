@@ -1,0 +1,275 @@
+---
+// src/pages/404.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+---
+
+<BaseLayout title="404 — Ania Starlight">
+  <div class="error-page">
+
+    <!-- Fondo animado -->
+    <div class="bg-grid"></div>
+    <div class="bg-glow"></div>
+    <div class="scanlines"></div>
+
+    <!-- Partículas -->
+    <div class="particles" id="particles"></div>
+
+    <div class="content">
+
+      <!-- Glitch 404 -->
+      <div class="glitch-wrap">
+        <span class="glitch" data-text="404">404</span>
+      </div>
+
+      <!-- Mensaje de error estilo terminal -->
+      <div class="terminal">
+        <div class="terminal-line">
+          <span class="prompt">ania@starlight:~$</span>
+          <span class="cmd" id="typeCmd"></span>
+          <span class="cursor">█</span>
+        </div>
+        <div class="terminal-output" id="termOutput" style="display:none">
+          <p><span class="err">ERROR</span> Página no encontrada en el sistema.</p>
+          <p><span class="warn">WARN </span> La ruta solicitada no existe en este universo.</p>
+          <p><span class="info">INFO </span> Redirigiendo al nodo principal...</p>
+        </div>
+      </div>
+
+      <h2 class="subtitle">Ruta no encontrada</h2>
+      <p class="desc">
+        Parece que te perdiste en el ciberespacio. Esta página no existe
+        o fue movida a otra dimensión. ✦˚‧
+      </p>
+
+      <div class="actions">
+        <a href="/" class="btn btn-cyan">Ir al inicio</a>
+        <a href="/temporada" class="btn btn-outline">Ver temporada</a>
+      </div>
+
+      <!-- Nav rápida -->
+      <div class="quick-nav">
+        <span class="quick-label">O ve directamente a:</span>
+        <div class="quick-links">
+          <a href="/temporada">Temporada</a>
+          <a href="/varios">Animes Varios</a>
+          <a href="/hemeroteca">Hemeroteca</a>
+          <a href="/faq">FAQ</a>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .error-page {
+    min-height: 100vh;
+    display: flex; align-items: center; justify-content: center;
+    position: relative; overflow: hidden;
+    padding-top: var(--nav-h);
+  }
+
+  /* ── Fondo ── */
+  .bg-grid {
+    position: absolute; inset: 0;
+    background-image:
+      linear-gradient(rgba(0,245,255,.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0,245,255,.04) 1px, transparent 1px);
+    background-size: 48px 48px;
+    animation: grid-drift 20s linear infinite;
+  }
+  @keyframes grid-drift { to { transform: translateY(48px); } }
+
+  .bg-glow {
+    position: absolute; inset: 0;
+    background:
+      radial-gradient(ellipse 60% 60% at 50% 50%, rgba(212,0,255,.08) 0%, transparent 60%),
+      radial-gradient(ellipse 40% 40% at 20% 80%, rgba(0,245,255,.06) 0%, transparent 50%);
+  }
+
+  .scanlines {
+    position: absolute; inset: 0; pointer-events: none;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,.08) 2px,
+      rgba(0,0,0,.08) 4px
+    );
+    animation: scan 8s linear infinite;
+  }
+  @keyframes scan {
+    0%   { background-position: 0 0; }
+    100% { background-position: 0 100vh; }
+  }
+
+  .particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+  /* ── Contenido ── */
+  .content {
+    position: relative; z-index: 2;
+    display: flex; flex-direction: column; align-items: center;
+    text-align: center; padding: 40px 24px;
+    animation: fade-up .8s ease both;
+  }
+  @keyframes fade-up { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:none} }
+
+  /* ── Glitch 404 ── */
+  .glitch-wrap { margin-bottom: 32px; }
+  .glitch {
+    font-family: 'Orbitron', sans-serif;
+    font-size: clamp(7rem, 20vw, 14rem);
+    font-weight: 900;
+    color: #fff;
+    position: relative;
+    display: inline-block;
+    line-height: 1;
+    text-shadow: var(--glow-c);
+    animation: glitch-base 4s infinite;
+  }
+
+  .glitch::before,
+  .glitch::after {
+    content: attr(data-text);
+    position: absolute; top: 0; left: 0;
+    font-family: inherit; font-size: inherit; font-weight: inherit;
+  }
+  .glitch::before {
+    color: var(--cyan);
+    animation: glitch-top 4s infinite;
+    clip-path: polygon(0 0, 100% 0, 100% 35%, 0 35%);
+  }
+  .glitch::after {
+    color: var(--pink);
+    animation: glitch-bot 4s infinite;
+    clip-path: polygon(0 65%, 100% 65%, 100% 100%, 0 100%);
+  }
+
+  @keyframes glitch-base {
+    0%,90%,100% { transform: none; }
+    92%          { transform: skewX(-2deg); }
+    94%          { transform: skewX(2deg); }
+    96%          { transform: none; }
+  }
+  @keyframes glitch-top {
+    0%,89%,100% { transform: none; opacity: 0; }
+    90%          { transform: translate(-3px, -2px); opacity: .8; }
+    92%          { transform: translate(3px, 0); opacity: .8; }
+    94%          { transform: translate(-2px, 1px); opacity: .8; }
+    96%          { opacity: 0; }
+  }
+  @keyframes glitch-bot {
+    0%,89%,100% { transform: none; opacity: 0; }
+    90%          { transform: translate(3px, 2px); opacity: .8; }
+    92%          { transform: translate(-3px, 0); opacity: .8; }
+    94%          { transform: translate(2px, -1px); opacity: .8; }
+    96%          { opacity: 0; }
+  }
+
+  /* ── Terminal ── */
+  .terminal {
+    background: rgba(0,0,0,.6);
+    border: 1px solid rgba(0,245,255,.2);
+    border-radius: 8px;
+    padding: 16px 20px;
+    font-family: 'Courier New', monospace;
+    font-size: .82rem;
+    text-align: left;
+    width: 100%; max-width: 520px;
+    margin-bottom: 32px;
+    box-shadow: inset 0 0 30px rgba(0,245,255,.03), 0 0 20px rgba(0,245,255,.1);
+  }
+  .terminal-line { display: flex; align-items: center; gap: 8px; }
+  .prompt { color: var(--cyan); }
+  .cmd    { color: #fff; }
+  .cursor {
+    color: var(--cyan); font-size: .7rem;
+    animation: blink .8s step-end infinite;
+  }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0} }
+
+  .terminal-output { margin-top: 10px; display: flex; flex-direction: column; gap: 4px; }
+  .terminal-output p { margin: 0; color: rgba(255,255,255,.6); }
+  .err  { color: var(--pink); font-weight: bold; }
+  .warn { color: #f5c518; font-weight: bold; }
+  .info { color: var(--cyan); font-weight: bold; }
+
+  /* ── Texto ── */
+  .subtitle {
+    font-family: 'Orbitron', sans-serif; font-size: 1.2rem;
+    font-weight: 700; letter-spacing: .1em; color: #fff;
+    margin-bottom: 12px;
+  }
+  .desc {
+    font-size: 1rem; color: var(--text-dim); line-height: 1.7;
+    max-width: 400px; margin-bottom: 36px;
+  }
+
+  /* ── Botones ── */
+  .actions { display: flex; gap: 16px; flex-wrap: wrap; justify-content: center; margin-bottom: 40px; }
+
+  /* ── Quick nav ── */
+  .quick-nav { display: flex; flex-direction: column; align-items: center; gap: 12px; }
+  .quick-label { font-family: 'Orbitron', sans-serif; font-size: .62rem; letter-spacing: .2em; color: var(--text-dim); text-transform: uppercase; }
+  .quick-links { display: flex; gap: 20px; flex-wrap: wrap; justify-content: center; }
+  .quick-links a {
+    font-family: 'Orbitron', sans-serif; font-size: .68rem;
+    letter-spacing: .1em; color: var(--text-dim);
+    text-decoration: none; text-transform: uppercase;
+    transition: color .2s;
+    position: relative;
+  }
+  .quick-links a::after {
+    content: ''; position: absolute; bottom: -2px; left: 0;
+    width: 0; height: 1px; background: var(--cyan);
+    transition: width .3s;
+  }
+  .quick-links a:hover { color: var(--cyan); }
+  .quick-links a:hover::after { width: 100%; }
+
+  @media(max-width: 480px) {
+    .terminal { font-size: .72rem; }
+    .actions  { flex-direction: column; align-items: center; }
+  }
+</style>
+
+<script>
+  // ── Partículas flotantes ──────────────────────────────────────
+  const container = document.getElementById('particles')!;
+  for (let i = 0; i < 30; i++) {
+    const p = document.createElement('span');
+    const size = Math.random() * 2 + 1;
+    p.style.cssText = `
+      position:absolute;
+      width:${size}px; height:${size}px;
+      border-radius:50%;
+      background:${Math.random() > .5 ? '#00f5ff' : '#ff2d8a'};
+      opacity:${Math.random() * .4 + .1};
+      left:${Math.random() * 100}%;
+      bottom:-10px;
+      --dx:${(Math.random() - .5) * 80}px;
+      animation: float-p ${Math.random() * 8 + 6}s linear ${Math.random() * 5}s infinite;
+    `;
+    container.appendChild(p);
+  }
+
+  // ── Efecto typewriter en terminal ────────────────────────────
+  const cmdEl    = document.getElementById('typeCmd')!;
+  const output   = document.getElementById('termOutput')!;
+  const cmdText  = 'find / -name "this-page" 2>/dev/null';
+  let i = 0;
+
+  function typeChar() {
+    if (i < cmdText.length) {
+      cmdEl.textContent += cmdText[i++];
+      setTimeout(typeChar, Math.random() * 60 + 30);
+    } else {
+      setTimeout(() => {
+        output.style.display = 'flex';
+        output.style.flexDirection = 'column';
+      }, 400);
+    }
+  }
+
+  setTimeout(typeChar, 800);
+</script>
