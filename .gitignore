@@ -1,5 +1,5 @@
 docker/nginx/assets/
-docker/data/
+data/
 .env
 node_modules/
 
