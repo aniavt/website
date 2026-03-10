@@ -12,6 +12,7 @@ RUN npm run build
 # --- production: serve static files with nginx ---
 FROM nginx:alpine
 
+COPY docker/web/default.conf /etc/nginx/conf.d/default.conf
 COPY --from=builder /app/dist /usr/share/nginx/html
 
 EXPOSE 80
