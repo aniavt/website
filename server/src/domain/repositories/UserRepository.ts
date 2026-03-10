@@ -8,8 +8,6 @@ export interface PaginationOptions {
     readonly sortBy?: "id" | "username" | "createdAt" | "updatedAt";
     readonly filter?: {
         readonly isActive?: boolean;
-        readonly isAdmin?: boolean;
-        readonly isRoot?: boolean;
         readonly createdAt?: Date;
         readonly updatedAt?: Date;
     };
@@ -22,7 +20,4 @@ export interface UserRepository {
     delete(id: string): Promise<void>;
     
     findAll(options?: PaginationOptions): Promise<UserEntity[]>;
-    findActiveUsers(options?: PaginationOptions): Promise<UserEntity[]>;
-    findAdminUsers(options?: PaginationOptions): Promise<UserEntity[]>;
-    findRootUsers(options?: PaginationOptions): Promise<UserEntity[]>;
 }

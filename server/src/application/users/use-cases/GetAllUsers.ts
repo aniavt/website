@@ -1,13 +1,12 @@
 import type { PaginationOptions, UserRepository } from "@domain/repositories/UserRepository";
+import { UserPermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { UserError } from "../errors";
 import { type UserDto, toUserDto } from "../dto";
 
 
 export class GetAllUsersUseCase {
-    constructor(
-        private readonly userRepository: UserRepository,
-    ) {}
+    constructor(private readonly userRepository: UserRepository) {}
 
     async execute(requesterId: string, options?: PaginationOptions): Promise<Result<UserDto[], UserError>> {
         const requester = await this.userRepository.findById(requesterId);
@@ -15,7 +14,7 @@ export class GetAllUsersUseCase {
             return err("user_not_found");
         }
 
-        if (!requester.isAdmin && !requester.isRoot) {
+        if (!requester.hasPermission({ type: "user", permission: UserPermission.READ_USER })) {
             return err("user_not_authorized");
         }
 

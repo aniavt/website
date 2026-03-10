@@ -1,15 +1,12 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
-import type { EventBus } from "@domain/services/EventBus";
+import { UserPermission } from "@domain/value-object/Permissions";
 import { type Result, err, ok } from "@lib/result";
 import type { UserError } from "../errors";
 
 
 
 export class ActivateUserUseCase {
-    constructor(
-        private readonly userRepository: UserRepository,
-        private readonly eventBus: EventBus,
-    ) {}
+    constructor(private readonly userRepository: UserRepository) {}
 
     async execute(id: string, requesterId: string): Promise<Result<void, UserError>> {
         const user = await this.userRepository.findById(id);
@@ -18,7 +15,7 @@ export class ActivateUserUseCase {
             return err("user_not_found");
         }
 
-        if (!requester.isRoot) {
+        if (!requester.hasPermission({ type: "user", permission: UserPermission.ACTIVATE_USER })) {
             return err("user_not_authorized");
         }
 
@@ -31,7 +28,6 @@ export class ActivateUserUseCase {
             return err("user_save_failed");
         }
 
-        await this.eventBus.publish(user.pullEvents());
         return ok(void 0);
     }
 }
