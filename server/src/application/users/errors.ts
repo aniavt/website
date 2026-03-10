@@ -1,6 +1,8 @@
 export type UserError = 
     | "user_not_found"
     | "user_not_authorized"
+    | "user_cannot_deactivate_root"
+    | "user_cannot_revoke_self_meta_manage_permissions"
     | "username_already_exists"
     | "username_too_short"
     | "username_too_long"

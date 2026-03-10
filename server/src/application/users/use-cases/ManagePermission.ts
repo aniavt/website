@@ -59,7 +59,14 @@ export class ManagePermissionUseCase {
                 case "user": if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER })) return err("permission_not_authorized"); break;
                 case "faq": if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_FAQ })) return err("permission_not_authorized"); break;
             }
-            user.grantPermission({ type: namespace as PermissionNamespace, permission: target });
+            if (action === "grant") {
+                user.grantPermission({ type: namespace, permission: target });
+            } else {
+                if (requester.id === user.id && namespace === "meta" && target.valueOf() === ManagePermission.META_MANAGE_PERMISSIONS.valueOf()) {
+                    return err("user_cannot_revoke_self_meta_manage_permissions");
+                }
+                user.revokePermission({ type: namespace, permission: target });
+            }
             return await saveUser(user);
         }
 
