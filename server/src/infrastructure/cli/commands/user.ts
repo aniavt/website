@@ -9,8 +9,8 @@ function printUser(data: UserDto) {
   console.log(`  Created: ${data.createdAt.toISOString()}`);
   console.log(`  Updated: ${data.updatedAt.toISOString()}`);
   console.log(`  Is Active: ${data.isActive}`);
-  console.log(`  Is Admin: ${data.isAdmin}`);
-  console.log(`  Is Root: ${data.isRoot}`);
+  console.log(`  Permissions: ${data.permissions.user.join(", ")}`);
+  console.log(`  FAQ Permissions: ${data.permissions.faq.join(", ")}`);
   console.log(`  Session Version: ${data.sessionVersion}`);
 }
 
@@ -190,60 +190,6 @@ export function buildUserCommands(userUseCases: IUserUseCases): CliFeature {
         },
       },
       {
-        name: "get-admin-users",
-        description: "user get-admin-users <requester-id> [page] [limit]",
-        async run([requesterId, page, limit]) {
-          if (!requesterId) {
-            console.error("Usage: user get-admin-users <requester-id> [page] [limit]");
-            return;
-          }
-
-          const options: PaginationOptions = {
-            limit: limit ? parseInt(limit) : undefined,
-            offset: page ? parseInt(page) : undefined,
-            filter: {
-              isAdmin: true,
-            }
-          }
-
-          const result = await userUseCases.getAll.execute(requesterId, options);
-          if (result.isError()) {
-            console.error(`Error:`, result.error);
-            return;
-          }
-          for (const user of result.data) {
-            printUser(user);
-          }
-        }
-      },
-      {
-        name: "get-root-users",
-        description: "user get-root-users <requester-id> [page] [limit]",
-        async run([requesterId, page, limit]) {
-          if (!requesterId) {
-            console.error("Usage: user get-root-users <requester-id> [page] [limit]");
-            return;
-          }
-
-          const options: PaginationOptions = {
-            limit: limit ? parseInt(limit) : undefined,
-            offset: page ? parseInt(page) : undefined,
-            filter: {
-              isRoot: true,
-            }
-          }
-
-          const result = await userUseCases.getAll.execute(requesterId, options);
-          if (result.isError()) {
-            console.error(`Error:`, result.error);
-            return;
-          }
-          for (const user of result.data) {
-            printUser(user);
-          }
-        },
-      },
-      {
         name: "get-inactive-users",
         description: "user get-inactive-users <requester-id> [page] [limit]",
         async run([requesterId, page, limit]) {
@@ -270,74 +216,6 @@ export function buildUserCommands(userUseCases: IUserUseCases): CliFeature {
         },
       },
       {
-        name: "grant-admin",
-        description: "user grant-admin <user-id> <requester-id>",
-        async run([userId, requesterId]) {
-          if (!userId || !requesterId) {
-            console.error("Usage: user grant-admin <user-id> <requester-id>");
-            return;
-          }
-
-        const result = await userUseCases.grantAdmin.execute(userId, requesterId);
-          if (result.isError()) {
-            console.error(`Error:`, result.error);
-            return;
-          }
-          console.log("Admin granted successfully");
-        },
-      },
-      {
-        name: "grant-root",
-        description: "user grant-root <user-id> <requester-id>",
-        async run([userId, requesterId]) {
-          if (!userId || !requesterId) {
-            console.error("Usage: user grant-root <user-id> <requester-id>");
-            return;
-          }
-
-          const result = await userUseCases.grantRoot.execute(userId, requesterId);
-          if (result.isError()) {
-            console.error(`Error:`, result.error);
-            return;
-          }
-          console.log("Root granted successfully");
-        },
-      },
-      {
-        name: "revoke-admin",
-        description: "user revoke-admin <user-id> <requester-id>",
-        async run([userId, requesterId]) {
-          if (!userId || !requesterId) {
-            console.error("Usage: user revoke-admin <user-id> <requester-id>");
-            return;
-          }
-
-          const result = await userUseCases.revokeAdmin.execute(userId, requesterId);
-          if (result.isError()) {
-            console.error(`Error:`, result.error);
-            return;
-          }
-          console.log("Admin revoked successfully");
-        },
-      },
-      {
-        name: "revoke-root",
-        description: "user revoke-root <user-id> <requester-id>",
-        async run([userId, requesterId]) {
-          if (!userId || !requesterId) {
-            console.error("Usage: user revoke-root <user-id> <requester-id>");
-            return;
-          }
-
-          const result = await userUseCases.revokeRoot.execute(userId, requesterId);
-          if (result.isError()) {
-            console.error(`Error:`, result.error);
-            return;
-          }
-          console.log("Root revoked successfully");
-        },
-      },
-      {
         name: "update-password",
         description: "user update-password <user-id> <new-password>",
         async run([userId, newPassword]) {
@@ -355,15 +233,15 @@ export function buildUserCommands(userUseCases: IUserUseCases): CliFeature {
         },
       },
       {
-        name: "bootstrap-root",
-        description: "user bootstrap-root <username> <password>",
+        name: "create-root",
+        description: "user create-root <username> <password>",
         async run([username, password]) {
           if (!username || !password) {
-            console.error("Usage: user bootstrap-root <username> <password>");
+            console.error("Usage: user create-root <username> <password>");
             return;
           }
 
-          const result = await userUseCases.bootstrapRoot.execute({ username, password });
+          const result = await userUseCases.createRoot.execute({ username, password });
           if (result.isError()) {
             console.error(`Error:`, result.error);
             return;
@@ -386,15 +264,9 @@ export function buildUserCommands(userUseCases: IUserUseCases): CliFeature {
           console.log("       user get-by-username <username> - get a user by username");
           console.log("       user get-all <requester-id> [page] [limit] - get all users");
           console.log("       user get-active-users <requester-id> [page] [limit] - get all active users");
-          console.log("       user get-admin-users <requester-id> [page] [limit] - get all admin users");
-          console.log("       user get-root-users <requester-id> [page] [limit] - get all root users");
           console.log("       user get-inactive-users <requester-id> [page] [limit] - get all inactive users");
-          console.log("       user grant-admin <user-id> <requester-id> - grant admin to a user");
-          console.log("       user grant-root <user-id> <requester-id> - grant root to a user");
-          console.log("       user revoke-admin <user-id> <requester-id> - revoke admin from a user");
-          console.log("       user revoke-root <user-id> <requester-id> - revoke root from a user");
           console.log("       user update-password <user-id> <new-password> - update a user's password");
-          console.log("       user bootstrap-root <username> <password> - create the first root user (if none exists)");
+          console.log("       user create-root <username> <password> - create the first root user (if none exists)");
           console.log("       user help - show this help");
         },
       }

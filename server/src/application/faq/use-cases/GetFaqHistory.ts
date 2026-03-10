@@ -1,6 +1,7 @@
 import type { FaqHistoryRepository } from "@domain/repositories/FaqHistoryRepository";
 import type { FaqItemRepository } from "@domain/repositories/FaqItemRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import { FAQPermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
 import type { FaqHistoryEntryDto } from "../dto";
@@ -17,12 +18,17 @@ export class GetFaqHistoryUseCase {
     async execute(requesterId: string, faqId: string): Promise<Result<FaqHistoryEntryDto[], FaqError>> {
         const requester = await this.userRepository.findById(requesterId);
         if (!requester) return err("faq_not_authorized");
-        if (!requester.isRoot && !requester.isAdmin) return err("faq_not_authorized");
+        if (!requester.hasPermission({ type: "faq", permission: FAQPermission.READ_FAQ })) return err("faq_not_authorized");
 
         const item = await this.faqItemRepository.findById(faqId);
         if (!item) return err("faq_item_not_found");
 
         const entries = await this.faqHistoryRepository.findByFaqId(faqId);
-        return ok(entries.map(toFaqHistoryEntryDto));
+
+        const userIds = [...new Set(entries.map((e) => e.by))];
+        const users = await Promise.all(userIds.map((id) => this.userRepository.findById(id)));
+        const usernameMap = new Map(userIds.map((id, i) => [id, users[i]?.username ?? id]));
+
+        return ok(entries.map((e) => toFaqHistoryEntryDto(e, usernameMap.get(e.by)!)));
     }
 }

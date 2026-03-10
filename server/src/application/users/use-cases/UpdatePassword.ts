@@ -1,6 +1,5 @@
 import type { SecureHasher } from "@domain/services/SecureHasher";
 import type { UserRepository } from "@domain/repositories/UserRepository";
-import type { EventBus } from "@domain/services/EventBus";
 import { type Result, err, ok } from "@lib/result";
 import type { UserError } from "../errors";
 
@@ -8,7 +7,6 @@ export class UpdatePasswordUseCase {
     constructor(
         private readonly userRepository: UserRepository,
         private readonly passwordHasher: SecureHasher,
-        private readonly eventBus: EventBus,
     ) {}
 
     async execute(id: string, password: string): Promise<Result<void, UserError>> {
@@ -25,7 +23,6 @@ export class UpdatePasswordUseCase {
             return err("user_save_failed");
         }
 
-        await this.eventBus.publish(user.pullEvents());
         return ok(void 0);
     }
 }

@@ -6,7 +6,8 @@ import type { IdGenerator } from "@domain/services/IdGenerator";
 import { FaqText } from "@domain/entities/FaqText";
 import { FaqItem } from "@domain/entities/FaqItem";
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
-import { err, ok, type Result } from "@lib/result";
+import { FAQPermission } from "@domain/value-object/Permissions";
+import { err, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
 import type { FaqItemPublicDto } from "../dto";
 import { resolveItemToPublicDto } from "../resolveFaqItem";
@@ -30,7 +31,7 @@ export class UpdateFaqItemUseCase {
     async execute(requesterId: string, input: UpdateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
         const requester = await this.userRepository.findById(requesterId);
         if (!requester) return err("faq_not_authorized");
-        if (!requester.isRoot && !requester.isAdmin) return err("faq_not_authorized");
+        if (!requester.hasPermission({ type: "faq", permission: FAQPermission.UPDATE_FAQ })) return err("faq_not_authorized");
 
         const item = await this.faqItemRepository.findById(input.id);
         if (!item) return err("faq_item_not_found");

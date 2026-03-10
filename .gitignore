@@ -2,6 +2,7 @@ docker/nginx/assets/
 data/
 .env
 node_modules/
+__pycache__/
 
 
 # build output

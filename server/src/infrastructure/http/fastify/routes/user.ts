@@ -1,19 +1,23 @@
 import type { FastifyReply, FastifySchema } from "fastify";
 import jsonwebtoken from "jsonwebtoken";
 
+import type { PaginationOptions } from "@domain/repositories/UserRepository";
+import { namespaces, type PermissionNamespace } from "@domain/value-object/Permissions";
+
 import type { IUserUseCases } from "@application/users/IUserUseCases";
-import type { RegisterRouteFn } from "../types";
-import type { UserError } from "@application/users/errors";
+import type { UserError, PermissionError } from "@application/users/errors";
 import type { UserDto } from "@application/users/dto";
 
+import type { RegisterRouteFn } from "../types";
 import { environment, jwt } from "../config";
 import { authenticate } from "../middlewares/auth";
-import type { PaginationOptions } from "@domain/repositories/UserRepository";
 
 
 export interface UserRoutesDependencies {
     userUseCases: IUserUseCases;
 }
+
+type UserOrPermissionError = UserError | PermissionError;
 
 const loginSchema: FastifySchema = {
     body: {
@@ -27,12 +31,13 @@ const loginSchema: FastifySchema = {
     }
 }
 
-function mapUserErrorToHttpErrorCode(error: UserError): number {
+function mapErrorToHttpErrorCode(error: UserOrPermissionError): number {
     switch (error) {
         case "user_not_found":
             return 404;
         case "user_not_authorized":
         case "password_verify_failed":
+        case "permission_not_authorized":
             return 401;
         case "username_already_exists":
         case "username_too_long":
@@ -43,6 +48,9 @@ function mapUserErrorToHttpErrorCode(error: UserError): number {
         case "password_week_number":
         case "password_week_symbol":
         case "username_too_short":
+        case "permission_invalid_action":
+        case "permission_invalid_namespace":
+        case "permission_invalid_slug":
             return 400;
         case "user_repo_error":
         case "user_save_failed":
@@ -77,9 +85,9 @@ function clearAuthCookie(reply: FastifyReply) {
     });
 }
 
-function sendErrorResponse(reply: FastifyReply, error: UserError) {
+function sendErrorResponse(reply: FastifyReply, error: UserOrPermissionError) {
     return reply
-        .status(mapUserErrorToHttpErrorCode(error))
+        .status(mapErrorToHttpErrorCode(error))
         .send({ error });
 }
 
@@ -90,8 +98,7 @@ function userToResponse(user: UserDto) {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         isActive: user.isActive,
-        isAdmin: user.isAdmin,
-        isRoot: user.isRoot,
+        permissions: user.permissions,
     }
 }
 
@@ -140,7 +147,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (request.query.all === "true") {
             await userUseCases.incrementSessionVersion.execute(request.user!.id);
         }
-        return reply.send({ message: "Logged out successfully" });
+        return reply.send({ message: "logout_success" });
     });
 
 
@@ -150,7 +157,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "Password updated successfully" });
+        return reply.send({ message: "password_updated" });
     });
 
     app.post(prefixUrl("/refresh-token"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -158,13 +165,113 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         return reply.send(userToResponse(request.user!));
     });
 
+    const managePermissionSchema: FastifySchema = {
+        body: {
+            type: "object",
+            required: ["namespace", "permission"],
+            properties: {
+                namespace: { type: "string", enum: namespaces },
+                permission: { type: "string", minLength: 1 },
+            },
+            additionalProperties: false,
+        },
+    };
+
+    app.post<{ Params: { userId: string }; Body: { namespace: PermissionNamespace; permission: string } }>(
+        prefixUrl("/user/:userId/permissions/grant"),
+        { preHandler: authenticate(userUseCases), schema: managePermissionSchema },
+        async (request, reply) => {
+            const { userId } = request.params;
+            const { namespace, permission } = request.body;
+
+            const result = await userUseCases.managePermission.execute({
+                userId,
+                requesterId: request.user!.id,
+                namespace,
+                permission,
+                action: "grant",
+            });
+
+            if (result.isError()) {
+                return sendErrorResponse(reply, result.error);
+            }
+
+            return reply.send({ message: "permission_granted" });
+        },
+    );
+
+    app.post<{ Params: { userId: string }; Body: { namespace: PermissionNamespace; permission: string } }>(
+        prefixUrl("/user/:userId/permissions/revoke"),
+        { preHandler: authenticate(userUseCases), schema: managePermissionSchema },
+        async (request, reply) => {
+            const { userId } = request.params;
+            const { namespace, permission } = request.body;
+
+            const result = await userUseCases.managePermission.execute({
+                userId,
+                requesterId: request.user!.id,
+                namespace,
+                permission,
+                action: "revoke",
+            });
+
+            if (result.isError()) {
+                return sendErrorResponse(reply, result.error);
+            }
+
+            return reply.send({ message: "permission_revoked" });
+        },
+    );
+
+    app.get<{ Params: { userId: string } }>(
+        prefixUrl("/user/:userId/permissions"),
+        { preHandler: authenticate(userUseCases) },
+        async (request, reply) => {
+            const requester = request.user!;
+            const targetUserId = request.params.userId;
+
+            const result = await userUseCases.getUserPermissions.execute({
+                userId: targetUserId,
+                requesterId: requester.id,
+            });
+            if (result.isError()) {
+                return sendErrorResponse(reply, result.error);
+            }
+
+            return reply.send({ permissions: result.data.permissions });
+        },
+    );
+
+    app.get<{ Params: { userId: string }; Querystring: { namespace: PermissionNamespace; permission: string } }>(
+        prefixUrl("/user/:userId/permissions/check"),
+        { preHandler: authenticate(userUseCases) },
+        async (request, reply) => {
+            const { userId } = request.params;
+            const { namespace, permission } = request.query;
+            const requester = request.user!;
+
+            const result = await userUseCases.getUserPermissions.execute({
+                userId,
+                requesterId: requester.id,
+            });
+            if (result.isError()) {
+                return sendErrorResponse(reply, result.error);
+            }
+
+            const slugs = result.data.permissions[namespace];
+            const hasPermission = slugs.includes(`${namespace}.${permission}`);
+
+            return reply.send({ hasPermission });
+        },
+    );
+
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/deactivate/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
         const result = await userUseCases.deactivate.execute(request.params.userId, request.user!.id);
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
         clearAuthCookie(reply);
-        return reply.send({ message: "User deactivated successfully" });
+        return reply.send({ message: "user_deactivated" });
     });
 
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/activate/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
@@ -172,39 +279,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         if (result.isError()) {
             return sendErrorResponse(reply, result.error);
         }
-        return reply.send({ message: "User activated successfully" });
-    });
-
-    app.post<{ Params: { userId: string } }>(prefixUrl("/user/grant-admin/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
-        const result = await userUseCases.grantAdmin.execute(request.params.userId, request.user!.id);
-        if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
-        }
-        return reply.send({ message: "Admin granted successfully" });
-    });
-
-    app.post<{ Params: { userId: string } }>(prefixUrl("/user/revoke-admin/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
-        const result = await userUseCases.revokeAdmin.execute(request.params.userId, request.user!.id);
-        if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
-        }
-        return reply.send({ message: "Admin revoked successfully" });
-    });
-
-    app.post<{ Params: { userId: string } }>(prefixUrl("/user/grant-root/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
-        const result = await userUseCases.grantRoot.execute(request.params.userId, request.user!.id);
-        if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
-        }
-        return reply.send({ message: "Root granted successfully" });
-    });
-
-    app.post<{ Params: { userId: string } }>(prefixUrl("/user/revoke-root/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
-        const result = await userUseCases.revokeRoot.execute(request.params.userId, request.user!.id);
-        if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
-        }
-        return reply.send({ message: "Root revoked successfully" });
+        return reply.send({ message: "user_activated" });
     });
 
     app.get<{Querystring: {
@@ -212,8 +287,6 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         offset?: string;
         sort?: "asc" | "desc";
         sortBy?: "id" | "username" | "createdAt" | "updatedAt";
-        isRoot?: string;
-        isAdmin?: string;
         isActive?: string;
         createdAt?: string;
         updatedAt?: string;
@@ -224,8 +297,6 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
             sort: request.query.sort === "asc" ? "asc" : "desc",
             sortBy: request.query.sortBy === "id" ? "id" : request.query.sortBy === "username" ? "username" : request.query.sortBy === "createdAt" ? "createdAt" : request.query.sortBy === "updatedAt" ? "updatedAt" : undefined,
             filter: {
-                isRoot: request.query.isRoot ? request.query.isRoot === "true" : undefined,
-                isAdmin: request.query.isAdmin ? request.query.isAdmin === "true" : undefined,
                 isActive: request.query.isActive ? request.query.isActive === "true" : undefined,
                 createdAt: request.query.createdAt ? new Date(request.query.createdAt) : undefined,
                 updatedAt: request.query.updatedAt ? new Date(request.query.updatedAt) : undefined,

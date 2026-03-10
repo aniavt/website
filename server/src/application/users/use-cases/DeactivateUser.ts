@@ -1,14 +1,11 @@
-import type { EventBus } from "@domain/services/EventBus";
-import type { UserError } from "../errors";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import { ManagePermission, UserPermission } from "@domain/value-object/Permissions";
 import { type Result, err, ok } from "@lib/result";
+import type { UserError } from "../errors";
 
 
 export class DeactivateUserUseCase {
-    constructor(
-        private readonly userRepository: UserRepository,
-        private readonly eventBus: EventBus,
-    ) {}
+    constructor(private readonly userRepository: UserRepository) {}
 
     async execute(id: string, requesterId: string): Promise<Result<void, UserError>> {
         const user = await this.userRepository.findById(id);
@@ -17,9 +14,14 @@ export class DeactivateUserUseCase {
             return err("user_not_found");
         }
 
-        // Only the user themselves or a root user can deactivate themselves
-        if (user.id !== requester.id && !requester.isRoot) {
+        if (user.id !== requester.id && !requester.hasPermission({ type: "user", permission: UserPermission.DEACTIVATE_USER })) {
             return err("user_not_authorized");
+        }
+
+        if (user.hasPermission({ type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS })
+            || user.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER })
+        ) {
+            return err("user_cannot_deactivate_root");
         }
 
         if (!user.isActive) return ok(void 0);
@@ -31,7 +33,6 @@ export class DeactivateUserUseCase {
             return err("user_save_failed");
         }
 
-        await this.eventBus.publish(user.pullEvents());
         return ok(void 0);
     }
 }

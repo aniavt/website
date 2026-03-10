@@ -10,10 +10,10 @@ cp docker/.env.example docker/.env
 ```bash
 docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml up -d
 ```
-3. Crear usuario root (solo la primera vez)
+3. Crear usuario root
 ```bash
 docker compose -f docker/docker-compose.yml -f docker/docker-compose.dev.yml exec server \
-  sh -lc "cd /app && bun run cli -- user bootstrap-root root_cli StrongRootP4ss!1"
+  sh -lc "cd /app && bun run cli -- user create-root root_cli StrongRootP4ss!1"
 ```
 
 ## API

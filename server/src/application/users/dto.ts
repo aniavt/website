@@ -6,9 +6,12 @@ export interface UserDto {
     readonly createdAt: Date;
     readonly updatedAt: Date;
     readonly isActive: boolean;
-    readonly isAdmin: boolean;
-    readonly isRoot: boolean;
     readonly sessionVersion: number;
+    readonly permissions: {
+        readonly meta: string[];
+        readonly user: string[];
+        readonly faq: string[];
+    };
 }
 
 export function toUserDto(user: UserEntity): UserDto {
@@ -18,8 +21,11 @@ export function toUserDto(user: UserEntity): UserDto {
         createdAt: user.createdAt,
         updatedAt: user.updatedAt,
         isActive: user.isActive,
-        isAdmin: user.isAdmin,
-        isRoot: user.isRoot,
         sessionVersion: user.sessionVersion,
+        permissions: {
+            meta: user.permissions.meta.getSlugs("meta"),
+            user: user.permissions.user.getSlugs("user"),
+            faq: user.permissions.faq.getSlugs("faq"),
+        },
     };
 }

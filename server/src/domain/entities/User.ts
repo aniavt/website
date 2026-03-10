@@ -1,19 +1,14 @@
-import type { UserEventId } from "@domain/events/UserEvents";
-
-import { AggregateRoot } from "@domain/shared/AggregateRoot";
 import {
-    UserCreatedEvent,
-    UserUpdatedPasswordEvent,
-    UserActivatedEvent,
-    UserDeactivatedEvent,
-    UserSessionVersionIncrementedEvent,
-    UserGrantAdminPrivilegesEvent,
-    UserRevokeAdminPrivilegesEvent,
-    UserGrantRootPrivilegesEvent,
-    UserRevokeRootPrivilegesEvent,
-} from "@domain/events/UserEvents";
+    Permission,
+    type PermissionNamespace,
+    ManagePermission,
+    UserPermission,
+    FAQPermission,
+} from "@domain/value-object/Permissions";
 
 
+export type UserPermissionPersistence = Record<PermissionNamespace, number>;
+export type UserPersistenceProps = Omit<UserProps, "permissions"> & { permissions: UserPermissionPersistence };
 export interface UserProps {
     readonly id: string;
     username: string;
@@ -22,11 +17,15 @@ export interface UserProps {
     updatedAt: Date;
     sessionVersion: number;
     isActive: boolean;
-    isRoot: boolean;
-    isAdmin: boolean; 
+    permissions: Record<PermissionNamespace, Permission>;
 }
 
-export class UserEntity extends AggregateRoot<UserEventId> {
+type PermissionType = 
+    | { type: "meta", permission: ManagePermission }
+    | { type: "user", permission: UserPermission }
+    | { type: "faq", permission: FAQPermission }
+
+export class UserEntity {
     readonly id: string;
     username: string;
     passwordHash: string;
@@ -34,11 +33,9 @@ export class UserEntity extends AggregateRoot<UserEventId> {
     createdAt: Date;
     updatedAt: Date;
     isActive: boolean;
-    isAdmin: boolean;
-    isRoot: boolean;
+    permissions: Record<PermissionNamespace, Permission>;
 
     constructor(props: UserProps) {
-        super();
         this.id = props.id;
         this.username = props.username;
         this.passwordHash = props.passwordHash;
@@ -46,8 +43,7 @@ export class UserEntity extends AggregateRoot<UserEventId> {
         this.createdAt = props.createdAt;
         this.updatedAt = props.updatedAt;
         this.isActive = props.isActive;
-        this.isAdmin = props.isAdmin;
-        this.isRoot = props.isRoot;
+        this.permissions = props.permissions;
     }
 
 
@@ -61,23 +57,37 @@ export class UserEntity extends AggregateRoot<UserEventId> {
             createdAt: now,
             updatedAt: now,
             isActive: true,
-            isRoot: false,
-            isAdmin: false,
+            permissions: {
+                meta: ManagePermission.fromValue(Permission.NONE.valueOf()),
+                user: UserPermission.fromValue(Permission.NONE.valueOf()),
+                faq: FAQPermission.fromValue(Permission.NONE.valueOf()),
+            }
         });
-        user.addEvent(new UserCreatedEvent(user));
+
         return user;
     }
 
-    static fromPersistence(props: UserProps) {
-        return new UserEntity(props);
+    static fromPersistence(props: UserPersistenceProps) {
+        return new UserEntity({
+            id: props.id,
+            username: props.username,
+            passwordHash: props.passwordHash,
+            sessionVersion: props.sessionVersion,
+            createdAt: props.createdAt,
+            updatedAt: props.updatedAt,
+            isActive: props.isActive,
+            permissions: {
+                meta: ManagePermission.fromValue(props.permissions.meta),
+                user: UserPermission.fromValue(props.permissions.user),
+                faq: FAQPermission.fromValue(props.permissions.faq),
+            }
+        });
     }
 
     updatePassword(passwordHash: string) {
-        const oldPasswordHash = this.passwordHash;
         this.passwordHash = passwordHash;
         this.sessionVersion++;
         this.updatedAt = new Date();
-        this.addEvent(new UserUpdatedPasswordEvent(this, oldPasswordHash));
         return this;
     }
 
@@ -85,7 +95,6 @@ export class UserEntity extends AggregateRoot<UserEventId> {
         if (this.isActive) return this;
         this.isActive = true;
         this.updatedAt = new Date();
-        this.addEvent(new UserActivatedEvent(this));
         return this;
     }
 
@@ -93,47 +102,32 @@ export class UserEntity extends AggregateRoot<UserEventId> {
         if (!this.isActive) return this;
         this.isActive = false;
         this.updatedAt = new Date();
-        this.addEvent(new UserDeactivatedEvent(this));
         return this;
     }
 
     incrementSessionVersion() {
-        const oldVersion = this.sessionVersion;
         this.sessionVersion++;
         this.updatedAt = new Date();
-        this.addEvent(new UserSessionVersionIncrementedEvent(this, oldVersion));
         return this;
     }
 
-    grantAdmin() {
-        if (this.isAdmin) return this;
-        this.isAdmin = true;
+    hasPermission({ type, permission }: PermissionType): boolean {
+        return this.isActive && this.permissions[type].has(permission);
+    }
+
+    grantPermission({ type, permission }: PermissionType): this {
+        // Permission.add() returns a new Permission instance; we must store it back
+        // to actually persist the updated bitmask in this user.
+        this.permissions[type] = this.permissions[type].add(permission);
         this.updatedAt = new Date();
-        this.addEvent(new UserGrantAdminPrivilegesEvent(this));
         return this;
     }
 
-    revokeAdmin() {
-        if (!this.isAdmin) return this;
-        this.isAdmin = false;
+    revokePermission({ type, permission }: PermissionType): this {
+        // Same as grantPermission: remove() returns a new Permission instance
+        // that must be assigned back to take effect.
+        this.permissions[type] = this.permissions[type].remove(permission);
         this.updatedAt = new Date();
-        this.addEvent(new UserRevokeAdminPrivilegesEvent(this));
-        return this;
-    }
-
-    grantRoot() {
-        if (this.isRoot) return this;
-        this.isRoot = true;
-        this.updatedAt = new Date();
-        this.addEvent(new UserGrantRootPrivilegesEvent(this));
-        return this;
-    }
-
-    revokeRoot() {
-        if (!this.isRoot) return this;
-        this.isRoot = false;
-        this.updatedAt = new Date();
-        this.addEvent(new UserRevokeRootPrivilegesEvent(this));
         return this;
     }
 }

@@ -37,16 +37,12 @@ export class InMemoryUserRepository implements UserRepository {
 
         const {
             isActive,
-            isAdmin,
-            isRoot,
             createdAt,
             updatedAt,
         } = filter ?? {};
 
         const filteredUsers = this.users.filter((u) => {
             if (isActive !== undefined && u.isActive !== isActive) return false;
-            if (isAdmin !== undefined && u.isAdmin !== isAdmin) return false;
-            if (isRoot !== undefined && u.isRoot !== isRoot) return false;
             if (createdAt !== undefined && u.createdAt < createdAt) return false;
             if (updatedAt !== undefined && u.updatedAt < updatedAt) return false;
             return true;
@@ -78,17 +74,5 @@ export class InMemoryUserRepository implements UserRepository {
         }
 
         return sortedUsers;
-    }
-
-    async findActiveUsers(options?: PaginationOptions): Promise<UserEntity[]> {
-        return this.findAll({ ...options, filter: { ...options?.filter, isActive: true } })
-    }
-
-    async findAdminUsers(options?: PaginationOptions): Promise<UserEntity[]> {
-        return this.findAll({ ...options, filter: { ...options?.filter, isAdmin: true } });
-    }
-
-    async findRootUsers(options?: PaginationOptions): Promise<UserEntity[]> {
-        return this.findAll({ ...options, filter: { ...options?.filter, isRoot: true } });
     }
 }

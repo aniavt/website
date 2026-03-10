@@ -5,9 +5,7 @@ import { type UserDto, toUserDto } from "../dto";
 
 
 export class GetUserByUsernameUseCase {
-    constructor(
-        private readonly userRepository: UserRepository,
-    ) {}
+    constructor(private readonly userRepository: UserRepository) {}
 
     async execute(username: string): Promise<Result<UserDto, UserError>> {
         const user = await this.userRepository.findByUsername(username);

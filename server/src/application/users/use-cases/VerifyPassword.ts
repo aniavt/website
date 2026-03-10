@@ -4,7 +4,6 @@ import { err, ok, type Result } from "@lib/result";
 import type { UserError } from "../errors";
 
 
-
 export class VerifyPasswordUseCase {
     constructor(
         private readonly userRepository: UserRepository,

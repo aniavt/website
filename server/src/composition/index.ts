@@ -3,7 +3,6 @@ import mongoose from "mongoose";
 
 
 // Services
-import { Bus } from "@infrastructure/EventBus";
 import { ArgonIdSecureHasher } from "@infrastructure/ArgonIdSecureHasher";
 import { CryptoIdGenerator } from "@infrastructure/CryptoIdGenerator";
 
@@ -18,18 +17,16 @@ import { MongoDbFaqHistoryRepository } from "@infrastructure/FaqHistoryRepositor
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import { ActivateUserUseCase } from "@application/users/use-cases/ActivateUser";
 import { CreateUserUseCase } from "@application/users/use-cases/CreateUser";
-import { BootstrapRootUseCase } from "@application/users/use-cases/BootstrapRoot";
+import { CreateRootUseCase } from "@application/users/use-cases/CreateRoot";
 import { DeactivateUserUseCase } from "@application/users/use-cases/DeactivateUser";
 import { GetAllUsersUseCase } from "@application/users/use-cases/GetAllUsers";
 import { GetUserByIdUseCase } from "@application/users/use-cases/GetUserById";
 import { GetUserByUsernameUseCase } from "@application/users/use-cases/GetUserByUsername";
-import { GrantAdminUseCase } from "@application/users/use-cases/GrantAdmin";
-import { GrantRootUseCase } from "@application/users/use-cases/GrantRoot";
 import { IncrementSessionVersionUseCase } from "@application/users/use-cases/IncrementSessionVersion";
-import { RevokeAdminUseCase } from "@application/users/use-cases/RevokeAdmin";
-import { RevokeRootUseCase } from "@application/users/use-cases/RevokeRoot";
 import { UpdatePasswordUseCase } from "@application/users/use-cases/UpdatePassword";
 import { VerifyPasswordUseCase } from "@application/users/use-cases/VerifyPassword";
+import { ManagePermissionUseCase } from "@application/users/use-cases/ManagePermission";
+import { GetUserPermissionsUseCase } from "@application/users/use-cases/GetUserPermissions";
 
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
 import { CreateFaqItemUseCase } from "@application/faq/use-cases/CreateFaqItem";
@@ -53,7 +50,6 @@ if (mongoUri === undefined) {
 const mongoClient = mongoose.createConnection(mongoUri);
 
 // Composition
-const eventBus = new Bus();
 const passwordHasher = new ArgonIdSecureHasher();
 const idGenerator = new CryptoIdGenerator();
 // const userRepository = new InMemoryUserRepository();
@@ -63,64 +59,18 @@ const faqItemRepository = new MongoDbFaqItemRepository(mongoClient);
 const faqHistoryRepository = new MongoDbFaqHistoryRepository(mongoClient);
 
 export const userUseCases: IUserUseCases = {
-    create: new CreateUserUseCase(
-        userRepository,
-        passwordHasher,
-        idGenerator,
-        eventBus,
-    ),
-    bootstrapRoot: new BootstrapRootUseCase(
-        userRepository,
-        passwordHasher,
-        idGenerator,
-        eventBus,
-    ),
-    getAll: new GetAllUsersUseCase(
-        userRepository,
-    ),
-    getByUsername: new GetUserByUsernameUseCase(
-        userRepository,
-    ),
-    updatePassword: new UpdatePasswordUseCase(
-        userRepository,
-        passwordHasher,
-        eventBus,
-    ),
-    incrementSessionVersion: new IncrementSessionVersionUseCase(
-        userRepository,
-        eventBus,
-    ),
-    grantAdmin: new GrantAdminUseCase(
-        userRepository,
-        eventBus,
-    ),
-    revokeAdmin: new RevokeAdminUseCase(
-        userRepository,
-        eventBus,
-    ),
-    grantRoot: new GrantRootUseCase(
-        userRepository,
-        eventBus,
-    ),
-    revokeRoot: new RevokeRootUseCase(
-        userRepository,
-        eventBus,
-    ),
-    verifyPassword: new VerifyPasswordUseCase(
-        userRepository,
-        passwordHasher,
-    ),
-    activate: new ActivateUserUseCase(
-        userRepository,
-        eventBus,
-    ),
-    deactivate: new DeactivateUserUseCase(
-        userRepository,
-        eventBus,
-    ),
-    getById: new GetUserByIdUseCase(
-        userRepository,
-    ),
+    create: new CreateUserUseCase(userRepository, passwordHasher, idGenerator),
+    createRoot: new CreateRootUseCase(userRepository, passwordHasher, idGenerator),
+    getAll: new GetAllUsersUseCase(userRepository),
+    getByUsername: new GetUserByUsernameUseCase(userRepository),
+    updatePassword: new UpdatePasswordUseCase(userRepository, passwordHasher),
+    incrementSessionVersion: new IncrementSessionVersionUseCase(userRepository),
+    verifyPassword: new VerifyPasswordUseCase(userRepository,passwordHasher),
+    activate: new ActivateUserUseCase(userRepository),
+    deactivate: new DeactivateUserUseCase(userRepository),
+    getById: new GetUserByIdUseCase(userRepository),
+    managePermission: new ManagePermissionUseCase(userRepository),
+    getUserPermissions: new GetUserPermissionsUseCase(userRepository),
 }
 
 export const faqUseCases: IFaqUseCases = {
