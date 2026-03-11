@@ -1,38 +1,45 @@
 ---
 // src/components/Navbar.astro
 const navLinks = [
-  { href: '/',            label: 'Inicio' },
-  { href: '/temporada',   label: 'Temporada' },
-  { href: '/manga',       label: 'Manga' },
-  { href: '/varios',      label: 'Animes Varios' },
-  { href: '/faq',         label: 'FAQ & Staff' },
-  { href: '/hemeroteca',  label: 'Hemeroteca' },
+  { href: "/", label: "Inicio" },
+  { href: "/temporada", label: "Temporada" },
+  { href: "/manga", label: "Manga" },
+  { href: "/varios", label: "Animes Varios" },
+  { href: "/faq", label: "FAQ & Staff" },
+  { href: "/hemeroteca", label: "Hemeroteca" },
 ];
 
-const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
+const currentPath = Astro.url.pathname.replace(/\/$/, "") || "/";
 ---
 
 <nav id="navbar">
+  <!-- Scan line accent on navbar border -->
+  <div class="nav-scanline"></div>
+
   <a href="/" class="nav-logo">
     <div class="nav-star"></div>
-    <div>ANIA<br />STARLIGHT</div>
+    <div class="nav-logo-text">
+      <span class="logo-line1">ANIA</span>
+      <span class="logo-line2">STARLIGHT</span>
+    </div>
   </a>
 
   <ul>
-    {navLinks.map(({ href, label }) => {
-      const normalizedHref = href === '/' ? '/' : href;
-      const isActive =
-        href === '/'
-          ? currentPath === '/' || currentPath === ''
-          : currentPath.startsWith(href);
-      return (
-        <li>
-          <a href={href} class:list={['nav-link', { active: isActive }]}>
-            {label}
-          </a>
-        </li>
-      );
-    })}
+    {
+      navLinks.map(({ href, label }) => {
+        const isActive =
+          href === "/"
+            ? currentPath === "/" || currentPath === ""
+            : currentPath.startsWith(href);
+        return (
+          <li>
+            <a href={href} class:list={["nav-link", { active: isActive }]}>
+              {label}
+            </a>
+          </li>
+        );
+      })
+    }
   </ul>
 
   <!-- Mobile hamburger -->
@@ -41,66 +48,203 @@ const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
 
 <style>
   nav {
-    position: fixed; top: 0; left: 0; right: 0; z-index: 1000;
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    z-index: 1000;
     height: var(--nav-h);
-    display: flex; align-items: center; justify-content: space-between;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
     padding: 0 48px;
     background: rgba(4, 6, 14, 0.92);
     backdrop-filter: blur(16px);
     border-bottom: 1px solid var(--border-c);
+    overflow: hidden;
   }
+
+  /* Animated scan line on navbar bottom edge */
+  .nav-scanline {
+    position: absolute;
+    bottom: 0;
+    left: -100%;
+    width: 60%;
+    height: 1px;
+    background: linear-gradient(
+      90deg,
+      transparent,
+      var(--cyan),
+      var(--magenta),
+      transparent
+    );
+    animation: nav-scan 4s linear infinite;
+    opacity: 0.7;
+    pointer-events: none;
+  }
+  @keyframes nav-scan {
+    0% {
+      left: -60%;
+    }
+    100% {
+      left: 120%;
+    }
+  }
+
+  /* ── Logo with Black Ops One font ── */
   .nav-logo {
-    display: flex; align-items: center; gap: 10px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900; font-size: 1.15rem;
-    background: linear-gradient(120deg, #fff 30%, var(--cyan));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    letter-spacing: 0.04em; line-height: 1.2;
-    white-space: nowrap;      /* ← evita que corte la palabra */
-    overflow: visible;        /* ← permite que se vea completo */
-    flex-shrink: 0;           /* ← no se achica con el navbar */
-    font-size: 1rem;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    text-decoration: none;
+    flex-shrink: 0;
+    overflow: visible;
+    white-space: nowrap;
   }
+  .nav-logo-text {
+    display: flex;
+    flex-direction: column;
+    line-height: 1.15;
+  }
+  .logo-line1 {
+    font-family: "Black Ops One", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    color: #ffffff;
+    text-shadow:
+      0 0 10px rgba(0, 245, 255, 0.4),
+      1px 0 rgba(0, 245, 255, 0.3);
+    letter-spacing: 0.08em;
+  }
+  .logo-line2 {
+    font-family: "Black Ops One", sans-serif;
+    font-size: 1.05rem;
+    font-weight: 400;
+    background: linear-gradient(90deg, var(--cyan) 0%, var(--magenta) 100%);
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 6px rgba(0, 245, 255, 0.4));
+    letter-spacing: 0.08em;
+  }
+  .nav-logo:hover .logo-line1 {
+    text-shadow:
+      0 0 16px rgba(0, 245, 255, 0.7),
+      2px 0 rgba(212, 0, 255, 0.4);
+  }
+  .nav-logo:hover .logo-line2 {
+    filter: drop-shadow(0 0 12px rgba(0, 245, 255, 0.7));
+  }
+
   .nav-star {
-    width: 24px; height: 24px; flex-shrink: 0;
-    background: conic-gradient(var(--cyan), var(--pink), var(--magenta), var(--cyan));
-    clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
+    width: 24px;
+    height: 24px;
+    flex-shrink: 0;
+    background: conic-gradient(
+      var(--cyan),
+      var(--pink),
+      var(--magenta),
+      var(--cyan)
+    );
+    clip-path: polygon(
+      50% 0%,
+      61% 35%,
+      98% 35%,
+      68% 57%,
+      79% 91%,
+      50% 70%,
+      21% 91%,
+      32% 57%,
+      2% 35%,
+      39% 35%
+    );
     animation: star-spin 5s linear infinite;
     filter: drop-shadow(0 0 5px var(--cyan));
   }
-  @keyframes star-spin { to { transform: rotate(360deg); } }
+  @keyframes star-spin {
+    to {
+      transform: rotate(360deg);
+    }
+  }
 
-  ul { display: flex; list-style: none; gap: 2px; }
+  ul {
+    display: flex;
+    list-style: none;
+    gap: 2px;
+  }
   .nav-link {
-    font-family: 'Rajdhani', sans-serif;
-    font-weight: 600; font-size: 0.88rem;
-    letter-spacing: 0.1em; text-transform: uppercase;
+    font-family: "Rajdhani", sans-serif;
+    font-weight: 600;
+    font-size: 0.88rem;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
     color: var(--text-dim);
-    padding: 8px 14px; border-radius: 6px;
-    transition: color 0.25s, background 0.25s;
+    padding: 8px 14px;
+    border-radius: 0;
+    transition:
+      color 0.25s,
+      background 0.25s,
+      text-shadow 0.25s;
     display: block;
+    position: relative;
+  }
+  /* neon underline on active/hover */
+  .nav-link::after {
+    content: "";
+    position: absolute;
+    bottom: 4px;
+    left: 14px;
+    right: 14px;
+    height: 1px;
+    background: var(--cyan);
+    box-shadow: 0 0 6px var(--cyan);
+    transform: scaleX(0);
+    transition: transform 0.25s ease;
+  }
+  .nav-link:hover::after,
+  .nav-link.active::after {
+    transform: scaleX(1);
   }
   .nav-link:hover,
-  .nav-link.active { color: var(--cyan); background: rgba(0, 245, 255, 0.07); }
+  .nav-link.active {
+    color: var(--cyan);
+    background: rgba(0, 245, 255, 0.07);
+    text-shadow: 0 0 8px rgba(0, 245, 255, 0.5);
+  }
 
-  .nav-toggle { display: none; color: var(--cyan); font-size: 1.4rem; padding: 8px; }
+  .nav-toggle {
+    display: none;
+    color: var(--cyan);
+    font-size: 1.4rem;
+    padding: 8px;
+  }
 
   @media (max-width: 900px) {
-    nav { padding: 0 20px; }
+    nav {
+      padding: 0 20px;
+    }
     ul {
-      display: none; flex-direction: column; gap: 4px;
-      position: absolute; top: var(--nav-h); left: 0; right: 0;
+      display: none;
+      flex-direction: column;
+      gap: 4px;
+      position: absolute;
+      top: var(--nav-h);
+      left: 0;
+      right: 0;
       background: rgba(4, 6, 14, 0.98);
       padding: 16px 20px 24px;
       border-bottom: 1px solid var(--border-c);
     }
-    ul.open { display: flex; }
-    .nav-toggle { display: block; }
+    ul.open {
+      display: flex;
+    }
+    .nav-toggle {
+      display: block;
+    }
   }
 </style>
 
 <script>
-  document.getElementById('navToggle')?.addEventListener('click', () => {
-    document.querySelector('nav ul')?.classList.toggle('open');
+  document.getElementById("navToggle")?.addEventListener("click", () => {
+    document.querySelector("nav ul")?.classList.toggle("open");
   });
 </script>

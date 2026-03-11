@@ -1,33 +1,88 @@
 ---
 // src/components/Footer.astro
-import { socials } from '../data/config';
+import { socials } from "../data/config";
 ---
 
 <footer>
+  <!-- Footer top accent line -->
+  <div class="footer-top-glow"></div>
   <div class="container">
     <div class="footer-grid">
       <div class="footer-brand">
         <div class="footer-logo">
           <div class="foot-star"></div>
-          <div>ANIA<br />STARLIGHT</div>
+          <div class="footer-logo-text">
+            <span class="flogo-line1">ANIA</span>
+            <span class="flogo-line2">STARLIGHT</span>
+          </div>
         </div>
-        <p>VTuber Cyber Hikikomori creando experiencias únicas para la comunidad anime y gaming. ✦˚‧</p>
+        <p>
+          VTuber Cyber Hikikomori creando experiencias únicas para la comunidad
+          anime y gaming. ✦˚‧
+        </p>
         <div class="footer-social">
-          <a href={socials.twitter}   target="_blank" rel="noopener" title="Twitter/X">𝕏</a>
-          <a href={socials.twitch}    target="_blank" rel="noopener" title="Twitch">🎮</a>
-          <a href={socials.youtube}   target="_blank" rel="noopener" title="YouTube">▶</a>
-          <a href={socials.instagram} target="_blank" rel="noopener" title="Instagram">📸</a>
-          <a href={socials.throne} target="_blank" rel="noopener" title="Throne">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 6l3 6h12l3-6-4.5 3L12 3 7.5 9 3 6zm1 8v4h16v-4H4z"/>
-          </svg></a>
-          <a href={socials.streamlabs} target="_blank" rel="noopener" title="Streamlabs">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.199 3.501 2 6.43 2c1.922 0 3.753.895 4.937 2.306A6.554 6.554 0 0 1 17.57 2C20.499 2 23 4.199 23 7.191c0 4.105-5.371 8.863-11 14.402z"/>
-              <path d="M12 8c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z" fill="var(--dark2)"/>
+          <a
+            href={socials.twitter}
+            target="_blank"
+            rel="noopener"
+            title="Twitter/X">𝕏</a
+          >
+          <a href={socials.twitch} target="_blank" rel="noopener" title="Twitch"
+            >🎮</a
+          >
+          <a
+            href={socials.youtube}
+            target="_blank"
+            rel="noopener"
+            title="YouTube">▶</a
+          >
+          <a
+            href={socials.instagram}
+            target="_blank"
+            rel="noopener"
+            title="Instagram">📸</a
+          >
+          <a
+            href={socials.throne}
+            target="_blank"
+            rel="noopener"
+            title="Throne"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path d="M3 6l3 6h12l3-6-4.5 3L12 3 7.5 9 3 6zm1 8v4h16v-4H4z"
+              ></path>
+            </svg></a
+          >
+          <a
+            href={socials.streamlabs}
+            target="_blank"
+            rel="noopener"
+            title="Streamlabs"
+          >
+            <svg
+              width="16"
+              height="16"
+              viewBox="0 0 24 24"
+              fill="currentColor"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <path
+                d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.199 3.501 2 6.43 2c1.922 0 3.753.895 4.937 2.306A6.554 6.554 0 0 1 17.57 2C20.499 2 23 4.199 23 7.191c0 4.105-5.371 8.863-11 14.402z"
+              ></path>
+              <path
+                d="M12 8c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z"
+                fill="var(--dark2)"></path>
             </svg>
           </a>
-          <a href={socials.tiktok}    target="_blank" rel="noopener" title="TikTok">🎵</a>
+          <a href={socials.tiktok} target="_blank" rel="noopener" title="TikTok"
+            >🎵</a
+          >
         </div>
       </div>
 
@@ -45,7 +100,9 @@ import { socials } from '../data/config';
       <div class="footer-col">
         <h4>Comunidad</h4>
         <ul>
-          <li><a href={socials.discord} target="_blank" rel="noopener">Discord</a></li>
+          <li>
+            <a href={socials.discord} target="_blank" rel="noopener">Discord</a>
+          </li>
           <li><a href="/faq">FAQ & Staff</a></li>
           <li><a href="#">#Anidraw</a></li>
           <li><a href="#">#Aniclips</a></li>
@@ -55,32 +112,113 @@ import { socials } from '../data/config';
       <div class="footer-col">
         <h4>Créditos</h4>
         <ul>
-          <li><a href="#">Design: >###</</a></li>
-          <li><a href="#">Art: >###</</a></li>
-          <li><a href="#">Web: >###</</a></li>
+          <li>
+            <a href="#">Design: >###</a>
+            <li>
+              <a href="#">Art: >###</a>
+              <li><a href="#">Web: >###</a></li>
+            </li>
+          </li>
+
+          <div class="footer-bottom">
+            <p>
+              © Copyright <span>Ania Starlight</span> — Todos los derechos reservados
+            </p>
+            <p>
+              Diseñado por <span>###</span> · Distribuido por <span>>###</span>
+            </p>
+          </div>
         </ul>
       </div>
-    </div>
 
-    <div class="footer-bottom">
-      <p>© Copyright <span>Ania Starlight</span> — Todos los derechos reservados</p>
-      <p>Diseñado por <span>###</span> · Distribuido por <span>>###</</span></p>
+      <style>
+        /* Top accent glow line */
+        .footer-top-glow {
+          width: 100%;
+          height: 1px;
+          background: linear-gradient(
+            90deg,
+            transparent 0%,
+            var(--cyan) 30%,
+            var(--magenta) 70%,
+            transparent 100%
+          );
+          opacity: 0.6;
+          margin-bottom: 0;
+        }
+
+        /* Logo with Black Ops One */
+        .footer-logo {
+          display: flex;
+          align-items: center;
+          gap: 10px;
+          margin-bottom: 4px;
+        }
+        .footer-logo-text {
+          display: flex;
+          flex-direction: column;
+          line-height: 1.15;
+        }
+        .flogo-line1 {
+          font-family: "Black Ops One", sans-serif;
+          font-size: 1.1rem;
+          font-weight: 400;
+          color: #ffffff;
+          text-shadow:
+            0 0 10px rgba(0, 245, 255, 0.4),
+            1px 0 rgba(0, 245, 255, 0.25);
+          letter-spacing: 0.08em;
+        }
+        .flogo-line2 {
+          font-family: "Black Ops One", sans-serif;
+          font-size: 1.1rem;
+          font-weight: 400;
+          background: linear-gradient(
+            90deg,
+            var(--cyan) 0%,
+            var(--magenta) 100%
+          );
+          -webkit-background-clip: text;
+          -webkit-text-fill-color: transparent;
+          filter: drop-shadow(0 0 5px rgba(0, 245, 255, 0.35));
+          letter-spacing: 0.08em;
+        }
+
+        .foot-star {
+          width: 22px;
+          height: 22px;
+          flex-shrink: 0;
+          background: conic-gradient(
+            var(--cyan),
+            var(--pink),
+            var(--magenta),
+            var(--cyan)
+          );
+          clip-path: polygon(
+            50% 0%,
+            61% 35%,
+            98% 35%,
+            68% 57%,
+            79% 91%,
+            50% 70%,
+            21% 91%,
+            32% 57%,
+            2% 35%,
+            39% 35%
+          );
+          filter: drop-shadow(0 0 4px var(--cyan));
+          animation: foot-star-pulse 3s ease-in-out infinite;
+        }
+        @keyframes foot-star-pulse {
+          0%,
+          100% {
+            filter: drop-shadow(0 0 4px var(--cyan));
+          }
+          50% {
+            filter: drop-shadow(0 0 10px var(--magenta));
+          }
+        }
+      </style>
     </div>
   </div>
 </footer>
-
-<style>
-  .footer-logo {
-    display: flex; align-items: center; gap: 10px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900; font-size: 1.1rem;
-    background: linear-gradient(120deg, #fff 30%, var(--cyan));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    letter-spacing: 0.04em; line-height: 1.2; margin-bottom: 4px;
-  }
-  .foot-star {
-    width: 22px; height: 22px; flex-shrink: 0;
-    background: conic-gradient(var(--cyan), var(--pink), var(--magenta), var(--cyan));
-    clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
-  }
-</style>

@@ -1,17 +1,27 @@
 ---
 // src/pages/temporada.astro
-import BaseLayout from '../layouts/BaseLayout.astro';
-import AnimeCard from '../components/AnimeCard.astro';
-import { animes } from '../data/animes';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import AnimeCard from "../components/AnimeCard.astro";
+import { animes } from "../data/animes";
 ---
 
 <BaseLayout title="Temporada — Ania Starlight">
-  <section class="section-pad" style="padding-top: calc(var(--nav-h) + 60px)">
+  <section
+    class="section-pad page-hero"
+    style="padding-top: calc(var(--nav-h) + 60px)"
+  >
+    <!-- HUD decorative elements -->
+    <span class="corner-coord tl">SYS::TEMPORADA<br />SEASON_DATA</span>
+    <span class="corner-coord tr">ANIMES::ACTIVOS<br />FILTERING_ON</span>
+    <div class="page-noise"></div>
+
     <div class="container">
       <div class="section-label">Animes en curso</div>
-      <h2 class="section-title">Temporada <span class="accent-c">Actual</span></h2>
+      <h2 class="section-title">
+        Temporada <span class="accent-c">Actual</span>
+      </h2>
 
-      <!-- Filtros (client-side) -->
+      <!-- Filtros con skew cyberpunk -->
       <div class="filters" id="animeFilters">
         <button class="filter-btn active" data-filter="all">Todos</button>
         <button class="filter-btn" data-filter="watching">Viendo</button>
@@ -19,30 +29,69 @@ import { animes } from '../data/animes';
         <button class="filter-btn" data-filter="upcoming">Próximamente</button>
       </div>
 
-      <!-- Grid — renderizado en servidor, filtrado en cliente -->
-      <div class="anime-grid" id="animeGrid">
-        {animes.map((anime) => (
-          <div data-status={anime.status}>
-            <AnimeCard anime={anime} />
-          </div>
-        ))}
+      <!-- Grid -->
+      <div class="anime-grid reveal" id="animeGrid">
+        {
+          animes.map((anime) => (
+            <div data-status={anime.status}>
+              <AnimeCard anime={anime} />
+            </div>
+          ))
+        }
       </div>
     </div>
   </section>
 </BaseLayout>
 
+<style>
+  .page-hero {
+    position: relative;
+    min-height: 100vh;
+    overflow: hidden;
+  }
+  /* Subtle noise grain on the page */
+  .page-noise {
+    position: fixed;
+    inset: 0;
+    pointer-events: none;
+    z-index: 0;
+    opacity: 0.03;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='200' height='200'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='200' height='200' filter='url(%23n)' opacity='1'/%3E%3C/svg%3E");
+    background-repeat: repeat;
+    background-size: 160px 160px;
+  }
+  /* Make filter buttons match the skewed cyberpunk style */
+  .filter-btn {
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    border-radius: 0 !important;
+  }
+  .filter-btn:hover,
+  .filter-btn.active {
+    box-shadow: 0 0 12px rgba(0, 245, 255, 0.4);
+    transform: translateY(-1px) skewX(-2deg);
+  }
+  .container {
+    position: relative;
+    z-index: 1;
+  }
+</style>
+
 <script>
-  const btns = document.querySelectorAll<HTMLButtonElement>('#animeFilters .filter-btn');
-  const items = document.querySelectorAll<HTMLElement>('#animeGrid [data-status]');
+  const btns = document.querySelectorAll<HTMLButtonElement>(
+    "#animeFilters .filter-btn",
+  );
+  const items = document.querySelectorAll<HTMLElement>(
+    "#animeGrid [data-status]",
+  );
 
   btns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      btns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      const filter = btn.dataset.filter ?? 'all';
+    btn.addEventListener("click", () => {
+      btns.forEach((b) => b.classList.remove("active"));
+      btn.classList.add("active");
+      const filter = btn.dataset.filter ?? "all";
       items.forEach((item) => {
         item.style.display =
-          filter === 'all' || item.dataset.status === filter ? '' : 'none';
+          filter === "all" || item.dataset.status === filter ? "" : "none";
       });
     });
   });
