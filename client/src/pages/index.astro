@@ -3,7 +3,14 @@
 import BaseLayout from '../layouts/BaseLayout.astro';
 import { streams } from '../data/config';
 import aniaHero from '../assets/ania-hero.jpg';
-import horariomarzo0208 from '../assets/horario-marzo-0208.png';
+import { getCurrentWeeklySchedule } from '../lib/api';
+import { getMediaUrl, isImage, isVideo } from '../lib/media';
+
+const schaduleMediaUrlFallback = "/assets/under_construction.webp"
+const currentSchedule = await getCurrentWeeklySchedule().catch(() => null);
+const scheduleMediaUrl = currentSchedule ? getMediaUrl(currentSchedule.fileId) : schaduleMediaUrlFallback;
+const scheduleIsImage = currentSchedule ? isImage(currentSchedule.fileContentType) : true;
+const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentType) : false;
 ---
 
 <BaseLayout title="Ania Starlight — Inicio">
@@ -84,7 +91,32 @@ import horariomarzo0208 from '../assets/horario-marzo-0208.png';
         <div class="monthly-card">
           <div class="badge">MARZO 2025</div>
           <div class="monthly-card-img">
-              <img src={horariomarzo0208.src} alt="Calendario Marzo 2025">
+            {scheduleIsVideo ? (
+              <video
+                src={scheduleMediaUrl}
+                controls
+                onerror={(event) => {
+                  const video = event.currentTarget as HTMLVideoElement;
+                  video.onerror = null;
+                  video.pause();
+                  video.style.display = 'none';
+                  const img = document.createElement('img');
+                  img.src = schaduleMediaUrlFallback;
+                  img.className = video.className;
+                  video.parentElement?.appendChild(img);
+                }}
+              />
+            ) : (
+              <img
+                src={scheduleMediaUrl}
+                alt="Calendario Marzo 2025"
+                onerror={(event) => {
+                  const img = event.currentTarget as HTMLImageElement;
+                  img.onerror = null;
+                  img.src = schaduleMediaUrlFallback;
+                }}
+              />
+            )}
           </div>
           <div class="monthly-card-body">
             <h3>Calendario Semanal</h3>

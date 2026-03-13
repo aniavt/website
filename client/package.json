@@ -4,11 +4,13 @@
   "version": "0.0.1",
   "scripts": {
     "dev": "astro dev",
-    "build": "astro build",
-    "preview": "astro preview",
+    "build": "bunx --bun astro build",
+    "preview": "bun run ./dist/server/entry.mjs",
+    "start": "bun run ./dist/server/entry.mjs",
     "astro": "astro"
   },
   "dependencies": {
-    "astro": "^5.17.1"
+    "astro": "^5.17.1",
+    "astro-bun": "^0.0.5-beta"
   }
 }

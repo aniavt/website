@@ -1,19 +1,23 @@
-# --- builder: build Astro static site ---
-FROM node:25-alpine3.22 AS builder
+FROM oven/bun:1 AS builder
 
 WORKDIR /app
 
-COPY client/package.json client/package-lock.json* ./
-RUN npm ci
+COPY client/package.json bun.lockb* ./
+RUN bun install
 
 COPY client/ .
-RUN npm run build
+RUN bunx --bun astro build
+# Prevent adapter from starting its own server (we serve static + handle via serve.mjs)
+RUN sed -i 's/serverEntrypointModule\[_start\](_manifest, _args);/\/\/ &/' dist/server/entry.mjs
 
-# --- production: serve static files with nginx ---
-FROM nginx:alpine
+FROM oven/bun:1 AS runner
 
-COPY docker/web/default.conf /etc/nginx/conf.d/default.conf
-COPY --from=builder /app/dist /usr/share/nginx/html
+WORKDIR /app
 
+COPY --from=builder /app ./
+COPY docker/web/serve.mjs ./
+
+ENV PORT=80
 EXPOSE 80
-CMD ["nginx", "-g", "daemon off;"]
+
+CMD ["bun", "run", "serve.mjs"]
