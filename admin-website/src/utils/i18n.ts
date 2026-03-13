@@ -50,6 +50,25 @@ const es: Record<string, string> = {
 
   // Generic
   unknown_error: "Ha ocurrido un error inesperado",
+
+  // Weekly schedule
+  weekly_schedule_load_failed: "Error al cargar los horarios semanales",
+  weekly_schedule_upload_failed: "Error al subir el horario semanal",
+  weekly_schedule_delete_failed: "Error al eliminar el horario semanal",
+  weekly_schedule_history_load_failed: "Error al cargar el historial del horario",
+  weekly_schedule_update_failed: "Error al actualizar el horario semanal",
+  weekly_schedule_restore_failed: "Error al restaurar el horario semanal",
+  weekly_schedule_not_found: "Horario semanal no encontrado",
+  weekly_schedule_invalid_week: "La semana especificada no es válida",
+  weekly_schedule_duplicate_week_year: "Ya existe un horario para esa semana y año",
+  weekly_schedule_file_not_found: "Archivo asociado al horario no encontrado",
+  weekly_schedule_cannot_modify_past: "No se pueden modificar horarios de semanas pasadas",
+  weekly_schedule_invalid_week_client: "La semana debe estar entre 1 y 53",
+  weekly_schedule_invalid_year_client: "El año especificado no es válido",
+  weekly_schedule_file_required: "Debes seleccionar un archivo para subir",
+  weekly_schedule_created: "Horario semanal creado correctamente",
+  weekly_schedule_deleted: "Horario semanal eliminado correctamente",
+  weekly_schedule_not_authorized: "No tienes permisos para ver los horarios semanales",
 };
 
 export function t(key: string): string {

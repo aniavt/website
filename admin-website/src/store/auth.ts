@@ -2,12 +2,13 @@ import { signal, computed } from "@preact/signals";
 import { api } from "@utils";
 import { route } from "preact-router";
 
-export type PermissionNamespace = "meta" | "user" | "faq";
+export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule";
 
 export interface UserPermissions {
   readonly meta: string[];
   readonly user: string[];
   readonly faq: string[];
+  readonly weekly_schedule: string[];
 }
 
 export interface User {
@@ -48,9 +49,31 @@ export const canManageFaqUpdate = computed(() => hasPermission("faq", "update_fa
 export const canManageFaqDelete = computed(() => hasPermission("faq", "delete_faq"));
 export const canManageFaqRestore = computed(() => hasPermission("faq", "restore_faq"));
 
+export const canReadWeeklySchedule = computed(() =>
+  hasPermission("weekly_schedule", "create_weekly_schedule") ||
+  hasPermission("weekly_schedule", "update_weekly_schedule") ||
+  hasPermission("weekly_schedule", "delete_weekly_schedule") ||
+  hasPermission("weekly_schedule", "read_weekly_schedule_history"),
+);
+export const canCreateWeeklySchedule = computed(() =>
+  hasPermission("weekly_schedule", "create_weekly_schedule"),
+);
+export const canUpdateWeeklySchedule = computed(() =>
+  hasPermission("weekly_schedule", "update_weekly_schedule"),
+);
+export const canDeleteWeeklySchedule = computed(() =>
+  hasPermission("weekly_schedule", "delete_weekly_schedule"),
+);
+export const canViewWeeklyScheduleHistory = computed(() =>
+  hasPermission("weekly_schedule", "read_weekly_schedule_history"),
+);
+
 export const canManagePermissionsMeta = computed(() => hasPermission("meta", "meta_manage_permissions"));
 export const canManageUserPermissions = computed(() => hasPermission("meta", "manage_user"));
 export const canManageFaqPermissions = computed(() => hasPermission("meta", "manage_faq"));
+export const canManageWeeklySchedulePermissions = computed(() =>
+  hasPermission("meta", "manage_weekly_schedule"),
+);
 
 export const isRootDerived = computed(
   () =>

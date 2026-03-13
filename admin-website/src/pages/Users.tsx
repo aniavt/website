@@ -9,6 +9,7 @@ import {
   canManagePermissionsMeta,
   canManageUserPermissions,
   canManageFaqPermissions,
+  canManageWeeklySchedulePermissions,
   userHasPermission,
   type UserPermissions,
 } from "@store/auth";
@@ -85,7 +86,10 @@ export default function Users() {
   }
 
   const canManageAnyPermissions =
-    canManagePermissionsMeta.value || canManageUserPermissions.value || canManageFaqPermissions.value;
+    canManagePermissionsMeta.value ||
+    canManageUserPermissions.value ||
+    canManageFaqPermissions.value ||
+    canManageWeeklySchedulePermissions.value;
 
   async function openPermissions(u: User) {
     if (!canManageAnyPermissions) return;
@@ -133,6 +137,7 @@ export default function Users() {
     { slug: "meta_manage_permissions", label: "Gestionar permisos meta" },
     { slug: "manage_user", label: "Gestionar permisos de usuarios" },
     { slug: "manage_faq", label: "Gestionar permisos de FAQ" },
+    { slug: "manage_weekly_schedule", label: "Gestionar permisos de horario semanal" },
   ];
 
   const userPermissionsConfig: { slug: string; label: string }[] = [
@@ -147,6 +152,16 @@ export default function Users() {
     { slug: "update_faq", label: "Editar FAQ" },
     { slug: "delete_faq", label: "Eliminar FAQ" },
     { slug: "restore_faq", label: "Restaurar FAQ" },
+  ];
+
+  const weeklySchedulePermissionsConfig: { slug: string; label: string }[] = [
+    { slug: "create_weekly_schedule", label: "Crear horario semanal" },
+    { slug: "update_weekly_schedule", label: "Editar horario semanal" },
+    { slug: "delete_weekly_schedule", label: "Eliminar horario semanal" },
+    {
+      slug: "read_weekly_schedule_history",
+      label: "Ver historial de horario semanal",
+    },
   ];
 
   function userActions(u: User) {
@@ -392,6 +407,39 @@ export default function Users() {
                         disabled={!canEdit}
                         onChange={(e) =>
                           togglePermission("faq", p.slug, (e.target as HTMLInputElement).checked)
+                        }
+                      />
+                      <span>{p.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">
+                Horario semanal
+              </h3>
+              <div class="flex flex-col gap-1">
+                {weeklySchedulePermissionsConfig.map((p) => {
+                  const full = `weekly_schedule.${p.slug}`;
+                  const checked = permissions.weekly_schedule.includes(full);
+                  const canEdit = canManageUserPermissions.value;
+                  return (
+                    <label
+                      key={p.slug}
+                      class="flex items-center gap-2 text-sm text-[var(--text-secondary)]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={!canEdit}
+                        onChange={(e) =>
+                          togglePermission(
+                            "weekly_schedule",
+                            p.slug,
+                            (e.target as HTMLInputElement).checked,
+                          )
                         }
                       />
                       <span>{p.label}</span>

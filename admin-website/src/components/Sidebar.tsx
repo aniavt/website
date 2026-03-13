@@ -3,6 +3,7 @@ import {
   logout,
   canReadUsers,
   canManageFaqRead,
+  canReadWeeklySchedule,
 } from "@store/auth";
 
 interface NavItem {
@@ -14,6 +15,11 @@ interface NavItem {
 export default function Sidebar() {
   const items: NavItem[] = [
     { label: "FAQ", href: "/admin/faq", visible: canManageFaqRead.value },
+    {
+      label: "Horario semanal",
+      href: "/admin/weekly-schedule",
+      visible: canReadWeeklySchedule.value,
+    },
     { label: "Usuarios", href: "/admin/users", visible: canReadUsers.value },
     { label: "Perfil", href: "/admin/profile", visible: true },
   ];
