@@ -62,7 +62,7 @@ export class UpdateFaqItemUseCase {
 
         try {
             await this.faqItemRepository.save(updated);
-            const historyId = this.idGenerator.generateFaqHistoryId();
+            const historyId = this.idGenerator.generateUUID();
             await this.faqHistoryRepository.append(
                 new FaqHistoryEntry({
                     id: historyId,
@@ -84,7 +84,7 @@ export class UpdateFaqItemUseCase {
     private async findOrCreateFaqText(value: string): Promise<FaqText> {
         const existing = await this.faqTextRepository.findByValue(value);
         if (existing) return existing;
-        const text = new FaqText({ id: this.idGenerator.generateFaqTextId(), value });
+        const text = new FaqText({ id: this.idGenerator.generateUUID(), value });
         await this.faqTextRepository.save(text);
         return text;
     }

@@ -37,7 +37,7 @@ export class CreateFaqItemUseCase {
 
         if (queryText.isError() || answerText.isError()) return err("faq_save_failed");
 
-        const itemId = this.idGenerator.generateFaqItemId();
+        const itemId = this.idGenerator.generateUUID();
         const item = new FaqItem({
             id: itemId,
             queryId: queryText.data.id,
@@ -48,7 +48,7 @@ export class CreateFaqItemUseCase {
 
         try {
             await this.faqItemRepository.save(item);
-            const historyId = this.idGenerator.generateFaqHistoryId();
+            const historyId = this.idGenerator.generateUUID();
             await this.faqHistoryRepository.append(
                 new FaqHistoryEntry({
                     id: historyId,
@@ -71,7 +71,7 @@ export class CreateFaqItemUseCase {
         const existing = await this.faqTextRepository.findByValue(value);
         if (existing) return ok(existing);
         try {
-            const text = new FaqText({ id: this.idGenerator.generateFaqTextId(), value });
+            const text = new FaqText({ id: this.idGenerator.generateUUID(), value });
             await this.faqTextRepository.save(text);
             return ok(text);
         } catch {

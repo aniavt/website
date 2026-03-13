@@ -33,7 +33,7 @@ export class CreateUserUseCase {
         }
 
         const passwordHash = await this.passwordHasher.hash(password);
-        const user = UserEntity.create(this.idGenerator.generateUserId(), username, passwordHash);
+        const user = UserEntity.create(this.idGenerator.generateUUID(), username, passwordHash);
 
         try {
             await this.userRepository.save(user);

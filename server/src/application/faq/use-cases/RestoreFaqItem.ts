@@ -39,7 +39,7 @@ export class RestoreFaqItemUseCase {
 
         try {
             await this.faqItemRepository.save(updated);
-            const historyId = this.idGenerator.generateFaqHistoryId();
+            const historyId = this.idGenerator.generateUUID();
             await this.faqHistoryRepository.append(
                 new FaqHistoryEntry({
                     id: historyId,

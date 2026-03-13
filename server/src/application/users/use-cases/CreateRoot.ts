@@ -38,7 +38,7 @@ export class CreateRootUseCase {
         }
 
         const passwordHash = await this.passwordHasher.hash(password);
-        const user = UserEntity.create(this.idGenerator.generateUserId(), username, passwordHash);
+        const user = UserEntity.create(this.idGenerator.generateUUID(), username, passwordHash);
 
         user.permissions.meta = new ManagePermission().add(
             ManagePermission.META_MANAGE_PERMISSIONS,
