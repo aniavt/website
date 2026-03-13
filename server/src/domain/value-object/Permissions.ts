@@ -1,5 +1,5 @@
 const mask = (bit: number) => 1 << bit;
-export const namespaces = ["meta", "user", "faq"] as const;
+export const namespaces = ["meta", "user", "faq", "weekly_schedule"] as const;
 
 export type PermissionNamespace = typeof namespaces[number];
 
@@ -104,12 +104,14 @@ export class ManagePermission extends Permission {
     static readonly META_MANAGE_PERMISSIONS = new this(mask(1)).setAssignmentPermission();
     static readonly MANAGE_USER = new this(mask(2)).setAssignmentPermission();
     static readonly MANAGE_FAQ  = new this(mask(3)).setAssignmentPermission();
+    static readonly MANAGE_WEEKLY_SCHEDULE = new this(mask(4)).setAssignmentPermission();
 
     protected static override readonly slugMap: string[] = [
         "", // bit 0, none
         "meta_manage_permissions",
         "manage_user",
         "manage_faq",
+        "manage_weekly_schedule",
     ];
 }
 
@@ -132,15 +134,15 @@ export class UserPermission extends Permission {
 
     protected static override readonly slugMap: string[] = [
         "", // bit 0, none
-        "read_user",
         "assign_read_user",
         "revoke_read_user",
-        "activate_user",
+        "read_user",
         "assign_activate_user",
         "revoke_activate_user",
-        "deactivate_user",
+        "activate_user",
         "assign_deactivate_user",
         "revoke_deactivate_user",
+        "deactivate_user",
     ];
 }
 
@@ -171,20 +173,59 @@ export class FAQPermission extends Permission {
 
     protected static override readonly slugMap: string[] = [
         "", // bit 0, none
-        "read_faq",
         "assign_read_faq",
         "revoke_read_faq",
-        "create_faq",
+        "read_faq",
         "assign_create_faq",
         "revoke_create_faq",
-        "delete_faq",
+        "create_faq",
         "assign_delete_faq",
         "revoke_delete_faq",
-        "restore_faq",
+        "delete_faq",
         "assign_restore_faq",
         "revoke_restore_faq",
-        "update_faq",
+        "restore_faq",
         "assign_update_faq",
         "revoke_update_faq",
+        "update_faq",
+    ];
+}
+
+export class WeeklySchedulePermission extends Permission {
+    static readonly ASSIGN_CREATE_WEEKLY_SCHEDULE = new this(mask(1)).setAssignmentPermission();
+    static readonly REVOKE_CREATE_WEEKLY_SCHEDULE = new this(mask(2)).setAssignmentPermission();
+    static readonly CREATE_WEEKLY_SCHEDULE = new this(mask(3)).setRequiredAssignmentPermission(this.ASSIGN_CREATE_WEEKLY_SCHEDULE, this.REVOKE_CREATE_WEEKLY_SCHEDULE);
+    static readonly ASSIGN_DELETE_WEEKLY_SCHEDULE = new this(mask(4)).setAssignmentPermission();
+    static readonly REVOKE_DELETE_WEEKLY_SCHEDULE = new this(mask(5)).setAssignmentPermission();
+    static readonly DELETE_WEEKLY_SCHEDULE = new this(mask(6)).setRequiredAssignmentPermission(this.ASSIGN_DELETE_WEEKLY_SCHEDULE, this.REVOKE_DELETE_WEEKLY_SCHEDULE);
+    static readonly ASSIGN_UPDATE_WEEKLY_SCHEDULE = new this(mask(7)).setAssignmentPermission();
+    static readonly REVOKE_UPDATE_WEEKLY_SCHEDULE = new this(mask(8)).setAssignmentPermission();
+    static readonly UPDATE_WEEKLY_SCHEDULE = new this(mask(9)).setRequiredAssignmentPermission(this.ASSIGN_UPDATE_WEEKLY_SCHEDULE, this.REVOKE_UPDATE_WEEKLY_SCHEDULE);
+    static readonly ASSIGN_READ_WEEKLY_SCHEDULE_HISTORY = new this(mask(10)).setAssignmentPermission();
+    static readonly REVOKE_READ_WEEKLY_SCHEDULE_HISTORY = new this(mask(11)).setAssignmentPermission();
+    static readonly READ_WEEKLY_SCHEDULE_HISTORY = new this(mask(12)).setRequiredAssignmentPermission(this.ASSIGN_READ_WEEKLY_SCHEDULE_HISTORY, this.REVOKE_READ_WEEKLY_SCHEDULE_HISTORY);
+
+
+    static readonly MANAGE_WEEKLY_SCHEDULE = new this().add(
+        this.CREATE_WEEKLY_SCHEDULE,
+        this.DELETE_WEEKLY_SCHEDULE,
+        this.UPDATE_WEEKLY_SCHEDULE,
+        this.READ_WEEKLY_SCHEDULE_HISTORY,
+    );
+
+    protected static override readonly slugMap: string[] = [
+        "", // bit 0, none
+        "assign_create_weekly_schedule",
+        "revoke_create_weekly_schedule",
+        "create_weekly_schedule",
+        "assign_delete_weekly_schedule",
+        "revoke_delete_weekly_schedule",
+        "delete_weekly_schedule",
+        "assign_update_weekly_schedule",
+        "revoke_update_weekly_schedule",
+        "update_weekly_schedule",
+        "assign_read_weekly_schedule_history",
+        "revoke_read_weekly_schedule_history",
+        "read_weekly_schedule_history",
     ];
 }

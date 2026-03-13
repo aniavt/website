@@ -10,9 +10,10 @@ services:
         X_URL: ${X_URL}
         YT_URL: ${YT_URL}
         TW_URL: ${TW_URL}
-        API_URL: http://172.20.0.101:${SERVER_PORT}
+        API_URL: http://172.20.0.101:3000
         WEB_ADMIN_URL: http://172.20.0.102:80
         WEB_URL: http://172.20.0.103
+        S3_URL: http://172.20.0.104:3900
     image: ania_nginx:latest
     env_file:
       - .env
@@ -22,7 +23,6 @@ services:
       - "${PORT}"
     network_mode: host
     volumes:
-      - ../data/nginx/assets:/usr/share/nginx/assets
       - ../data/nginx/log:/var/log/nginx
 
   db:
@@ -51,6 +51,8 @@ services:
     restart: unless-stopped
     expose:
       - "80"
+    environment:
+      - PUBLIC_SERVER_URL=http://172.20.0.101:3000
     networks:
       ania_network:
         ipv4_address: 172.20.0.103
@@ -63,9 +65,9 @@ services:
     env_file:
       - .env
     expose:
-      - "${SERVER_PORT}"
+      - "3000"
     environment:
-      PORT: ${SERVER_PORT}
+      PORT: 3000
       HOSTNAME: ${SERVER_HOSTNAME}
       MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@172.20.0.100:27017/${MONGO_INITDB_DATABASE}?authSource=admin"
     networks:
@@ -88,6 +90,40 @@ services:
     networks:
       ania_network:
         ipv4_address: 172.20.0.102
+
+  s3:
+    # DOC:
+      # Primera vez (v2 no tiene "init"; asignar rol y aplicar layout):
+      #   docker exec ania_s3_garage /garage status   # ver ID del nodo
+      #   docker exec ania_s3_garage /garage layout assign -z dc1 -c 10G <NODE_ID>
+      #   docker exec ania_s3_garage /garage layout show   
+      #    --> anotar <version>
+      #   docker exec ania_s3_garage /garage layout apply --version <version>
+
+      # Crear key S3 y (opcionalmente) un bucket
+      #   docker exec ania_s3_garage /garage key create myuser
+      #    --> anotar <KEY_ID>
+      #   docker exec ania_s3_garage /garage key allow <KEY_ID> --create-bucket
+      #   docker exec ania_s3_garage /garage bucket create <BUCKET_NAME>
+      #   docker exec ania_s3_garage /garage bucket allow <BUCKET_NAME> --key <KEY_ID> --read --write
+
+    image: dxflrs/garage:v2.2.0
+    container_name: ania_s3_garage
+    restart: unless-stopped
+    # 3900 -> S3 API (HTTP/HTTPS)
+    # 3901 -> RPC (interno entre nodos)
+    # 3903 -> Admin API (HTTP/HTTPS)
+    expose:
+      - "3900"
+      - "3901"
+      - "3903"
+    volumes:
+      - ../data/s3-garage:/var/lib/garage
+      - ./garage/config.toml:/etc/garage.toml
+    networks:
+      ania_network:
+        ipv4_address: 172.20.0.104
+
 
 networks:
   ania_network:

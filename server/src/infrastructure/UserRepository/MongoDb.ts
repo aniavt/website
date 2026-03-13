@@ -15,6 +15,7 @@ const userSchema = new mongoose.Schema({
         meta: { type: [Number], required: true },
         user: { type: [Number], required: true },
         faq: { type: [Number], required: true },
+        weekly_schedule: { type: Number, required: true, default: 0 },
     },
 });
 
@@ -30,6 +31,7 @@ interface UserDocument {
         meta: number;
         user: number;
         faq: number;
+        weekly_schedule: number;
     }
 }
 
@@ -57,6 +59,7 @@ function userToDocument(user: UserEntity): UserDocument {
             meta: user.permissions.meta.valueOf(),
             user: user.permissions.user.valueOf(),
             faq: user.permissions.faq.valueOf(),
+            weekly_schedule: user.permissions.weekly_schedule.valueOf(),
         },
     };
 }

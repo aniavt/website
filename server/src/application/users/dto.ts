@@ -11,6 +11,7 @@ export interface UserDto {
         readonly meta: string[];
         readonly user: string[];
         readonly faq: string[];
+        readonly weekly_schedule: string[];
     };
 }
 
@@ -26,6 +27,7 @@ export function toUserDto(user: UserEntity): UserDto {
             meta: user.permissions.meta.getSlugs("meta"),
             user: user.permissions.user.getSlugs("user"),
             faq: user.permissions.faq.getSlugs("faq"),
+            weekly_schedule: user.permissions.weekly_schedule.getSlugs("weekly_schedule"),
         },
     };
 }

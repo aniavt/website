@@ -5,6 +5,7 @@ ARG PORT
 ARG API_URL
 ARG WEB_ADMIN_URL
 ARG WEB_URL
+ARG S3_URL
 
 # Social URLs
 ARG DISCORD_URL
@@ -20,6 +21,7 @@ RUN apk update && apk add --no-cache logrotate busybox-suid
 COPY nginx.conf     /etc/nginx/nginx.conf.template
 COPY logrotate.conf /etc/logrotate.d/nginx
 COPY html           /usr/share/nginx/html
+COPY assets         /usr/share/nginx/assets
 
 
 # Replace variables in the html files
@@ -68,7 +70,8 @@ RUN DOMAIN=${DOMAIN}   \
     API_URL=${API_URL} \
     WEB_ADMIN_URL=${WEB_ADMIN_URL} \
     WEB_URL=${WEB_URL} \
-    envsubst '$DOMAIN $PORT $API_URL $WEB_ADMIN_URL $WEB_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+    S3_URL=${S3_URL}   \
+    envsubst '$DOMAIN $PORT $API_URL $WEB_ADMIN_URL $WEB_URL $S3_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 
 EXPOSE ${PORT}

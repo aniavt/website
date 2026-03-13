@@ -1,7 +1,7 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { SecureHasher } from "@domain/services/SecureHasher";
 import type { IdGenerator } from "@domain/services/IdGenerator";
-import { FAQPermission, ManagePermission, UserPermission } from "@domain/value-object/Permissions";
+import { FAQPermission, ManagePermission, UserPermission, WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { UserEntity } from "@domain/entities/User";
 import { type Result, err, ok } from "@lib/result";
 import type { UserError } from "../errors";
@@ -76,6 +76,20 @@ export class CreateRootUseCase {
             FAQPermission.REVOKE_UPDATE_FAQ,
         );
 
+        user.permissions.weekly_schedule = new WeeklySchedulePermission().add(
+            WeeklySchedulePermission.CREATE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.ASSIGN_CREATE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.REVOKE_CREATE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.ASSIGN_DELETE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.REVOKE_DELETE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.UPDATE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.ASSIGN_UPDATE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.REVOKE_UPDATE_WEEKLY_SCHEDULE,
+            WeeklySchedulePermission.READ_WEEKLY_SCHEDULE_HISTORY,
+            WeeklySchedulePermission.ASSIGN_READ_WEEKLY_SCHEDULE_HISTORY,
+            WeeklySchedulePermission.REVOKE_READ_WEEKLY_SCHEDULE_HISTORY,
+        );
 
         try {
             await this.userRepository.save(user);

@@ -4,6 +4,7 @@ import {
     ManagePermission,
     UserPermission,
     FAQPermission,
+    WeeklySchedulePermission,
 } from "@domain/value-object/Permissions";
 
 
@@ -24,6 +25,7 @@ type PermissionType =
     | { type: "meta", permission: ManagePermission }
     | { type: "user", permission: UserPermission }
     | { type: "faq", permission: FAQPermission }
+    | { type: "weekly_schedule", permission: WeeklySchedulePermission }
 
 export class UserEntity {
     readonly id: string;
@@ -61,6 +63,7 @@ export class UserEntity {
                 meta: ManagePermission.fromValue(Permission.NONE.valueOf()),
                 user: UserPermission.fromValue(Permission.NONE.valueOf()),
                 faq: FAQPermission.fromValue(Permission.NONE.valueOf()),
+                weekly_schedule: WeeklySchedulePermission.fromValue(Permission.NONE.valueOf()),
             }
         });
 
@@ -80,6 +83,7 @@ export class UserEntity {
                 meta: ManagePermission.fromValue(props.permissions.meta),
                 user: UserPermission.fromValue(props.permissions.user),
                 faq: FAQPermission.fromValue(props.permissions.faq),
+                weekly_schedule: WeeklySchedulePermission.fromValue(props.permissions.weekly_schedule ?? Permission.NONE.valueOf()),
             }
         });
     }

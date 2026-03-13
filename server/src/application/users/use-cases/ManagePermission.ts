@@ -1,5 +1,13 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
-import { FAQPermission, isPermissionNamespace, ManagePermission, type PermissionNamespace, UserPermission, type Permission } from "@domain/value-object/Permissions";
+import {
+    FAQPermission,
+    isPermissionNamespace,
+    ManagePermission,
+    type PermissionNamespace,
+    UserPermission,
+    WeeklySchedulePermission,
+    type Permission,
+} from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { UserEntity } from "@domain/entities/User";
 import type { UserError, PermissionError } from "../errors";
@@ -37,6 +45,7 @@ export class ManagePermissionUseCase {
                 case "meta": return ManagePermission;
                 case "user": return UserPermission;
                 case "faq":  return FAQPermission;
+                case "weekly_schedule": return WeeklySchedulePermission;
             }
             return "permission_invalid_namespace";
         })();
@@ -55,9 +64,22 @@ export class ManagePermissionUseCase {
 
         if (target.isAssignmentPermission()) {
             switch (namespace) {
-                case "meta": if (!requester.hasPermission({ type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS })) return err("permission_not_authorized"); break;
-                case "user": if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER })) return err("permission_not_authorized"); break;
-                case "faq": if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_FAQ })) return err("permission_not_authorized"); break;
+                case "meta":
+                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS }))
+                        return err("permission_not_authorized");
+                    break;
+                case "user":
+                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER }))
+                        return err("permission_not_authorized");
+                    break;
+                case "faq":
+                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_FAQ }))
+                        return err("permission_not_authorized");
+                    break;
+                case "weekly_schedule":
+                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_WEEKLY_SCHEDULE }))
+                        return err("permission_not_authorized");
+                    break;
             }
             if (action === "grant") {
                 user.grantPermission({ type: namespace, permission: target });
