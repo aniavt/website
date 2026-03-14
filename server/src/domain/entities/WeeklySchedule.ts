@@ -25,11 +25,6 @@ export class WeeklySchedule {
         return this.week >= 1 && this.week <= 53;
     }
 
-    isCurrentWeek(): boolean {
-        const { week: currentWeek, year: currentYear } = WeeklySchedule.getISOWeekAndYear(new Date());
-        return this.week === currentWeek && this.year === currentYear;
-    }
-
     /** ISO-8601: week (1–53) and year (week-year, can differ from calendar year at boundaries). */
     static getISOWeekAndYear(date: Date): { week: number; year: number } {
         const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
