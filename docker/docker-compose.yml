@@ -47,6 +47,7 @@ services:
     build:
       context: ..
       dockerfile: docker/web/Dockerfile
+      target: runner
     image: ania_web:latest
     container_name: ania_web
     restart: unless-stopped
@@ -130,7 +131,6 @@ services:
       ania_network:
         ipv4_address: 172.20.0.104
 
-
 networks:
   ania_network:
     driver: bridge
@@ -139,4 +139,3 @@ networks:
       config:
         - subnet: 172.20.0.0/16
           gateway: 172.20.0.1
-  
