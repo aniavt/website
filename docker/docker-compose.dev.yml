@@ -3,6 +3,8 @@ services:
     build:
       context: ..
       dockerfile: docker/server/Dockerfile.dev
+    container_name: ania_server_dev
+    image: ania_server:dev
     volumes:
       - ../server:/app
 
@@ -10,8 +12,21 @@ services:
     build:
       context: ..
       dockerfile: docker/admin-website/Dockerfile.dev
+    container_name: ania_web_admin_dev
+    image: ania_web_admin:dev
     volumes:
       - ../admin-website:/app
     environment:
       - NODE_ENV=development
       - VITE_API_NODE_ENV=development
+
+  web:
+    build:
+      context: ..
+      dockerfile: docker/web/Dockerfile
+      target: dev
+    image: ania_web:dev
+    container_name: ania_web_dev
+    volumes:
+      - ../client:/app
+      - /app/node_modules
