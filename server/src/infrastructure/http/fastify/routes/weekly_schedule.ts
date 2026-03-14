@@ -5,7 +5,7 @@ import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { RegisterRouteFn } from "../types";
 import type { WeeklyScheduleError } from "@application/weekly_schedule/errors";
 import type { MediaError } from "@application/media/errors";
-import { authenticate } from "../middlewares/auth";
+import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 
 export interface WeeklyScheduleRoutesDependencies {
     userUseCases: IUserUseCases;
@@ -165,8 +165,8 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
         },
     );
 
-    app.get(prefixUrl("/weekly-schedule/current"), async (request, reply) => {
-        const result = await weeklyScheduleUseCases.getCurrentWeek.execute();
+    app.get(prefixUrl("/weekly-schedule/current"), async (_request, reply) => {
+        const result = await weeklyScheduleUseCases.getCurrentWeek.execute(null);
         if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
         return reply.send(result.data);
     });
@@ -179,27 +179,33 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
             if (Number.isNaN(week) || Number.isNaN(year)) {
                 return reply.status(400).send({ error: "weekly_schedule_invalid_week" });
             }
-            const result = await weeklyScheduleUseCases.getByWeekAndYear.execute(week, year);
+            const result = await weeklyScheduleUseCases.getByWeekAndYear.execute(null, week, year);
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
             return reply.send(result.data);
         },
     );
 
-    app.get<{ Querystring: { year?: string; includeDeleted?: string } }>(prefixUrl("/weekly-schedule"), async (request, reply) => {
-        const year = request.query.year !== undefined ? parseInt(request.query.year, 10) : undefined;
-        if (request.query.year !== undefined && Number.isNaN(year!)) {
-            return reply.status(400).send({ error: "weekly_schedule_invalid_week" });
-        }
-        const includeDeleted = request.query.includeDeleted === "true";
-        const result = await weeklyScheduleUseCases.list.execute(
-            year !== undefined ? { year: year!, includeDeleted } : { includeDeleted },
-        );
-        if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
-        return reply.send(result.data);
-    });
+    app.get<{ Querystring: { year?: string; includeDeleted?: string } }>(
+        prefixUrl("/weekly-schedule"),
+        { preHandler: optionalAuthenticate(userUseCases) },
+        async (request, reply) => {
+            const year = request.query.year !== undefined ? parseInt(request.query.year, 10) : undefined;
+            if (request.query.year !== undefined && Number.isNaN(year!)) {
+                return reply.status(400).send({ error: "weekly_schedule_invalid_week" });
+            }
+            const includeDeleted = request.query.includeDeleted === "true";
+            const requesterId = request.user?.id ?? null;
+            const result = await weeklyScheduleUseCases.list.execute(
+                requesterId,
+                year !== undefined ? { year: year!, includeDeleted } : { includeDeleted },
+            );
+            if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
+            return reply.send(result.data);
+        },
+    );
 
     app.get<{ Params: { id: string } }>(prefixUrl("/weekly-schedule/:id"), async (request, reply) => {
-        const result = await weeklyScheduleUseCases.getById.execute(request.params.id);
+        const result = await weeklyScheduleUseCases.getById.execute(null, request.params.id);
         if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
         return reply.send(result.data);
     });

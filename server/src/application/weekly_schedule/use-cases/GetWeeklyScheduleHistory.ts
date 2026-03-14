@@ -22,7 +22,7 @@ export class GetWeeklyScheduleHistoryUseCase {
             return err("weekly_schedule_not_authorized");
         }
 
-        const schedule = await this.weeklyScheduleRepository.findById(scheduleId);
+        const schedule = await this.weeklyScheduleRepository.findById(scheduleId, { includeDeleted: true });
         if (!schedule) return err("weekly_schedule_not_found");
 
         const entries = await this.weeklyScheduleHistoryRepository.findByScheduleId(scheduleId);

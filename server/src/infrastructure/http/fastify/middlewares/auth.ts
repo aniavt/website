@@ -37,6 +37,14 @@ export function authenticate(userUseCases: IUserUseCases) {
     }
 }
 
+/** Sets request.user when auth succeeds; leaves it undefined when no/invalid token. Does not reply 401. */
+export function optionalAuthenticate(userUseCases: IUserUseCases) {
+    return async (request: FastifyRequest, _reply: FastifyReply) => {
+        const result = await getUserFromRequest(request, userUseCases);
+        request.user = result.isSuccess() ? result.data : undefined;
+    }
+}
+
 export async function getUserFromRequest(request: FastifyRequest, userUseCases: IUserUseCases): Promise<Result<UserDto, UserAuthenticationError>> {
     const token = request.cookies.auth;
     if (!token) return err("token_not_found");

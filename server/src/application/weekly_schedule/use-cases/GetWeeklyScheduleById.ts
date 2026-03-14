@@ -1,5 +1,7 @@
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { FileRepository } from "@domain/repositories/FileRepository";
+import type { UserRepository } from "@domain/repositories/UserRepository";
+import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
@@ -10,10 +12,20 @@ export class GetWeeklyScheduleByIdUseCase {
     constructor(
         private readonly weeklyScheduleRepository: WeeklyScheduleRepository,
         private readonly fileRepository: FileRepository,
+        private readonly userRepository: UserRepository,
     ) {}
 
-    async execute(id: string): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
-        const schedule = await this.weeklyScheduleRepository.findById(id);
+    async execute(requesterId: string | null, id: string): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
+        const canSeeDeleted =
+            requesterId !== null &&
+            (await this.userRepository.findById(requesterId))?.hasPermission({
+                type: "weekly_schedule",
+                permission: WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE,
+            }) === true;
+
+        const schedule = await this.weeklyScheduleRepository.findById(id, {
+            includeDeleted: canSeeDeleted,
+        });
         if (!schedule) return err("weekly_schedule_not_found");
         const file = await this.fileRepository.findById(schedule.fileId);
         const contentType = file?.contentType ?? null;

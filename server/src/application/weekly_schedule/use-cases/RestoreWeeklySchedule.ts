@@ -26,7 +26,7 @@ export class RestoreWeeklyScheduleUseCase {
             return err("weekly_schedule_not_authorized");
         }
 
-        const schedule = await this.weeklyScheduleRepository.findById(id);
+        const schedule = await this.weeklyScheduleRepository.findById(id, { includeDeleted: true });
         if (!schedule) return err("weekly_schedule_not_found");
 
         const now = new Date();

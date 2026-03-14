@@ -2,6 +2,8 @@ import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import type {
     WeeklyScheduleRepository,
     WeeklyScheduleFindAllOptions,
+    FindByIdOptions,
+    FindByWeekAndYearOptions,
 } from "@domain/repositories/WeeklyScheduleRepository";
 import mongoose from "mongoose";
 
@@ -90,13 +92,21 @@ export class MongoDbWeeklyScheduleRepository implements WeeklyScheduleRepository
         }
     }
 
-    async findById(id: string): Promise<WeeklySchedule | null> {
-        const doc = await this.model.findOne({ id });
+    async findById(id: string, options?: FindByIdOptions): Promise<WeeklySchedule | null> {
+        const filter: { id: string; isDeleted?: boolean } = { id };
+        if (options?.includeDeleted !== true) {
+            filter.isDeleted = false;
+        }
+        const doc = await this.model.findOne(filter);
         return doc ? toEntity(doc) : null;
     }
 
-    async findByWeekAndYear(week: number, year: number): Promise<WeeklySchedule | null> {
-        const doc = await this.model.findOne({ week, year });
+    async findByWeekAndYear(week: number, year: number, options?: FindByWeekAndYearOptions): Promise<WeeklySchedule | null> {
+        const filter: { week: number; year: number; isDeleted?: boolean } = { week, year };
+        if (options?.includeDeleted !== true) {
+            filter.isDeleted = false;
+        }
+        const doc = await this.model.findOne(filter);
         return doc ? toEntity(doc) : null;
     }
 
