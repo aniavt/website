@@ -12,7 +12,9 @@ export function getStaticPaths() {
     }));
 }
 
-const { item } = Astro.props;
+const { id } = Astro.params;
+const allItems = varios.flatMap((sec) => sec.items);
+const item = allItems.find((a) => String(a.id) === id);
 
 const statusLabel = {
   completed: { text: 'Completado',   class: 'status-completed' },
