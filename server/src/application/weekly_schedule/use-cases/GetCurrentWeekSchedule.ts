@@ -15,8 +15,7 @@ export class GetCurrentWeekScheduleUseCase {
 
     async execute(): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
         const now = new Date();
-        const currentWeek = WeeklySchedule.getWeekNumber(now);
-        const currentYear = now.getFullYear();
+        const { week: currentWeek, year: currentYear } = WeeklySchedule.getISOWeekAndYear(now);
 
         const schedule = await this.weeklyScheduleRepository.findByWeekAndYear(currentWeek, currentYear);
         if (!schedule) return err("weekly_schedule_not_found");

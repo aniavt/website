@@ -22,20 +22,26 @@ export class WeeklySchedule {
     }
 
     isWeekValid(): boolean {
-        return this.week >= 1 && this.week <= 52;
+        return this.week >= 1 && this.week <= 53;
     }
 
     isCurrentWeek(): boolean {
-        const currentDate = new Date();
-        const currentWeek = WeeklySchedule.getWeekNumber(currentDate);
-        const currentYear = currentDate.getFullYear();
-    
+        const { week: currentWeek, year: currentYear } = WeeklySchedule.getISOWeekAndYear(new Date());
         return this.week === currentWeek && this.year === currentYear;
     }
 
+    /** ISO-8601: week (1–53) and year (week-year, can differ from calendar year at boundaries). */
+    static getISOWeekAndYear(date: Date): { week: number; year: number } {
+        const d = new Date(Date.UTC(date.getFullYear(), date.getMonth(), date.getDate()));
+        const day = d.getUTCDay() || 7; // 1=Mon … 7=Sun
+        d.setUTCDate(d.getUTCDate() + 4 - day); // Thursday of this week
+        const yearStart = new Date(Date.UTC(d.getUTCFullYear(), 0, 1));
+        const week = Math.ceil(((d.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
+        return { week, year: d.getUTCFullYear() };
+    }
+
+    /** @deprecated Use getISOWeekAndYear for ISO week/year; this returns ISO week only. */
     static getWeekNumber(date: Date): number {
-        const startOfYear = new Date(date.getFullYear(), 0, 1);
-        const pastDays = Math.floor((date.getTime() - startOfYear.getTime()) / (1000 * 60 * 60 * 24));
-        return Math.ceil((pastDays + startOfYear.getDay() + 1) / 7);
+        return WeeklySchedule.getISOWeekAndYear(date).week;
     }
 }

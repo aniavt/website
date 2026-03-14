@@ -13,7 +13,7 @@ export class GetWeeklyScheduleByWeekAndYearUseCase {
     ) {}
 
     async execute(week: number, year: number): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
-        if (week < 1 || week > 52) return err("weekly_schedule_invalid_week");
+        if (week < 1 || week > 53) return err("weekly_schedule_invalid_week");
 
         const schedule = await this.weeklyScheduleRepository.findByWeekAndYear(week, year);
         if (!schedule) return err("weekly_schedule_not_found");
