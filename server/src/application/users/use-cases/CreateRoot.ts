@@ -44,6 +44,7 @@ export class CreateRootUseCase {
             ManagePermission.META_MANAGE_PERMISSIONS,
             ManagePermission.MANAGE_USER,
             ManagePermission.MANAGE_FAQ,
+            ManagePermission.MANAGE_WEEKLY_SCHEDULE,
         );
         
         user.permissions.user = new UserPermission().add(

@@ -85,6 +85,7 @@ const weeklyScheduleHistoryRepository = new MongoDbWeeklyScheduleHistoryReposito
 const s3Region = Bun.env.S3_REGION;
 const s3Bucket = Bun.env.S3_BUCKET;
 const s3Endpoint = Bun.env.S3_ENDPOINT;
+const s3PublicEndpoint = Bun.env.S3_PUBLIC_ENDPOINT ?? s3Endpoint;
 const s3AccessKeyId = Bun.env.AWS_ACCESS_KEY_ID;
 const s3SecretAccessKey = Bun.env.AWS_SECRET_ACCESS_KEY;
 
@@ -100,7 +101,16 @@ const s3Client = new S3Client({
         secretAccessKey: s3SecretAccessKey,
     }
 });
-const mediaService = new S3Service(s3Client, s3Bucket, idGenerator);
+const s3SigningClient = new S3Client({
+    region: s3Region,
+    endpoint: s3PublicEndpoint,
+    forcePathStyle: true,
+    credentials: {
+        accessKeyId: s3AccessKeyId,
+        secretAccessKey: s3SecretAccessKey,
+    }
+});
+const mediaService = new S3Service(s3Client, s3SigningClient, s3Bucket, idGenerator);
 
 export const userUseCases: IUserUseCases = {
     create: new CreateUserUseCase(userRepository, passwordHasher, idGenerator),

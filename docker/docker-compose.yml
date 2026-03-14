@@ -14,6 +14,7 @@ services:
         WEB_ADMIN_URL: http://172.20.0.102:80
         WEB_URL: http://172.20.0.103
         S3_URL: http://172.20.0.104:3900
+        S3_BUCKET: ${S3_BUCKET}
     image: ania_nginx:latest
     env_file:
       - .env
@@ -62,6 +63,7 @@ services:
       context: ..
       dockerfile: docker/server/Dockerfile
     container_name: ania_server
+    image: ania_server:latest
     env_file:
       - .env
     expose:
@@ -75,12 +77,14 @@ services:
         ipv4_address: 172.20.0.101
     depends_on:
       - db
+      - s3
 
   web_admin:
     build:
       context: ..
       dockerfile: docker/admin-website/Dockerfile
     container_name: ania_web_admin
+    image: ania_web_admin:latest
     restart: unless-stopped
     expose:
       - "80"
@@ -107,8 +111,11 @@ services:
       #   docker exec ania_s3_garage /garage bucket create <BUCKET_NAME>
       #   docker exec ania_s3_garage /garage bucket allow <BUCKET_NAME> --key <KEY_ID> --read --write
 
-    image: dxflrs/garage:v2.2.0
+    build:
+      context: ./garage
+      dockerfile: Dockerfile
     container_name: ania_s3_garage
+    image: ania_s3_garage:latest
     restart: unless-stopped
     # 3900 -> S3 API (HTTP/HTTPS)
     # 3901 -> RPC (interno entre nodos)
@@ -119,7 +126,6 @@ services:
       - "3903"
     volumes:
       - ../data/s3-garage:/var/lib/garage
-      - ./garage/config.toml:/etc/garage.toml
     networks:
       ania_network:
         ipv4_address: 172.20.0.104

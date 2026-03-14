@@ -8,6 +8,7 @@ import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 export class S3Service implements MediaService {
     constructor(
         private readonly s3Client: S3Client,
+        private readonly s3SigningClient: S3Client,
         private readonly bucketName: string,
         private readonly idGenerator: IdGenerator,
     ) {}
@@ -49,6 +50,6 @@ export class S3Service implements MediaService {
             Key: id,
         });
 
-        return await getSignedUrl(this.s3Client, command, { expiresIn: 300 });
+        return await getSignedUrl(this.s3SigningClient, command, { expiresIn: 300 });
     }
 }

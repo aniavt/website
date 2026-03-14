@@ -6,6 +6,7 @@ ARG API_URL
 ARG WEB_ADMIN_URL
 ARG WEB_URL
 ARG S3_URL
+ARG S3_BUCKET
 
 # Social URLs
 ARG DISCORD_URL
@@ -14,7 +15,7 @@ ARG YT_URL
 ARG TW_URL
 
 # Install dependencies
-RUN apk update && apk add --no-cache logrotate busybox-suid
+RUN timeout 20s sh -c "apk update && apk add --no-cache logrotate busybox-suid"
 
 
 # Copy configuration files
@@ -71,7 +72,8 @@ RUN DOMAIN=${DOMAIN}   \
     WEB_ADMIN_URL=${WEB_ADMIN_URL} \
     WEB_URL=${WEB_URL} \
     S3_URL=${S3_URL}   \
-    envsubst '$DOMAIN $PORT $API_URL $WEB_ADMIN_URL $WEB_URL $S3_URL' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
+    S3_BUCKET=${S3_BUCKET} \
+    envsubst '$DOMAIN $PORT $API_URL $WEB_ADMIN_URL $WEB_URL $S3_URL $S3_BUCKET' < /etc/nginx/nginx.conf.template > /etc/nginx/nginx.conf
 
 
 EXPOSE ${PORT}

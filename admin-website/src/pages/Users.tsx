@@ -3,7 +3,6 @@ import { api, ApiError, t } from "@utils";
 import { addToast } from "@store/toast";
 import {
   user as currentUser,
-  canReadUsers,
   canActivateUsers,
   canDeactivateUsers,
   canManagePermissionsMeta,
