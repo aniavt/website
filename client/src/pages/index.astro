@@ -109,7 +109,7 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
             ) : (
               <img
                 src={scheduleMediaUrl}
-                alt="Calendario Marzo 2025"
+                alt={currentSchedule?.title?.trim() || "Calendario semanal"}
                 onerror={(event) => {
                   const img = event.currentTarget as HTMLImageElement;
                   img.onerror = null;
@@ -119,12 +119,17 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
             )}
           </div>
           <div class="monthly-card-body">
-            <h3>Calendario Semanal</h3>
-            <p>Qué día se ve / juega cada cosa. Se actualiza cada semana.</p>
+            <h3>{currentSchedule?.title?.trim() || "Calendario Semanal"}</h3>
+            <p class="schedule-desc">{currentSchedule?.description?.trim() || "Qué día se ve / juega cada cosa. Se actualiza cada semana."}</p>
             <div style="margin-top:12px">
-              <span class="tag tag-cyan">LUN · MOMAZOS</span>
-              <span class="tag tag-pink">MAR · REACCIONES</span>
-              <span class="tag tag-cyan">MIE · CLIPS</span>
+              {currentSchedule?.tags?.length && currentSchedule.tags.map((tag) => (
+                  <span
+                    class="tag"
+                    style={`background-color:${tag.bgColor};color:${tag.txColor}`}
+                  >
+                    {tag.label}
+                  </span>
+                ))}
             </div>
           </div>
         </div>
@@ -320,6 +325,7 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
   .monthly-card-body { padding: 20px 22px; }
   .monthly-card-body h3 { font-family: 'Orbitron', sans-serif; font-size: .85rem; letter-spacing: .06em; color: #fff; margin-bottom: 8px; }
   .monthly-card-body p  { font-size: .88rem; color: var(--text-dim); line-height: 1.6; }
+  .monthly-card-body .schedule-desc { white-space: pre-line; }
   .badge {
     position: absolute; top: 12px; right: 12px;
     font-family: 'Orbitron', sans-serif; font-size: .58rem; letter-spacing: .12em;
