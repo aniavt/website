@@ -49,6 +49,9 @@ export class RestoreWeeklyScheduleUseCase {
             year: schedule.year,
             fileId: schedule.fileId,
             isDeleted: false,
+            title: schedule.title,
+            description: schedule.description,
+            tags: schedule.tags,
         });
 
         try {

@@ -15,6 +15,9 @@ import { toWeeklyScheduleDto } from "../dto";
 export interface UpdateWeeklyScheduleInput {
     id: string;
     fileId?: string;
+    title?: string;
+    description?: string;
+    tags?: readonly { label: string; bgColor: string; txColor: string }[];
 }
 
 export class UpdateWeeklyScheduleUseCase {
@@ -60,6 +63,9 @@ export class UpdateWeeklyScheduleUseCase {
             year: schedule.year,
             fileId,
             isDeleted: schedule.isDeleted,
+            title: input.title !== undefined ? input.title : schedule.title,
+            description: input.description !== undefined ? input.description : schedule.description,
+            tags: input.tags !== undefined ? input.tags : schedule.tags,
         });
 
         try {

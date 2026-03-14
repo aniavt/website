@@ -16,6 +16,9 @@ export interface CreateWeeklyScheduleInput {
     week: number;
     year: number;
     fileId: string;
+    title?: string;
+    description?: string;
+    tags?: readonly { label: string; bgColor: string; txColor: string }[];
 }
 
 export class CreateWeeklyScheduleUseCase {
@@ -40,6 +43,9 @@ export class CreateWeeklyScheduleUseCase {
             year: input.year,
             fileId: input.fileId,
             isDeleted: false,
+            title: input.title ?? "",
+            description: input.description ?? "",
+            tags: input.tags ?? [],
         });
         if (!schedule.isWeekValid()) return err("weekly_schedule_invalid_week");
 
@@ -57,6 +63,9 @@ export class CreateWeeklyScheduleUseCase {
             year: input.year,
             fileId: input.fileId,
             isDeleted: false,
+            title: input.title ?? "",
+            description: input.description ?? "",
+            tags: input.tags ?? [],
         });
 
         try {

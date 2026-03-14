@@ -51,6 +51,16 @@ function sendMediaError(reply: FastifyReply, error: MediaError) {
     return reply.status(mapMediaErrorToHttpCode(error)).send({ error });
 }
 
+const weeklyScheduleTagSchema = {
+    type: "object",
+    properties: {
+        label: { type: "string" },
+        bgColor: { type: "string" },
+        txColor: { type: "string" },
+    },
+    required: ["label", "bgColor", "txColor"],
+} as const;
+
 const createWeeklyScheduleSchema: FastifySchema = {
     body: {
         type: "object",
@@ -59,6 +69,9 @@ const createWeeklyScheduleSchema: FastifySchema = {
             week: { type: "number" },
             year: { type: "number" },
             fileId: { type: "string" },
+            title: { type: "string" },
+            description: { type: "string" },
+            tags: { type: "array", items: weeklyScheduleTagSchema },
         },
         additionalProperties: false,
     },
@@ -69,6 +82,9 @@ const updateWeeklyScheduleSchema: FastifySchema = {
         type: "object",
         properties: {
             fileId: { type: "string" },
+            title: { type: "string" },
+            description: { type: "string" },
+            tags: { type: "array", items: weeklyScheduleTagSchema },
         },
         additionalProperties: false,
     },
@@ -79,24 +95,50 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
     prefixUrl,
     { userUseCases, weeklyScheduleUseCases, mediaUseCases },
 ) => {
+    type CreateBody = {
+        week: number;
+        year: number;
+        fileId: string;
+        title?: string;
+        description?: string;
+        tags?: { label: string; bgColor: string; txColor: string }[];
+    };
+    type UpdateBody = {
+        fileId?: string;
+        title?: string;
+        description?: string;
+        tags?: { label: string; bgColor: string; txColor: string }[];
+    };
+
     app.post(
         prefixUrl("/weekly-schedule"),
         { preHandler: authenticate(userUseCases), schema: createWeeklyScheduleSchema },
         async (request, reply) => {
-            const body = request.body as { week: number; year: number; fileId: string };
-            const result = await weeklyScheduleUseCases.create.execute(request.user!.id, body);
+            const body = request.body as CreateBody;
+            const result = await weeklyScheduleUseCases.create.execute(request.user!.id, {
+                week: body.week,
+                year: body.year,
+                fileId: body.fileId,
+                title: body.title,
+                description: body.description,
+                tags: body.tags,
+            });
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
             return reply.status(201).send(result.data);
         },
     );
 
-    app.patch<{ Params: { id: string }; Body: { fileId?: string } }>(
+    app.patch<{ Params: { id: string }; Body: UpdateBody }>(
         prefixUrl("/weekly-schedule/:id"),
         { preHandler: authenticate(userUseCases), schema: updateWeeklyScheduleSchema },
         async (request, reply) => {
+            const body = request.body ?? {};
             const result = await weeklyScheduleUseCases.update.execute(request.user!.id, {
                 id: request.params.id,
-                fileId: request.body?.fileId,
+                fileId: body.fileId,
+                title: body.title,
+                description: body.description,
+                tags: body.tags,
             });
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
             return reply.send(result.data);

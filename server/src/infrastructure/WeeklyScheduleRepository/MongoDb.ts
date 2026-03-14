@@ -5,13 +5,31 @@ import type {
 } from "@domain/repositories/WeeklyScheduleRepository";
 import mongoose from "mongoose";
 
+const weeklyScheduleTagSchema = new mongoose.Schema(
+    {
+        label: { type: String, required: true },
+        bgColor: { type: String, required: true },
+        txColor: { type: String, required: true },
+    },
+    { _id: false },
+);
+
 const weeklyScheduleSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     week: { type: Number, required: true },
     year: { type: Number, required: true },
     fileId: { type: String, required: true },
     isDeleted: { type: Boolean, required: true },
+    title: { type: String, default: "" },
+    description: { type: String, default: "" },
+    tags: { type: [weeklyScheduleTagSchema], default: [] },
 });
+
+interface WeeklyScheduleTagDocument {
+    label: string;
+    bgColor: string;
+    txColor: string;
+}
 
 interface WeeklyScheduleDocument {
     id: string;
@@ -19,6 +37,9 @@ interface WeeklyScheduleDocument {
     year: number;
     fileId: string;
     isDeleted: boolean;
+    title?: string;
+    description?: string;
+    tags?: WeeklyScheduleTagDocument[];
 }
 
 weeklyScheduleSchema.index({ week: 1, year: 1 }, { unique: true });
@@ -30,11 +51,23 @@ function toDocument(schedule: WeeklySchedule): WeeklyScheduleDocument {
         year: schedule.year,
         fileId: schedule.fileId,
         isDeleted: schedule.isDeleted,
+        title: schedule.title,
+        description: schedule.description,
+        tags: [...schedule.tags],
     };
 }
 
 function toEntity(doc: WeeklyScheduleDocument): WeeklySchedule {
-    return new WeeklySchedule(doc);
+    return new WeeklySchedule({
+        id: doc.id,
+        week: doc.week,
+        year: doc.year,
+        fileId: doc.fileId,
+        isDeleted: doc.isDeleted,
+        title: doc.title ?? "",
+        description: doc.description ?? "",
+        tags: doc.tags ?? [],
+    });
 }
 
 export class MongoDbWeeklyScheduleRepository implements WeeklyScheduleRepository {

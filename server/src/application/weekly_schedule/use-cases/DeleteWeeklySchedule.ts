@@ -45,6 +45,9 @@ export class DeleteWeeklyScheduleUseCase {
             year: schedule.year,
             fileId: schedule.fileId,
             isDeleted: true,
+            title: schedule.title,
+            description: schedule.description,
+            tags: schedule.tags,
         });
 
         try {
