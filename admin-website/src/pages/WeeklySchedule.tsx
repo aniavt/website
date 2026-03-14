@@ -2,6 +2,7 @@ import { useEffect, useState, useCallback } from "preact/hooks";
 import Layout from "@components/Layout";
 import Table, { type Column } from "@components/Table";
 import Button from "@components/Button";
+import ColorPicker from "@components/ColorPicker";
 import Modal from "@components/Modal";
 import Pagination from "@components/Pagination";
 import { addToast } from "@store/toast";
@@ -20,9 +21,12 @@ import {
   uploadWeeklyScheduleFile,
   restoreWeeklySchedule,
   updateWeeklyScheduleFile,
+  updateWeeklySchedule,
   ApiError,
   t,
 } from "@utils";
+
+type ScheduleTag = { label: string; bgColor: string; txColor: string };
 
 const LIMIT = 15;
 
@@ -53,7 +57,21 @@ export default function WeeklySchedule() {
   const [uploadWeek, setUploadWeek] = useState<string>(String(currentWeek));
   const [uploadYear, setUploadYear] = useState<string>(String(currentYear));
   const [uploadFileState, setUploadFileState] = useState<File | null>(null);
+  const [uploadTitle, setUploadTitle] = useState("");
+  const [uploadDescription, setUploadDescription] = useState("");
+  const [uploadTags, setUploadTags] = useState<ScheduleTag[]>([]);
   const [uploadLoading, setUploadLoading] = useState(false);
+  const [previewFileUrl, setPreviewFileUrl] = useState<string | null>(null);
+
+  useEffect(() => {
+    if (!uploadFileState) {
+      setPreviewFileUrl(null);
+      return;
+    }
+    const url = URL.createObjectURL(uploadFileState);
+    setPreviewFileUrl(url);
+    return () => URL.revokeObjectURL(url);
+  }, [uploadFileState]);
 
   const [historyOpen, setHistoryOpen] = useState(false);
   const [historyLoading, setHistoryLoading] = useState(false);
@@ -109,6 +127,9 @@ export default function WeeklySchedule() {
     setUploadWeek(String(currentWeek));
     setUploadYear(String(currentYear));
     setUploadFileState(null);
+    setUploadTitle("");
+    setUploadDescription("");
+    setUploadTags([]);
     setEditingTarget(null);
   }
 
@@ -118,31 +139,58 @@ export default function WeeklySchedule() {
 
     const weekNum = Number(uploadWeek);
     const yearNum = Number(uploadYear);
+    const hasMetadata = uploadTitle.trim() !== "" || uploadDescription.trim() !== "" || uploadTags.length > 0;
 
-    if (!weekNum || weekNum < 1 || weekNum > 53) {
-      addToast(t("weekly_schedule_invalid_week_client"), "error");
-      return;
-    }
-    if (!yearNum || yearNum < 2000 || yearNum > 2100) {
-      addToast(t("weekly_schedule_invalid_year_client"), "error");
-      return;
-    }
-    if (!uploadFileState) {
-      addToast(t("weekly_schedule_file_required"), "error");
-      return;
+    if (!editingTarget) {
+      if (!weekNum || weekNum < 1 || weekNum > 53) {
+        addToast(t("weekly_schedule_invalid_week_client"), "error");
+        return;
+      }
+      if (!yearNum || yearNum < 2000 || yearNum > 2100) {
+        addToast(t("weekly_schedule_invalid_year_client"), "error");
+        return;
+      }
+      if (!uploadFileState) {
+        addToast(t("weekly_schedule_file_required"), "error");
+        return;
+      }
+    } else {
+      if (!uploadFileState && !hasMetadata) {
+        addToast("Indica un archivo o edita título, descripción o etiquetas", "error");
+        return;
+      }
     }
 
     setUploadLoading(true);
     try {
+      let scheduleId: string;
       if (editingTarget) {
-        await updateWeeklyScheduleFile(editingTarget.id, uploadFileState);
+        if (uploadFileState) {
+          await updateWeeklyScheduleFile(editingTarget.id, uploadFileState);
+        }
+        scheduleId = editingTarget.id;
+        if (hasMetadata) {
+          await updateWeeklySchedule(scheduleId, {
+            title: uploadTitle.trim(),
+            description: uploadDescription.trim(),
+            tags: uploadTags,
+          });
+        }
         addToast(t("weekly_schedule_updated"), "success");
       } else {
-        await uploadWeeklyScheduleFile({
+        const created = await uploadWeeklyScheduleFile({
           week: weekNum,
           year: yearNum,
-          file: uploadFileState,
+          file: uploadFileState!,
         });
+        scheduleId = created.id;
+        if (hasMetadata) {
+          await updateWeeklySchedule(scheduleId, {
+            title: uploadTitle.trim(),
+            description: uploadDescription.trim(),
+            tags: uploadTags,
+          });
+        }
         addToast(t("weekly_schedule_created"), "success");
       }
       setUploadOpen(false);
@@ -238,6 +286,34 @@ export default function WeeklySchedule() {
       ),
     },
     {
+      key: "title",
+      header: "Título",
+      render: (i) => (
+        <span class="text-sm text-[var(--text-primary)]">
+          {i.title?.trim() ? i.title : "—"}
+        </span>
+      ),
+    },
+    {
+      key: "tags",
+      header: "Etiquetas",
+      render: (i) => (
+        <div class="flex flex-wrap gap-1">
+          {i.tags?.length
+            ? i.tags.map((t, idx) => (
+                <span
+                  key={idx}
+                  class="inline-flex items-center rounded px-1.5 py-0.5 text-xs"
+                  style={{ backgroundColor: t.bgColor, color: t.txColor }}
+                >
+                  {t.label}
+                </span>
+              ))
+            : "—"}
+        </div>
+      ),
+    },
+    {
       key: "status",
       header: "Estado",
       render: (i) => (
@@ -274,6 +350,9 @@ export default function WeeklySchedule() {
                   setEditingTarget(i);
                   setUploadWeek(String(i.week));
                   setUploadYear(String(i.year));
+                  setUploadTitle(i.title ?? "");
+                  setUploadDescription(i.description ?? "");
+                  setUploadTags(i.tags ? [...i.tags] : []);
                   setUploadOpen(true);
                 }}
               >
@@ -410,55 +489,187 @@ export default function WeeklySchedule() {
             ? `Actualizar horario semana ${editingTarget.week} / ${editingTarget.year}`
             : "Subir horario semanal"
         }
+        wide
       >
         <form class="flex flex-col gap-4" onSubmit={submitUpload}>
-          <div class="flex gap-3">
-            <label class="flex-1 text-sm text-[var(--text-secondary)] flex flex-col gap-1">
-              <span>Año</span>
-              <select
-                class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none"
-                value={uploadYear}
-                onChange={(e) => setUploadYear((e.target as HTMLSelectElement).value)}
-                disabled={!!editingTarget}
-              >
-                <option value="">Selecciona un año</option>
-                {yearsOptions.map((y) => (
-                  <option key={y} value={y}>
-                    {y}
-                  </option>
-                ))}
-              </select>
-            </label>
-          </div>
+          {/* BloqueArriba #1: VistaPrevia | Calendario | Información */}
+          <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+            {/* #3 BloqueVistaPrevia */}
+            <div class="flex flex-col gap-2">
+              <span class="text-sm text-[var(--text-muted)]">Vista previa</span>
+              <div class="rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] overflow-hidden flex flex-col min-h-[220px]">
+                <div class="aspect-video bg-[var(--bg-tertiary)] flex items-center justify-center shrink-0">
+                  {previewFileUrl ? (
+                    <img
+                      src={previewFileUrl}
+                      alt="Vista previa"
+                      class="w-full h-full object-contain"
+                    />
+                  ) : editingTarget ? (
+                    <img
+                      src={`/api/media/${editingTarget.fileId}`}
+                      alt="Horario actual"
+                      class="w-full h-full object-contain"
+                      onError={(e) => {
+                        (e.target as HTMLImageElement).style.display = "none";
+                        const parent = (e.target as HTMLImageElement).parentElement;
+                        if (parent && !parent.querySelector(".schedule-preview-placeholder")) {
+                          const el = document.createElement("span");
+                          el.className = "schedule-preview-placeholder text-xs text-[var(--text-muted)]";
+                          el.textContent = "No se pudo cargar la imagen";
+                          parent.appendChild(el);
+                        }
+                      }}
+                    />
+                  ) : (
+                    <span class="text-xs text-[var(--text-muted)]">Selecciona un archivo abajo</span>
+                  )}
+                </div>
+                <div class="p-3 flex flex-col gap-1.5">
+                  <h3 class="text-sm font-semibold text-[var(--text-primary)]">
+                    {uploadTitle?.trim() || "Calendario Semanal"}
+                  </h3>
+                  <p class="text-xs text-[var(--text-muted)] whitespace-pre-line line-clamp-2">
+                    {uploadDescription?.trim() || "Qué día se ve / juega cada cosa. Se actualiza cada semana."}
+                  </p>
+                  <div class="flex flex-wrap gap-1">
+                    {uploadTags.length
+                      ? uploadTags.map((t, i) => (
+                          <span
+                            key={i}
+                            class="inline-flex items-center rounded px-1.5 py-0.5 text-xs"
+                            style={{ backgroundColor: t.bgColor || "#e5e7eb", color: t.txColor || "#1f2937" }}
+                          >
+                            {t.label?.trim() || "Etiqueta"}
+                          </span>
+                        ))
+                      : (
+                          <span class="text-xs text-[var(--text-muted)]">Sin etiquetas</span>
+                      )}
+                  </div>
+                </div>
+              </div>
+            </div>
 
-          <div class="flex flex-col gap-2">
-            <span class="text-sm text-[var(--text-secondary)]">Semana</span>
-            <div class="grid grid-cols-8 gap-1">
-              {weekNumbers.map((w) => {
-                const selected = Number(uploadWeek) === w;
-                return (
-                  <button
-                    type="button"
-                    key={w}
-                    onClick={() => setUploadWeek(String(w))}
-                    disabled={!!editingTarget}
-                    class={`h-8 rounded-md text-xs font-medium border transition-colors ${
-                      selected
-                        ? "bg-[var(--accent)] text-white border-[var(--accent)]"
-                        : "bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)]"
-                    }`}
-                  >
-                    {w}
-                  </button>
-                );
-              })}
+            {/* #4 BloqueCalendario: Año y Semana */}
+            <div class="flex flex-col gap-4">
+              <span class="text-sm text-[var(--text-muted)]">Calendario</span>
+              <label class="text-sm text-[var(--text-secondary)] flex flex-col gap-1">
+                <span>Año</span>
+                <select
+                  class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none"
+                  value={uploadYear}
+                  onChange={(e) => setUploadYear((e.target as HTMLSelectElement).value)}
+                  disabled={!!editingTarget}
+                >
+                  <option value="">Selecciona un año</option>
+                  {yearsOptions.map((y) => (
+                    <option key={y} value={y}>
+                      {y}
+                    </option>
+                  ))}
+                </select>
+              </label>
+              <div class="flex flex-col gap-2">
+                <span class="text-sm text-[var(--text-secondary)]">Semana</span>
+                <div class="grid grid-cols-8 gap-1">
+                  {weekNumbers.map((w) => {
+                    const selected = Number(uploadWeek) === w;
+                    return (
+                      <button
+                        type="button"
+                        key={w}
+                        onClick={() => setUploadWeek(String(w))}
+                        disabled={!!editingTarget}
+                        class={`h-8 rounded-md text-xs font-medium border transition-colors ${
+                          selected
+                            ? "bg-[var(--accent)] text-white border-[var(--accent)]"
+                            : "bg-[var(--bg-tertiary)] text-[var(--text-secondary)] border-[var(--border-subtle)] hover:bg-[var(--bg-hover)]"
+                        }`}
+                      >
+                        {w}
+                      </button>
+                    );
+                  })}
+                </div>
+              </div>
+            </div>
+
+            {/* #5 BloqueInformación: Título, Descripción, Etiquetas */}
+            <div class="flex flex-col gap-4">
+              <span class="text-sm text-[var(--text-muted)]">Información</span>
+              <label class="text-sm text-[var(--text-secondary)] flex flex-col gap-1">
+                <span>Título</span>
+                <input
+                  type="text"
+                  value={uploadTitle}
+                  onInput={(e) => setUploadTitle((e.target as HTMLInputElement).value)}
+                  class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none"
+                  placeholder="Opcional"
+                />
+              </label>
+              <label class="text-sm text-[var(--text-secondary)] flex flex-col gap-1">
+                <span>Descripción</span>
+                <textarea
+                  value={uploadDescription}
+                  onInput={(e) => setUploadDescription((e.target as HTMLTextAreaElement).value)}
+                  class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none min-h-[72px]"
+                  placeholder="Opcional"
+                />
+              </label>
+              <div class="flex flex-col gap-2">
+                <span class="text-sm text-[var(--text-secondary)]">Etiquetas</span>
+                {uploadTags.map((tag, idx) => (
+                  <div key={idx} class="flex gap-2 items-center flex-wrap">
+                    <input
+                      type="text"
+                      value={tag.label}
+                      onInput={(e) => {
+                        const v = (e.target as HTMLInputElement).value;
+                        setUploadTags((prev) => prev.map((t, i) => (i === idx ? { ...t, label: v } : t)));
+                      }}
+                      placeholder="Etiqueta"
+                      class="rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-2 py-1 text-sm w-24"
+                    />
+                    <ColorPicker
+                      value={tag.bgColor}
+                      onInput={(v) =>
+                        setUploadTags((prev) => prev.map((t, i) => (i === idx ? { ...t, bgColor: v } : t)))
+                      }
+                    />
+                    <ColorPicker
+                      value={tag.txColor}
+                      onInput={(v) =>
+                        setUploadTags((prev) => prev.map((t, i) => (i === idx ? { ...t, txColor: v } : t)))
+                      }
+                    />
+                    <Button
+                      type="button"
+                      variant="ghost"
+                      onClick={() => setUploadTags((prev) => prev.filter((_, i) => i !== idx))}
+                      class="self-end"
+                    >
+                      Quitar
+                    </Button>
+                  </div>
+                ))}
+                <Button
+                  type="button"
+                  variant="ghost"
+                  onClick={() => setUploadTags((prev) => [...prev, { label: "", bgColor: "#e5e7eb", txColor: "#1f2937" }])}
+                >
+                  Añadir etiqueta
+                </Button>
+              </div>
             </div>
           </div>
 
-          <label class="text-sm text-[var(--text-secondary)] flex flex-col gap-1">
+          {/* BloqueAbajo #2: Archivo */}
+          <label class="text-sm text-[var(--text-secondary)] flex flex-col gap-1 border-t border-[var(--border-subtle)] pt-4">
             <span>Archivo</span>
             <input
               type="file"
+              accept="image/*,video/*"
               onChange={(e) => {
                 const f = (e.target as HTMLInputElement).files?.[0] ?? null;
                 setUploadFileState(f);
@@ -467,7 +678,7 @@ export default function WeeklySchedule() {
             />
           </label>
 
-          <div class="flex justify-end gap-3 mt-4">
+          <div class="flex justify-end gap-3 mt-2">
             <Button
               type="button"
               variant="ghost"
@@ -497,32 +708,70 @@ export default function WeeklySchedule() {
             ? `Horario semana ${viewTarget.week} / ${viewTarget.year}`
             : "Horario semanal"
         }
+        wide
       >
         {viewTarget && (
-          <div class="flex flex-col gap-3">
-            {viewTarget.fileContentType?.startsWith("image/") && (
-              <img
-                src={`/api/media/${viewTarget.fileId}`}
-                alt="Horario semanal"
-                class="max-h-96 w-full object-contain rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]"
-              />
-            )}
-
-            {viewTarget.fileContentType?.startsWith("video/") && (
-              <video
-                src={`/api/media/${viewTarget.fileId}`}
-                controls
-                class="max-h-96 w-full rounded border border-[var(--border-subtle)] bg-black"
-              />
-            )}
-
+          <div class="flex flex-col gap-4 max-w-3xl mx-auto">
+            <div class="rounded-lg border border-[var(--border-subtle)] bg-[var(--card)] overflow-hidden">
+              <div class="bg-[var(--bg-tertiary)] flex items-center justify-center min-h-[280px] max-h-[70vh]">
+                {viewTarget.fileContentType?.startsWith("image/") ? (
+                  <img
+                    src={`/api/media/${viewTarget.fileId}`}
+                    alt={viewTarget.title?.trim() || "Horario semanal"}
+                    class="w-full h-full object-contain max-h-[70vh]"
+                  />
+                ) : viewTarget.fileContentType?.startsWith("video/") ? (
+                  <video
+                    src={`/api/media/${viewTarget.fileId}`}
+                    controls
+                    class="w-full max-h-[70vh] rounded-b-lg"
+                  />
+                ) : (
+                  <img
+                    src={`/api/media/${viewTarget.fileId}`}
+                    alt={viewTarget.title?.trim() || "Horario semanal"}
+                    class="w-full h-full object-contain max-h-[70vh]"
+                    onError={(e) => {
+                      (e.target as HTMLImageElement).style.display = "none";
+                    }}
+                  />
+                )}
+              </div>
+              <div class="p-4 flex flex-col gap-3">
+                <h3 class="text-base font-semibold text-[var(--text-primary)]">
+                  {viewTarget.title?.trim() || "Calendario Semanal"}
+                </h3>
+                {(viewTarget.description?.trim() || viewTarget.tags?.length) ? (
+                  <>
+                    {viewTarget.description?.trim() && (
+                      <p class="text-sm text-[var(--text-secondary)] whitespace-pre-wrap">
+                        {viewTarget.description}
+                      </p>
+                    )}
+                    {viewTarget.tags?.length > 0 && (
+                      <div class="flex flex-wrap gap-1.5">
+                        {viewTarget.tags.map((t, idx) => (
+                          <span
+                            key={idx}
+                            class="inline-flex items-center rounded px-2 py-0.5 text-sm"
+                            style={{ backgroundColor: t.bgColor, color: t.txColor }}
+                          >
+                            {t.label}
+                          </span>
+                        ))}
+                      </div>
+                    )}
+                  </>
+                ) : null}
+              </div>
+            </div>
             <a
               href={`/api/media/${viewTarget.fileId}`}
               target="_blank"
               rel="noreferrer"
-              class="text-xs text-[var(--accent)] underline self-start"
+              class="text-sm text-[var(--accent)] underline self-start"
             >
-              Abrir en una pestaña nueva
+              Abrir archivo en una pestaña nueva
             </a>
           </div>
         )}

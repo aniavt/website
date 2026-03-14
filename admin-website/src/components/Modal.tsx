@@ -6,9 +6,11 @@ interface Props {
   onClose: () => void;
   title: string;
   children: ComponentChildren;
+  /** Si true, el modal usa max-w-5xl en lugar de max-w-lg */
+  wide?: boolean;
 }
 
-export default function Modal({ open, onClose, title, children }: Props) {
+export default function Modal({ open, onClose, title, children, wide }: Props) {
   useEffect(() => {
     if (!open) return;
     const handler = (e: KeyboardEvent) => {
@@ -23,7 +25,7 @@ export default function Modal({ open, onClose, title, children }: Props) {
   return (
     <div class="fixed inset-0 z-40 flex items-center justify-center">
       <div class="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div class="relative z-50 w-full max-w-lg rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-2xl mx-4">
+      <div class={`relative z-50 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-2xl mx-4 ${wide ? "max-w-5xl" : "max-w-lg"}`}>
         <div class="flex items-center justify-between mb-4">
           <h2 class="text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
           <button

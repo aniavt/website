@@ -38,12 +38,21 @@ export const api = {
 
 export { ApiError };
 
+export interface WeeklyScheduleTagDto {
+  readonly label: string;
+  readonly bgColor: string;
+  readonly txColor: string;
+}
+
 export interface WeeklyScheduleDto {
   readonly id: string;
   readonly week: number;
   readonly year: number;
   readonly fileId: string;
   readonly isDeleted: boolean;
+  readonly title: string;
+  readonly description: string;
+  readonly tags: readonly WeeklyScheduleTagDto[];
   readonly fileContentType?: string | null;
 }
 
@@ -86,6 +95,19 @@ export async function deleteWeeklySchedule(id: string): Promise<void> {
 
 export async function restoreWeeklySchedule(id: string): Promise<WeeklyScheduleDto> {
   return api.post<WeeklyScheduleDto>(`/weekly-schedule/${id}/restore`);
+}
+
+export interface UpdateWeeklyScheduleInput {
+  title?: string;
+  description?: string;
+  tags?: { label: string; bgColor: string; txColor: string }[];
+}
+
+export async function updateWeeklySchedule(
+  id: string,
+  input: UpdateWeeklyScheduleInput,
+): Promise<WeeklyScheduleDto> {
+  return api.patch<WeeklyScheduleDto>(`/weekly-schedule/${id}`, input);
 }
 
 interface UploadWeeklyScheduleInput {
