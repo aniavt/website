@@ -10,7 +10,8 @@ export function getStaticPaths() {
   }));
 }
 
-const { anime } = Astro.props;
+const { id } = Astro.params;
+const anime = animes.find((a) => String(a.id) === id);
 
 const statusLabel = {
   watching:  { text: 'Viendo',       class: 'status-watching'  },
