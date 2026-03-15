@@ -36,7 +36,15 @@ export function userHasPermission(
 }
 
 export function hasPermission(namespace: PermissionNamespace, permission: string): boolean {
-  return userHasPermission(user.value, namespace, permission);
+  if (userHasPermission(user.value, namespace, permission)) return true;
+  if (userHasPermission(user.value, "meta", "meta_manage_permissions")) return true;
+  switch (namespace) {
+    case "user": return userHasPermission(user.value, "meta", "manage_user");
+    case "faq": return userHasPermission(user.value, "meta", "manage_faq");
+    case "weekly_schedule": return userHasPermission(user.value, "meta", "manage_weekly_schedule");
+  }
+
+  return false;
 }
 
 export const canReadUsers = computed(() => hasPermission("user", "read_user"));
