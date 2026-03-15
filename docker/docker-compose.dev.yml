@@ -3,6 +3,8 @@ services:
     build:
       context: ..
       dockerfile: docker/server/Dockerfile.dev
+    container_name: ania_server_dev
+    image: ania_server:dev
     volumes:
       - ../server:/app
 
@@ -10,6 +12,8 @@ services:
     build:
       context: ..
       dockerfile: docker/admin-website/Dockerfile.dev
+    container_name: ania_web_admin_dev
+    image: ania_web_admin:dev
     volumes:
       - ../admin-website:/app
     environment:
@@ -23,12 +27,6 @@ services:
       target: dev
     image: ania_web:dev
     container_name: ania_web_dev
-    restart: unless-stopped
-    expose:
-      - "80"
     volumes:
       - ../client:/app
       - /app/node_modules
-    networks:
-      ania_network:
-        ipv4_address: 172.20.0.103

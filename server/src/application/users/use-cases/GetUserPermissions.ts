@@ -1,5 +1,5 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
-import { UserPermission } from "@domain/value-object/Permissions";
+import { ManagePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { UserError } from "../errors";
 import type { UserDto } from "../dto";
@@ -31,7 +31,7 @@ export class GetUserPermissionsUseCase {
         }
 
         const isSelf = user.id === requester.id;
-        const canManageUser = requester.hasPermission({ type: "user", permission: UserPermission.READ_USER });
+        const canManageUser = requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER });
 
         if (!isSelf && !canManageUser) {
             return err("user_not_authorized");

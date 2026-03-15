@@ -9,7 +9,7 @@ export type VariosItem = {
   status: 'completed' | 'upcoming';
   url: string;    // link a animeav1.com, TMO, etc.
   urlLabel: string; // "Ver en AV1" | "Leer en TMO"
-  id? : number
+  id : number
   description? : string
   episodes: VariosEpisode[];
 };
@@ -62,6 +62,7 @@ export const varios: VariosSection[] = [
         episodes: [
           { num: 'EP 01', label: 'TEST', url: 'https://animeav1.com/' },
         ],
+        id: 2
       },
     ],
   },

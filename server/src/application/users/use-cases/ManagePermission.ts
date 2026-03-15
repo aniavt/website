@@ -62,41 +62,29 @@ export class ManagePermissionUseCase {
 
         if (!user || !requester) return err("user_not_found");
 
-        if (target.isAssignmentPermission()) {
-            switch (namespace) {
-                case "meta":
-                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS }))
-                        return err("permission_not_authorized");
-                    break;
-                case "user":
-                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER }))
-                        return err("permission_not_authorized");
-                    break;
-                case "faq":
-                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_FAQ }))
-                        return err("permission_not_authorized");
-                    break;
-                case "weekly_schedule":
-                    if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_WEEKLY_SCHEDULE }))
-                        return err("permission_not_authorized");
-                    break;
-            }
-            if (action === "grant") {
-                user.grantPermission({ type: namespace, permission: target });
-            } else {
-                if (requester.id === user.id && namespace === "meta" && target.valueOf() === ManagePermission.META_MANAGE_PERMISSIONS.valueOf()) {
-                    return err("user_cannot_revoke_self_meta_manage_permissions");
-                }
-                user.revokePermission({ type: namespace, permission: target });
-            }
-            return await saveUser(user);
+        switch (namespace) {
+            case "meta":
+                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS }))
+                    return err("permission_not_authorized");
+                break;
+            case "user":
+                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER }))
+                    return err("permission_not_authorized");
+                break;
+            case "faq":
+                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_FAQ }))
+                    return err("permission_not_authorized");
+                break;
+            case "weekly_schedule":
+                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_WEEKLY_SCHEDULE }))
+                    return err("permission_not_authorized");
+                break;
         }
 
-        const { assign, revoke } = target.getRequiredAssignmentPermission() || {};
+        if (action === "revoke" && requester.id === user.id && namespace === "meta" && target.valueOf() === ManagePermission.META_MANAGE_PERMISSIONS.valueOf()) {
+            return err("user_cannot_revoke_self_meta_manage_permissions");
+        }
 
-        if (action === "grant" && assign && !requester.hasPermission({ type: namespace, permission: assign })) return err("permission_not_authorized");
-        if (action === "revoke" && revoke && !requester.hasPermission({ type: namespace, permission: revoke })) return err("permission_not_authorized");
-        
         if (action === "grant") {
             user.grantPermission({ type: namespace, permission: target });
         } else {
