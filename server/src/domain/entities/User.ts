@@ -116,20 +116,24 @@ export class UserEntity {
     }
 
     hasPermission({ type, permission }: PermissionType): boolean {
-        return this.isActive && this.permissions[type].has(permission);
+        if (!this.isActive) return false;
+        if (this.permissions[type].has(permission)) return true;
+        if (this.permissions.meta.has(ManagePermission.META_MANAGE_PERMISSIONS)) return true;
+        switch (type) {
+            case "user": return this.permissions.meta.has(ManagePermission.MANAGE_USER);
+            case "faq": return this.permissions.meta.has(ManagePermission.MANAGE_FAQ);
+            case "weekly_schedule": return this.permissions.meta.has(ManagePermission.MANAGE_WEEKLY_SCHEDULE);
+        }
+        return false;
     }
 
     grantPermission({ type, permission }: PermissionType): this {
-        // Permission.add() returns a new Permission instance; we must store it back
-        // to actually persist the updated bitmask in this user.
         this.permissions[type] = this.permissions[type].add(permission);
         this.updatedAt = new Date();
         return this;
     }
 
     revokePermission({ type, permission }: PermissionType): this {
-        // Same as grantPermission: remove() returns a new Permission instance
-        // that must be assigned back to take effect.
         this.permissions[type] = this.permissions[type].remove(permission);
         this.updatedAt = new Date();
         return this;
