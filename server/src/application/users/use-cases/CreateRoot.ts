@@ -47,50 +47,9 @@ export class CreateRootUseCase {
             ManagePermission.MANAGE_WEEKLY_SCHEDULE,
         );
         
-        user.permissions.user = new UserPermission().add(
-            UserPermission.READ_USER,
-            UserPermission.ASSIGN_READ_USER,
-            UserPermission.REVOKE_READ_USER,
-            UserPermission.ACTIVATE_USER,
-            UserPermission.ASSIGN_ACTIVATE_USER,
-            UserPermission.REVOKE_ACTIVATE_USER,
-            UserPermission.DEACTIVATE_USER,
-            UserPermission.ASSIGN_DEACTIVATE_USER,
-            UserPermission.REVOKE_DEACTIVATE_USER,
-        );
-
-        user.permissions.faq = new FAQPermission().add(
-            FAQPermission.READ_FAQ,
-            FAQPermission.ASSIGN_READ_FAQ,
-            FAQPermission.REVOKE_READ_FAQ,
-            FAQPermission.CREATE_FAQ,
-            FAQPermission.ASSIGN_CREATE_FAQ,
-            FAQPermission.REVOKE_CREATE_FAQ,
-            FAQPermission.RESTORE_FAQ,
-            FAQPermission.ASSIGN_RESTORE_FAQ,
-            FAQPermission.REVOKE_RESTORE_FAQ,
-            FAQPermission.DELETE_FAQ,
-            FAQPermission.ASSIGN_DELETE_FAQ,
-            FAQPermission.REVOKE_DELETE_FAQ,
-            FAQPermission.UPDATE_FAQ,
-            FAQPermission.ASSIGN_UPDATE_FAQ,
-            FAQPermission.REVOKE_UPDATE_FAQ,
-        );
-
-        user.permissions.weekly_schedule = new WeeklySchedulePermission().add(
-            WeeklySchedulePermission.CREATE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.ASSIGN_CREATE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.REVOKE_CREATE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.ASSIGN_DELETE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.REVOKE_DELETE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.UPDATE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.ASSIGN_UPDATE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.REVOKE_UPDATE_WEEKLY_SCHEDULE,
-            WeeklySchedulePermission.READ_WEEKLY_SCHEDULE_HISTORY,
-            WeeklySchedulePermission.ASSIGN_READ_WEEKLY_SCHEDULE_HISTORY,
-            WeeklySchedulePermission.REVOKE_READ_WEEKLY_SCHEDULE_HISTORY,
-        );
+        user.permissions.user = new UserPermission().add(UserPermission.MANAGE_USER);
+        user.permissions.faq = new FAQPermission().add(FAQPermission.MANAGE_FAQ);
+        user.permissions.weekly_schedule = new WeeklySchedulePermission().add(WeeklySchedulePermission.MANAGE_WEEKLY_SCHEDULE);
 
         try {
             await this.userRepository.save(user);
