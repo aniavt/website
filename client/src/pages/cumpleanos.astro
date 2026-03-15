@@ -1,0 +1,689 @@
+---
+// src/pages/cumpleanos.astro
+import BaseLayout from '../layouts/BaseLayout.astro';
+
+const BIRTHDAY_ISO = '2026-03-16T00:00:00';
+const VTUBER_YEARS = 3;
+const PERSON_AGE   = 24;
+
+const CARTA = `Tres años han pasado desde que este universo digital cobró vida,
+y cada momento ha sido una aventura que jamás olvidaremos.
+
+Gracias por crear este espacio único, por cada reacción, cada stream,
+cada momento compartido con la comunidad. Tu energía y dedicación
+han construido algo verdaderamente especial.
+
+Que este nuevo año traiga aún más aventuras, más animes, más momentos
+mágicos... y más excusas para no salir de casa. ✦˚‧
+
+¡Feliz cumpleaños, Ania! 🌟`;
+
+// ✏️ Galería de recuerdos generales
+const GALLERY: { driveUrl: string; caption: string }[] = [
+  { driveUrl: 'https://drive.google.com/file/d/19Fw88Hr86NYR2oyqjjlmaXbwKAEDxMSk/view', caption: 'Nue y Mods' },
+  { driveUrl: 'https://drive.google.com/file/d/1xf5jw5NIvNRAElC5he7aCOmalQymYcmE/view', caption: 'NueHashi' },
+  { driveUrl: 'https://drive.google.com/file/d/1IE8U3aR5A_hQ293YRjqnO-PPhPtGFWUa/view', caption: 'TKM NueHashi' },
+  { driveUrl: 'https://drive.google.com/file/d/1ViUZK8xsOj0NV_vmhLTZJenZP-vm26bt/view', caption: 'Nue Perro' },
+  { driveUrl: 'https://drive.google.com/file/d/1VaUQLBl-NP8x0h6TzD7qn5KPKMmwhg7q/view', caption: 'Nue Pato' },
+  { driveUrl: 'https://drive.google.com/file/d/1cGmk9jpPDOPOH6xNrXTd8RLyOlNpQFHm/view', caption: 'Nue Mamada' },
+  { driveUrl: 'https://drive.google.com/file/d/17g48L1X8bAL6gciV9jpTW1YWVQgQHZdt/view', caption: 'Nue Sexy' },
+  { driveUrl: 'https://drive.google.com/file/d/1BeMX-Gkg5MsFGwQQ0eq1vTKgClwcZyPg/view', caption: 'Nue Fire Force' },
+  { driveUrl: 'https://drive.google.com/file/d/1u35ULOlQMcjREix-Cq65YZ93gctWmlFx/view', caption: 'Nue Colegiala' },
+  { driveUrl: 'https://drive.google.com/file/d/1wyIailw80WiPE9aG6wcBLaNBWE-SgLLZ/view', caption: 'Nue Gremlin' },
+  { driveUrl: 'https://drive.google.com/file/d/1aXchyt2gzduq8mx7gG-o_U3HNRmdcGMf/view', caption: 'Nue Skillsong' },
+  { driveUrl: 'https://drive.google.com/file/d/12gzJ6BQAUwmf0X4zhtC7w2VulVbqcEzG/view', caption: 'Nue Zapatito' },
+  { driveUrl: 'https://drive.google.com/file/d/1yzGOBE53NhGGJWd0RhBAjkFl5vVfEaeU/view', caption: 'Nue Pokemon' },
+  { driveUrl: 'https://drive.google.com/file/d/138xo1PcYJEg3vHMUzky1hL3fHuU-G-IG/view', caption: 'Nue' },
+  { driveUrl: 'https://drive.google.com/file/d/1uab7kSfzt3EZS5lpUQWPhJR6VO_DahXG/view', caption: 'XtreNue' },
+  { driveUrl: 'https://drive.google.com/file/d/1iEPgaAHUVuiVwf4Yf45OV_ia0jj3U7Qs/view', caption: 'Nue Navidad' },
+  { driveUrl: 'https://drive.google.com/file/d/14ezR3HCQ4Q2KrS8sz56h0x5KxcQ9gGoc/view', caption: 'Nue' },
+  { driveUrl: 'https://drive.google.com/file/d/1N1tM9VzW_syEfnzKtFR7Gop0LmqqVpvY/view', caption: 'Nue Genshin' },
+  { driveUrl: 'https://drive.google.com/file/d/163Yem_XtY27rT_6uXPBCKrRNjrOL2WQy/view', caption: 'Nue Pollo' },
+  { driveUrl: 'https://drive.google.com/file/d/1YgBVJK7Z73p4wSw8jyulDK8mutK3r5JA/view', caption: 'Nue Monja' },
+];
+
+// ✏️ Imágenes especiales de cumpleaños (fanarts, cards, etc.)
+const BDAY_IMAGES: { driveUrl: string; caption: string }[] = [
+  { driveUrl: 'https://drive.google.com/file/d/1TATpv6H40VCoVtrejqzVaAw1AxnHMIeX/view', caption: 'Feliz Cumple Nue' },
+];
+
+// ✏️ Videos clips/momentos generales
+const VIDEOS: { title: string; driveUrl: string }[] = [
+  { title: 'Cine Moment',          driveUrl: 'https://drive.google.com/file/d/17vNHj_6GifWiE5UZg6H6csukmQOweB-4/view' },
+  { title: 'Izquierda != Derecha', driveUrl: 'https://drive.google.com/file/d/1_NHdh_gmC-nFYVKa-b6pSnkozVwqF1ZX/view' },
+  { title: 'Nani Gas Ki',          driveUrl: 'https://drive.google.com/file/d/1u-Ksy2Ddcw54nm2PtuDSPZX_YlsoKqYi/view' },
+  { title: 'Mast#rba P3rros',      driveUrl: 'https://drive.google.com/file/d/1ABfPIVeVtEW2s30FPNdep1OrH9CErMNU/view' },
+  { title: 'Asma Moment',          driveUrl: 'https://drive.google.com/file/d/18XDMJ5qTYzbF-kA47orz2aFTNJI5FQoD/view' },
+  { title: 'Empanadas de que?',    driveUrl: 'https://drive.google.com/file/d/1CZCT9caJUNUZXwpnYGhc27YWItcoVXeo/view' },
+  { title: 'Agachate',             driveUrl: 'https://drive.google.com/file/d/1pmqegOb6-YhEodwE_ubtXmo1eu5zWQ1J/view' },
+  { title: 'S1da',                 driveUrl: 'https://drive.google.com/file/d/18HRnWDWmg2s_q-Jumc9zkeStAST_MAdk/view' },
+  { title: 'Feliz Anio',           driveUrl: 'https://drive.google.com/file/d/1c4F6Ud7dh73pYqURWB34PUzxHXHi4Z_R/view' },
+  { title: 'Gatito',               driveUrl: 'https://drive.google.com/file/d/1bixPch5ioEf-G1cX60lBbTwX4SvoasAi/view' },
+  { title: 'Conversación mas normal',        driveUrl: 'https://drive.google.com/file/d/1mzdw5UBXtEUw9gc4e6IhijV-pYw8h_mF/view' },
+  { title: 'Entrando',          driveUrl: 'https://drive.google.com/file/d/144rUsGxYdQuR4yTxKMBMBLNWZyvq1fYo/view' },
+  { title: 'La más fan',          driveUrl: 'https://drive.google.com/file/d/1hLLuS9LH2OXKrwo7tdSIKWRrfar_PXUj/view' },
+  { title: 'Wuf Wuf',          driveUrl: 'https://drive.google.com/file/d/19cXiRqpmvABoW9Pqmb_d7rs8C3JYfMqG/view' },
+  { title: 'La comunidad apoyando a la vtuber',  driveUrl: 'https://drive.google.com/file/d/1FEV387q_Mlg31XVlauPdsoVzqr8RbO1q/view' },
+  { title: 'Sin temor',    driveUrl: 'https://drive.google.com/file/d/1rJABsAg-B5RFyPubQwUeGLy2r-oHohGU/view' },
+  { title: '¿Podrá succionarla?',    driveUrl: 'https://drive.google.com/file/d/1cobIrdk5S9G9nEWclJBsHT6ULwq1R6By/view' },
+  { title: 'Subaru',    driveUrl: 'https://drive.google.com/file/d/1wy-CTmcVPCC_t91ZUvbQAlQth84L4gpn/view' },
+  { title: 'Que rico',    driveUrl: 'https://drive.google.com/file/d/1inNtJyUvbVyBpGBiUebd8fFLvXXASgzY/view' },
+  { title: 'PEAK',    driveUrl: 'https://drive.google.com/file/d/1NJG_otqGSyZ6FIncZJRguPA8E5H44zfy/view' },
+  { title: 'Joker Moment',    driveUrl: 'https://drive.google.com/file/d/1mKtpOPcq2GlvrKbQnIX2PBSaaKHeOBRy/view' },
+  { title: 'Psyco Moment',    driveUrl: 'https://drive.google.com/file/d/1aPVRX6Ks0VII-4CzVFlXe27ontA0DMg6/view' },
+];
+
+// ✏️ Videos especiales de cumpleaños (mensajes, tributos, etc.)
+const BDAY_VIDEOS: { title: string; driveUrl: string }[] = [
+  { title: 'Feliz Cumpleaños Nue', driveUrl: 'https://drive.google.com/file/d/1Jbk2cpa4oHhPQ39WbgAOftNYnUHDvLV8/view' },
+];
+
+// ✏️ Dedicatorias
+const DEDICATORIAS: { autor: string; rol: string; texto: string; avatar: string }[] = [
+  { autor: 'Hatashi', rol: 'Viewer', texto: 'Ania hoy que estamos celebrando tu cumpleaños, te digo Felicidades. A  la vtuber que estoy siguiendo, poco a poco me doy cuenta de lo loca y sonsita que eres, pero no puedo negar que me divierto escuchando tus locas aventuras y tus chismes que estan good XD pasalo muy bien. ₍^. .^₎⟆ diviértete mucho . Te tiro suerte para que todo te salga bien estos días /ᐠ˵- ⩊ -˵マ', avatar: '⭐' },
+  { autor: 'Yusei', rol: 'Marido de la vtuber', texto: `Muchas felicidades pequeña Ania, hoy se cumplen tus 24 primaveras. Hace poco pasaste por días pesados, pero de corazón deseo que hoy sea un día maravilloso para ti, que vengan muchos buenos días y muchos momentos maravillosos, mereces ser feliz y reír mucho, después de todo, tu risa es demasiado encantadora como para que no la uses.
+Y también sé que hay días que estás triste y eres muy dura contigo misma o te ves como un fracaso. Cuando tengas esos días, vuelve a leer estos mensajes, y mira el amor que la gente te tiene. Gente de varios países, que gracias a ti son parte de una bella comunidad.
+
+Lo haz hecho tú misma (aún sin conocerte en persona), con tu esfuerzo y tu dedicación, con tu gran carisma, y sobre todo, con tu hermoso corazón, tu ternura y tu gran cariño, esa calidez humana que nos brindas cada día. Todos están aquí por ti y para ti, reunidos cada día esperando verte, y esperando escucharte. Tu voz es la canción que yo escucho una y otra vez, que me relaja como una bella melodía, una que no me canso de escuchar sin importar cuantos días pasen. No dudes de tu capacidad para lograr las cosas. Te quiero mucho, y te adoro con el corazón. Estoy muy orgulloso de ti y de todo lo que haz logrado crecer en todo este tiempo. Animo preciosa, ¡Sabes que siempre te vamos a apoyar!
+
+En los días malos estaremos para ti y buscaremos la forma de ayudar, aunque sea charlando o buscando como alegrarte el día;  y en los días buenos estaremos para ti compartiendo esas risas, esos buenos momentos y creando futuros buenos recuerdos. Por mi parte sabes que tendrás siempre un amigo que te escuche, un compañero que te apoye, (Ya sabemos todos que también me ves como un amante e interes romantico, no te culpo). es broma XD
+
+Pasate un día muy bonito, ¡Te mando un fuerte abrazo a la distancia y mis mejores deseos para ti y tu familia!`, avatar: '⭐' },
+{ autor: 'SimpDeVT', rol: 'Simp', texto: `Felices 24 primaveras qliadas, estas un año mas vieja, bueno ya vas 3 años como vtuber 2 años y llegas al tiempo de expiración si fueras una burra. No recuerdo ni como llegue a tu comunidad pero no me arrepiento de ello. Pasaron muchas cosas en estos 3 años, 3 debuts y 3 graduaciones si contamos la de la U (al fin qliada te tomo 2 graduaciones de vtuber para terminar la U). No se por que me quede al inicio pero me gusta mucho estar en la comunidad, con orgullo puedo decir que de todas las vtuber que simpeo tu eres con la que paso mayor tiempo esto por tu actitud si bien a veces (siempre) eres medio sonsa me gusta la alegría que desprendes en los streams, a pesar de que estes cansada por la chamba y por el tráfico (pinche tráfico de Lema) siempre nos recibes con una sonrisa. Deja de hacer tus experimentos culinarios, tienes que comer bien para poder crecer ChatANIA.
+
+A la marrona detras de la vtuber, queria decirle que eres una gran persona deja de pensar que mal sobre ti, tu tranquila nosotros preocupados comienza a valorarte mas es bonito ver como la comunidad sigue creciendo.
+
+Espero que te guste esta sorpresa, se que este mes no es el mejor para ti considerando lo que paso en tu familia, y quería retribuir algo del cariño que nos das. Independiente de cuantas veces renazcas mueres o demás, espero poder estar ahi con la enana qliada que tanto aprecio, hasta que me automoricione o sea mi fin.`, avatar: '⭐' },
+];
+
+function getDriveId(url: string): string | null {
+  const m = url.match(/drive\.google\.com\/file\/d\/([^/\?]+)/);
+  return m ? m[1] : null;
+}
+function getDriveThumbnail(url: string): string {
+  const id = getDriveId(url);
+  return id ? `https://drive.google.com/thumbnail?id=${id}&sz=w800` : '';
+}
+function getDriveEmbed(url: string): string {
+  const id = getDriveId(url);
+  return id ? `https://drive.google.com/file/d/${id}/preview` : url;
+}
+---
+
+<BaseLayout title="¡Feliz Cumpleaños Ania! — 24 años & 3 años VTuber">
+  <div class="bday-page">
+    <div class="bday-bg"></div>
+    <div class="confetti-container" id="confetti"></div>
+
+    <!-- COUNTDOWN -->
+    <div class="countdown-screen" id="countdownScreen">
+      <div class="hero-stars" id="cntStars"></div>
+      <div class="cd-inner container">
+        <div class="cd-eyebrow">
+          <span class="star-icon">✦</span> Algo especial se acerca <span class="star-icon">✦</span>
+        </div>
+        <h1 class="cd-title">
+          <span class="cd-line1">Ania</span>
+          <span class="cd-line2">Starlight</span>
+        </h1>
+        <p class="cd-sub">{PERSON_AGE} años · {VTUBER_YEARS} años VTuber · pronto lo celebramos juntos</p>
+        <div class="cd-timer">
+          <div class="cd-unit"><span class="cd-num" id="cdDays">00</span><span class="cd-lbl">Días</span></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><span class="cd-num" id="cdHours">00</span><span class="cd-lbl">Horas</span></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><span class="cd-num" id="cdMins">00</span><span class="cd-lbl">Min</span></div>
+          <div class="cd-sep">:</div>
+          <div class="cd-unit"><span class="cd-num" id="cdSecs">00</span><span class="cd-lbl">Seg</span></div>
+        </div>
+        <div class="cd-cake">
+          <div class="candles">
+            {Array.from({length: 5}).map((_, i) => (
+              <div class="candle" style={`animation-delay:${i * 0.2}s`}><div class="flame"></div></div>
+            ))}
+          </div>
+          <div class="cake-top-cd"></div>
+          <div class="cake-mid-cd"></div>
+          <div class="cake-bot-cd"></div>
+        </div>
+        <p class="cd-hint"><button class="cd-unlock-btn" id="cdUnlockBtn">Acceder Ahora ✦</button></p>
+      </div>
+    </div>
+
+    <!-- CONTENIDO PRINCIPAL -->
+    <div class="bday-content" id="bdayContent" style="display:none">
+
+      <!-- HERO -->
+      <section class="bday-hero">
+        <div class="hero-stars" id="heroStars"></div>
+        <div class="bday-hero-inner container">
+          <div class="bday-eyebrow">
+            <span class="star-icon">✦</span>
+            <span>{VTUBER_YEARS} años como VTuber</span>
+            <span class="sep">·</span>
+            <span>{PERSON_AGE} años de vida</span>
+            <span class="star-icon">✦</span>
+          </div>
+          <h1 class="bday-title">
+            <span class="bday-line1">¡Feliz</span>
+            <span class="bday-line2">Cumpleaños</span>
+            <span class="bday-line3">Ania!</span>
+          </h1>
+          <div class="bday-cake">
+            <div class="cake-body">
+              <div class="cake-top">
+                <div class="candles">
+                  {Array.from({length: 5}).map((_, i) => (
+                    <div class="candle" style={`animation-delay:${i * 0.2}s`}><div class="flame"></div></div>
+                  ))}
+                </div>
+              </div>
+              <div class="cake-mid"></div>
+              <div class="cake-bot"></div>
+            </div>
+          </div>
+          <div class="bday-stats">
+            <div class="bday-stat"><span class="bday-stat-num">{PERSON_AGE}</span><span class="bday-stat-lbl">Años de vida</span></div>
+            <div class="bday-stat-div">✦</div>
+            <div class="bday-stat"><span class="bday-stat-num">{VTUBER_YEARS}</span><span class="bday-stat-lbl">Años VTuber</span></div>
+            <div class="bday-stat-div">✦</div>
+            <div class="bday-stat"><span class="bday-stat-num">∞</span><span class="bday-stat-lbl">Amor de la comunidad</span></div>
+          </div>
+        </div>
+      </section>
+
+      <!-- CARTA -->
+      <section class="section-pad bday-section">
+        <div class="container" style="max-width:720px">
+          <div class="section-label">Mensaje especial</div>
+          <h2 class="section-title">Una <span class="accent-p">carta</span> para ti</h2>
+          <div class="carta-wrap">
+            <div class="carta-deco-tl">✦</div><div class="carta-deco-tr">✦</div>
+            <div class="carta-deco-bl">✦</div><div class="carta-deco-br">✦</div>
+            <div class="carta-lines">
+              {CARTA.split('\n').map(line => <p class="carta-line">{line || '\u00a0'}</p>)}
+            </div>
+            <div class="carta-firma">— Con cariño, los StarHornys/Anitos/Nucitos/Nudistas 💜</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ══ 1. GALERÍA DE RECUERDOS ══ -->
+      <section class="section-pad bday-section">
+        <div class="container">
+          <div class="section-label">Momentos</div>
+          <h2 class="section-title">Galería <span class="accent-c">de recuerdos</span></h2>
+          {GALLERY.length > 0 ? (
+            <div class="gallery-grid">
+              {GALLERY.map((img, i) => (
+                <div class={`gallery-item ${i === 0 ? 'gallery-featured' : ''}`} data-embed={getDriveEmbed(img.driveUrl)} data-caption={img.caption}>
+                  <img src={getDriveThumbnail(img.driveUrl)} alt={img.caption} loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                  <div class="img-fallback" style="display:none">📸</div>
+                  <div class="gallery-overlay">
+                    <span class="gallery-caption">{img.caption}</span>
+                    <div class="gallery-play">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 3h6v6M10 14L21 3M21 16v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+                      Ver imagen
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="placeholder-grid">
+              {Array.from({length: 6}).map((_, i) => (
+                <div class="placeholder-card"><span class="placeholder-icon">📸</span><span class="placeholder-text">Foto {i + 1}</span></div>
+              ))}
+              <p class="placeholder-hint">✏️ Staff: agrega links de Drive en el array <code>GALLERY</code>.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <!-- ══ 2. IMÁGENES DE CUMPLEAÑOS ══ -->
+      <section class="section-pad bday-section">
+        <div class="container">
+          <div class="section-label">🎂 Especial cumpleaños</div>
+          <h2 class="section-title">Imágenes <span class="accent-p">de cumpleaños</span></h2>
+          {BDAY_IMAGES.length > 0 ? (
+            <div class="gallery-grid bday-gallery">
+              {BDAY_IMAGES.map((img, i) => (
+                <div class={`gallery-item bday-item ${i === 0 ? 'gallery-featured' : ''}`} data-embed={getDriveEmbed(img.driveUrl)} data-caption={img.caption}>
+                  <img src={getDriveThumbnail(img.driveUrl)} alt={img.caption} loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                  <div class="img-fallback" style="display:none">🎨</div>
+                  <div class="gallery-overlay bday-overlay">
+                    <span class="gallery-caption">{img.caption}</span>
+                    <div class="gallery-play bday-play">
+                      <svg width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="white" stroke-width="2"><path d="M15 3h6v6M10 14L21 3M21 16v5a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h5"/></svg>
+                      Ver imagen
+                    </div>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="placeholder-grid">
+              {Array.from({length: 4}).map((_, i) => (
+                <div class="placeholder-card bday-placeholder">
+                  <span class="placeholder-icon">🎨</span>
+                  <span class="placeholder-text">Imagen {i + 1}</span>
+                </div>
+              ))}
+              <p class="placeholder-hint">✏️ Staff: agrega fanarts, cards o imágenes en el array <code>BDAY_IMAGES</code>.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <!-- ══ 3. VIDEOS CLIPS GENERALES ══ -->
+      <section class="section-pad bday-section">
+        <div class="container">
+          <div class="section-label">Revive los momentos</div>
+          <h2 class="section-title">Videos <span class="accent-p">especiales</span></h2>
+          {VIDEOS.length > 0 ? (
+            <div class="videos-grid">
+              {VIDEOS.map((vid) => (
+                <div class="video-card" data-embed={getDriveEmbed(vid.driveUrl)} data-title={vid.title}>
+                  <div class="video-thumb">
+                    <img src={getDriveThumbnail(vid.driveUrl)} alt={vid.title} loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                    <div class="video-thumb-placeholder" style="display:none">🎬</div>
+                    <div class="video-play-overlay">
+                      <div class="video-play-btn">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="video-info"><h3 class="video-title">{vid.title}</h3></div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="placeholder-grid">
+              {Array.from({length: 3}).map((_, i) => (
+                <div class="placeholder-card"><span class="placeholder-icon">🎬</span><span class="placeholder-text">Video {i + 1}</span></div>
+              ))}
+              <p class="placeholder-hint">✏️ Staff: agrega links de Drive en el array <code>VIDEOS</code>.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <!-- ══ 4. VIDEOS DE CUMPLEAÑOS ══ -->
+      <section class="section-pad bday-section">
+        <div class="container">
+          <div class="section-label">🎂 Especial cumpleaños</div>
+          <h2 class="section-title">Videos <span class="accent-c">de cumpleaños</span></h2>
+          {BDAY_VIDEOS.length > 0 ? (
+            <div class="videos-grid">
+              {BDAY_VIDEOS.map((vid) => (
+                <div class="video-card bday-video-card" data-embed={getDriveEmbed(vid.driveUrl)} data-title={vid.title}>
+                  <div class="video-thumb">
+                    <img src={getDriveThumbnail(vid.driveUrl)} alt={vid.title} loading="lazy" onerror="this.style.display='none';this.nextElementSibling.style.display='flex'" />
+                    <div class="video-thumb-placeholder" style="display:none">🎂</div>
+                    <div class="video-play-overlay">
+                      <div class="video-play-btn bday-play-btn">
+                        <svg width="22" height="22" viewBox="0 0 24 24" fill="white"><polygon points="5,3 19,12 5,21"/></svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="video-info">
+                    <h3 class="video-title">{vid.title}</h3>
+                    <span class="bday-badge">🎂 Cumpleaños</span>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="placeholder-grid">
+              {Array.from({length: 3}).map((_, i) => (
+                <div class="placeholder-card bday-placeholder">
+                  <span class="placeholder-icon">🎂</span>
+                  <span class="placeholder-text">Video {i + 1}</span>
+                </div>
+              ))}
+              <p class="placeholder-hint">✏️ Staff: agrega mensajes o videos especiales en el array <code>BDAY_VIDEOS</code>.</p>
+            </div>
+          )}
+        </div>
+      </section>
+
+      <!-- DEDICATORIAS -->
+      <section class="section-pad bday-section">
+        <div class="container">
+          <div class="section-label">De la comunidad</div>
+          <h2 class="section-title">Dedicatorias <span class="accent-c">con amor</span></h2>
+          <div class="dedic-grid">
+            {DEDICATORIAS.map((d, i) => (
+              <div class="dedic-card" style={`animation-delay:${i * 0.1}s`}>
+                <div class="dedic-avatar">{d.avatar}</div>
+                <div class="dedic-body">
+                  <div class="dedic-header">
+                    <span class="dedic-autor">{d.autor}</span>
+                    <span class="dedic-rol">{d.rol}</span>
+                  </div>
+                  <p class="dedic-texto">"{d.texto}"</p>
+                </div>
+                <div class="dedic-deco">✦</div>
+              </div>
+            ))}
+          </div>
+          {DEDICATORIAS.length === 0 && (
+            <p class="dedic-empty">✏️ Staff: agrega dedicatorias en el array <code>DEDICATORIAS</code>.</p>
+          )}
+        </div>
+      </section>
+
+      <!-- CIERRE -->
+      <section class="bday-footer-section">
+        <div class="container" style="text-align:center">
+          <div class="bday-finale-emoji">🌟</div>
+          <h2 class="bday-finale-title">¡Que sigan los streams,<br/>los animes y las aventuras!</h2>
+          <p class="bday-finale-sub">{PERSON_AGE} años · {VTUBER_YEARS} años VTuber · infinitos momentos por vivir ✦˚‧</p>
+          <a href="/" class="btn btn-cyan" style="margin-top:32px">Volver al inicio</a>
+        </div>
+      </section>
+
+    </div><!-- /bday-content -->
+
+    <!-- VIEWER MODAL -->
+    <div class="viewer-overlay" id="viewerOverlay">
+      <div class="viewer-box">
+        <div class="viewer-header">
+          <span class="viewer-title" id="viewerTitle"></span>
+          <button class="viewer-close" id="viewerClose">✕</button>
+        </div>
+        <div class="viewer-frame-wrap">
+          <iframe id="viewerFrame" src="" allow="autoplay; fullscreen" allowfullscreen frameborder="0"></iframe>
+        </div>
+      </div>
+    </div>
+
+  </div>
+</BaseLayout>
+
+<style>
+  /* ══ BASE ═══════════════════════════════════════════════════════ */
+  .bday-page    { min-height: 100vh; padding-top: var(--nav-h); position: relative; overflow-x: hidden; }
+  .bday-bg      { position: fixed; inset: 0; z-index: 0; pointer-events: none; background: radial-gradient(ellipse 70% 50% at 80% 20%, rgba(212,0,255,.07) 0%, transparent 55%), radial-gradient(ellipse 50% 50% at 10% 80%, rgba(0,245,255,.05) 0%, transparent 50%); }
+  .confetti-container { position: fixed; inset: 0; z-index: 1; pointer-events: none; overflow: hidden; }
+  .bday-section { position: relative; z-index: 2; }
+  .hero-stars   { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+
+  /* ══ COUNTDOWN ══════════════════════════════════════════════════ */
+  .countdown-screen { position: relative; z-index: 2; min-height: calc(100vh - var(--nav-h)); display: flex; align-items: center; justify-content: center; }
+  .cd-inner   { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 28px; padding: 60px 24px; }
+  .cd-eyebrow { font-family: 'Orbitron', sans-serif; font-size: .72rem; letter-spacing: .25em; color: var(--cyan); text-transform: uppercase; display: flex; align-items: center; gap: 12px; }
+  .star-icon  { color: var(--pink); animation: spin-slow 6s linear infinite; display: inline-block; }
+  @keyframes spin-slow { to { transform: rotate(360deg); } }
+  .cd-title { font-family: 'Orbitron', sans-serif; font-weight: 900; line-height: 1; }
+  .cd-line1 { display: block; font-size: clamp(3rem, 8vw, 6rem); color: #fff; }
+  .cd-line2 { display: block; font-size: clamp(3.5rem, 10vw, 8rem); background: linear-gradient(90deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 30px rgba(0,245,255,.3)); }
+  .cd-sub   { font-family: 'Orbitron', sans-serif; font-size: .72rem; letter-spacing: .18em; color: var(--text-dim); text-transform: uppercase; }
+  .cd-timer { display: flex; align-items: center; gap: 8px; }
+  .cd-unit  { display: flex; flex-direction: column; align-items: center; gap: 6px; background: rgba(0,245,255,.06); border: 1px solid rgba(0,245,255,.2); border-radius: 12px; padding: 20px 28px; min-width: 90px; }
+  .cd-num   { font-family: 'Orbitron', sans-serif; font-size: clamp(2rem, 5vw, 3.5rem); font-weight: 900; color: #fff; line-height: 1; }
+  .cd-lbl   { font-family: 'Orbitron', sans-serif; font-size: .6rem; letter-spacing: .2em; color: var(--text-dim); text-transform: uppercase; }
+  .cd-sep   { font-family: 'Orbitron', sans-serif; font-size: 2.5rem; color: var(--cyan); font-weight: 900; animation: blink-sep 1s step-end infinite; margin-bottom: 18px; }
+  @keyframes blink-sep { 0%,100%{opacity:1} 50%{opacity:.2} }
+  .cd-cake    { display: flex; flex-direction: column; align-items: center; animation: float-cake 3s ease-in-out infinite; }
+  @keyframes float-cake { 0%,100%{transform:translateY(0)} 50%{transform:translateY(-12px)} }
+  .cake-top-cd { width: 100px; height: 40px; background: linear-gradient(135deg, #2d0a4e, #1a0630); border-radius: 8px 8px 0 0; border: 1px solid rgba(212,0,255,.3); border-bottom: none; display: flex; align-items: flex-end; justify-content: center; padding-bottom: 4px; }
+  .cake-mid-cd { width: 130px; height: 45px; background: linear-gradient(135deg, #1a0a3a, #0d0620); border: 1px solid rgba(0,245,255,.2); border-top: none; border-bottom: none; }
+  .cake-bot-cd { width: 160px; height: 50px; background: linear-gradient(135deg, #0d0620, #060310); border: 1px solid rgba(255,45,138,.25); border-top: none; border-radius: 0 0 10px 10px; }
+  .cd-hint       { font-size: .82rem; color: var(--text-dim); }
+  .cd-unlock-btn { background: transparent; border: none; color: var(--cyan); font-family: 'Orbitron', sans-serif; font-size: .72rem; letter-spacing: .1em; cursor: pointer; text-decoration: underline; padding: 0; transition: color .2s; }
+  .cd-unlock-btn:hover { color: var(--pink); }
+
+  /* Candles */
+  .candles { display: flex; justify-content: center; gap: 10px; }
+  .candle  { width: 7px; height: 20px; background: linear-gradient(var(--cyan), var(--magenta)); border-radius: 3px; position: relative; }
+  .flame   { width: 9px; height: 12px; background: radial-gradient(ellipse at 50% 80%, #fff 0%, #ffee00 30%, #ff8c00 60%, transparent 100%); border-radius: 50% 50% 30% 30%; position: absolute; top: -11px; left: -1px; animation: flicker .6s ease-in-out infinite alternate; }
+  @keyframes flicker { 0%{transform:scaleY(1) rotate(-3deg)} 100%{transform:scaleY(.9) rotate(3deg)} }
+
+  /* ══ HERO ════════════════════════════════════════════════════════ */
+  .bday-hero       { position: relative; z-index: 2; min-height: 95vh; display: flex; align-items: center; padding: 80px 0 60px; border-bottom: 1px solid rgba(0,245,255,.12); }
+  .bday-hero-inner { display: flex; flex-direction: column; align-items: center; text-align: center; gap: 32px; }
+  .bday-eyebrow    { display: flex; align-items: center; gap: 12px; flex-wrap: wrap; justify-content: center; font-family: 'Orbitron', sans-serif; font-size: .72rem; letter-spacing: .25em; color: var(--cyan); text-transform: uppercase; }
+  .sep { color: var(--text-dim); }
+  .bday-title  { display: flex; flex-direction: column; align-items: center; font-family: 'Orbitron', sans-serif; font-weight: 900; line-height: 1; animation: hero-in 1s ease both; }
+  @keyframes hero-in { from{opacity:0;transform:translateY(40px)} to{opacity:1;transform:none} }
+  .bday-line1  { font-size: clamp(2rem, 5vw, 4rem); color: #fff; }
+  .bday-line2  { font-size: clamp(3rem, 8vw, 7rem); background: linear-gradient(90deg, var(--cyan), var(--magenta)); -webkit-background-clip: text; -webkit-text-fill-color: transparent; filter: drop-shadow(0 0 30px rgba(0,245,255,.3)); }
+  .bday-line3  { font-size: clamp(3.5rem, 10vw, 9rem); color: #fff; text-shadow: 0 0 40px rgba(255,45,138,.4); }
+  .bday-cake   { animation: float-cake 3s ease-in-out infinite; }
+  .cake-body   { display: flex; flex-direction: column; align-items: center; }
+  .cake-top    { width: 120px; background: linear-gradient(135deg, #2d0a4e, #1a0630); border-radius: 8px 8px 0 0; padding: 10px 0 0; border: 1px solid rgba(212,0,255,.3); border-bottom: none; }
+  .cake-mid    { width: 150px; height: 50px; background: linear-gradient(135deg, #1a0a3a, #0d0620); border: 1px solid rgba(0,245,255,.2); border-top: none; border-bottom: none; position: relative; }
+  .cake-mid::after { content: '✦ ✦ ✦'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: var(--cyan); font-size: .7rem; letter-spacing: .2em; }
+  .cake-bot    { width: 180px; height: 55px; background: linear-gradient(135deg, #0d0620, #060310); border: 1px solid rgba(255,45,138,.25); border-top: none; border-radius: 0 0 10px 10px; position: relative; }
+  .cake-bot::after { content: '♡ ♡ ♡'; position: absolute; top: 50%; left: 50%; transform: translate(-50%,-50%); color: var(--pink); font-size: .75rem; letter-spacing: .3em; }
+  .bday-stats    { display: flex; align-items: center; gap: 32px; flex-wrap: wrap; justify-content: center; }
+  .bday-stat     { display: flex; flex-direction: column; align-items: center; gap: 4px; }
+  .bday-stat-num { font-family: 'Orbitron', sans-serif; font-size: 2.2rem; font-weight: 900; color: #fff; line-height: 1; }
+  .bday-stat-lbl { font-family: 'Orbitron', sans-serif; font-size: .6rem; letter-spacing: .18em; color: var(--text-dim); text-transform: uppercase; }
+  .bday-stat-div { font-size: 1.2rem; color: var(--pink); animation: pulse-star 2s ease infinite; }
+  @keyframes pulse-star { 0%,100%{opacity:1;transform:scale(1)} 50%{opacity:.5;transform:scale(.8)} }
+
+  /* ══ CARTA ════════════════════════════════════════════════════════ */
+  .carta-wrap  { position: relative; background: linear-gradient(135deg, rgba(212,0,255,.06), rgba(0,245,255,.04)); border: 1px solid rgba(212,0,255,.25); border-radius: 16px; padding: 48px 40px; box-shadow: 0 0 60px rgba(212,0,255,.08); }
+  .carta-deco-tl,.carta-deco-tr,.carta-deco-bl,.carta-deco-br { position: absolute; font-size: 1.2rem; color: var(--pink); opacity: .6; }
+  .carta-deco-tl { top:14px; left:18px; } .carta-deco-tr { top:14px; right:18px; }
+  .carta-deco-bl { bottom:14px; left:18px; } .carta-deco-br { bottom:14px; right:18px; }
+  .carta-lines { display: flex; flex-direction: column; gap: 16px; }
+  .carta-line  { font-size: 1.05rem; line-height: 1.8; color: rgba(255,255,255,.85); margin: 0; font-style: italic; }
+  .carta-firma { margin-top: 28px; text-align: right; font-family: 'Orbitron', sans-serif; font-size: .75rem; letter-spacing: .1em; color: var(--magenta); }
+
+  /* ══ GALERÍAS ════════════════════════════════════════════════════ */
+  .gallery-grid    { display: grid; grid-template-columns: repeat(3,1fr); grid-auto-rows: 220px; gap: 12px; }
+  .gallery-featured{ grid-column: span 2; grid-row: span 2; }
+  .gallery-item    { border-radius: 10px; overflow: hidden; position: relative; cursor: pointer; border: 1px solid var(--border-c); transition: transform .3s, box-shadow .3s; background: rgba(0,245,255,.03); }
+  .gallery-item:hover { transform: scale(1.02); box-shadow: var(--glow-c); border-color: var(--cyan); }
+  .gallery-item img   { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; display: block; }
+  .gallery-item:hover img { transform: scale(1.06); }
+  .img-fallback { width:100%; height:100%; display:flex; align-items:center; justify-content:center; font-size:3rem; opacity:.3; }
+  .gallery-overlay { position: absolute; inset: 0; background: rgba(4,6,14,.55); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 10px; opacity: 0; transition: opacity .3s; }
+  .gallery-item:hover .gallery-overlay { opacity: 1; }
+  .gallery-caption { font-family: 'Orbitron', sans-serif; font-size: .7rem; letter-spacing: .1em; color: #fff; text-align: center; padding: 0 8px; }
+  .gallery-play    { display: flex; align-items: center; gap: 8px; font-family: 'Orbitron', sans-serif; font-size: .65rem; letter-spacing: .12em; color: var(--cyan); background: rgba(4,6,14,.7); border: 1px solid rgba(0,245,255,.3); padding: 6px 14px; border-radius: 6px; }
+  .bday-gallery .bday-item { border-color: var(--border-p); }
+  .bday-gallery .bday-item:hover { box-shadow: var(--glow-p); border-color: var(--pink); }
+  .bday-overlay { background: rgba(4,6,14,.6); }
+  .bday-play    { color: var(--pink) !important; border-color: rgba(255,45,138,.3) !important; }
+
+  /* ══ VIDEOS ═══════════════════════════════════════════════════════ */
+  .videos-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(280px,1fr)); gap: 20px; }
+  .video-card  { background: var(--card); border: 1px solid var(--border-c); border-radius: var(--radius); overflow: hidden; cursor: pointer; transition: transform .3s, border-color .3s, box-shadow .3s; }
+  .video-card:hover { transform: translateY(-5px); border-color: var(--pink); box-shadow: var(--glow-p); }
+  .video-thumb { aspect-ratio: 16/9; position: relative; overflow: hidden; background: rgba(212,0,255,.05); }
+  .video-thumb img { width: 100%; height: 100%; object-fit: cover; transition: transform .4s; display: block; }
+  .video-card:hover .video-thumb img { transform: scale(1.05); }
+  .video-thumb-placeholder { width: 100%; height: 100%; display: flex; align-items: center; justify-content: center; font-size: 3rem; opacity: .3; }
+  .video-play-overlay { position: absolute; inset: 0; background: rgba(4,6,14,.4); display: flex; align-items: center; justify-content: center; opacity: 0; transition: opacity .3s; }
+  .video-card:hover .video-play-overlay { opacity: 1; }
+  .video-play-btn { width: 56px; height: 56px; border-radius: 50%; background: rgba(255,45,138,.2); border: 2px solid var(--pink); display: flex; align-items: center; justify-content: center; box-shadow: var(--glow-p); }
+  .video-info  { padding: 14px 16px; }
+  .video-title { font-size: .95rem; font-weight: 600; color: #fff; margin-bottom: 6px; }
+  .bday-video-card { border-color: var(--border-p); }
+  .bday-video-card:hover { border-color: var(--cyan); box-shadow: var(--glow-c); }
+  .bday-play-btn   { background: rgba(0,245,255,.2) !important; border-color: var(--cyan) !important; box-shadow: var(--glow-c) !important; }
+  .bday-badge { display: inline-block; font-family: 'Orbitron', sans-serif; font-size: .58rem; letter-spacing: .12em; color: var(--cyan); background: rgba(0,245,255,.08); border: 1px solid rgba(0,245,255,.2); padding: 2px 8px; border-radius: 4px; }
+
+  /* ══ PLACEHOLDERS ════════════════════════════════════════════════ */
+  .placeholder-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px,1fr)); gap: 12px; }
+  .placeholder-card { aspect-ratio: 16/9; border-radius: 10px; border: 1px dashed rgba(0,245,255,.2); background: rgba(0,245,255,.03); display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; }
+  .bday-placeholder { border-color: rgba(255,45,138,.2) !important; background: rgba(255,45,138,.03) !important; }
+  .placeholder-icon { font-size: 2rem; opacity: .4; }
+  .placeholder-text { font-family: 'Orbitron', sans-serif; font-size: .65rem; letter-spacing: .1em; color: var(--text-dim); }
+  .placeholder-hint { grid-column: 1/-1; font-size: .8rem; color: var(--text-dim); padding: 12px; background: rgba(0,245,255,.04); border-radius: 8px; border: 1px solid var(--border-c); }
+  .placeholder-hint code { color: var(--cyan); }
+
+  /* ══ DEDICATORIAS ════════════════════════════════════════════════ */
+  .dedic-grid { display: flex; flex-direction: column; gap: 20px; }
+  .dedic-card      { background: linear-gradient(135deg, rgba(0,245,255,.04), rgba(212,0,255,.04)); border: 1px solid var(--border-c); border-radius: 14px; padding: 24px; display: flex; gap: 16px; align-items: flex-start; position: relative; transition: border-color .3s, box-shadow .3s; animation: fade-up .6s ease both; }
+  @keyframes fade-up { from{opacity:0;transform:translateY(20px)} to{opacity:1;transform:none} }
+  .dedic-card:hover { border-color: rgba(0,245,255,.3); box-shadow: var(--glow-c); }
+  .dedic-avatar    { font-size: 1.8rem; flex-shrink: 0; width: 48px; height: 48px; display: flex; align-items: center; justify-content: center; background: rgba(0,245,255,.07); border: 1px solid var(--border-c); border-radius: 50%; }
+  .dedic-body      { flex: 1; min-width: 0; }
+  .dedic-header    { display: flex; align-items: center; gap: 10px; margin-bottom: 10px; flex-wrap: wrap; }
+  .dedic-autor     { font-family: 'Orbitron', sans-serif; font-size: .78rem; font-weight: 700; color: #fff; }
+  .dedic-rol       { font-family: 'Orbitron', sans-serif; font-size: .6rem; letter-spacing: .1em; color: var(--cyan); background: rgba(0,245,255,.08); border: 1px solid rgba(0,245,255,.2); padding: 2px 8px; border-radius: 4px; }
+  .dedic-texto     { font-size: .92rem; line-height: 1.8; color: rgba(255,255,255,.78); font-style: italic; margin: 0; word-break: break-word; white-space: pre-line; }
+  /* Botón "Ver más" — estilos base por si el JS inline falla */
+  .dedic-toggle    { display: block; margin-top: 10px; background: transparent; border: 1px solid #00f5ff; border-radius: 4px; color: #00f5ff !important; font-family: 'Orbitron', sans-serif; font-size: .65rem; letter-spacing: .12em; cursor: pointer; padding: 4px 12px; text-transform: uppercase; transition: color .2s, border-color .2s; }
+  .dedic-toggle:hover { color: #ff2d8a !important; border-color: #ff2d8a; }
+  .dedic-deco      { position: absolute; top: 14px; right: 16px; color: var(--pink); opacity: .4; font-size: .9rem; }
+  .dedic-empty     { font-size: .85rem; color: var(--text-dim); padding: 16px; background: rgba(0,245,255,.03); border-radius: 8px; border: 1px dashed var(--border-c); }
+  .dedic-empty code { color: var(--cyan); }
+
+  /* ══ VIEWER MODAL ════════════════════════════════════════════════ */
+  .viewer-overlay { position: fixed; inset: 0; z-index: 3000; background: rgba(4,6,14,.94); backdrop-filter: blur(10px); display: none; align-items: center; justify-content: center; padding: 20px; }
+  .viewer-overlay.open { display: flex; }
+  .viewer-box { background: var(--dark2); border: 1px solid var(--border-c); border-radius: 14px; width: 100%; max-width: 1000px; max-height: 90vh; overflow: hidden; display: flex; flex-direction: column; animation: modal-in .25s ease both; }
+  @keyframes modal-in { from{opacity:0;transform:scale(.95) translateY(20px)} to{opacity:1;transform:none} }
+  .viewer-header { display: flex; align-items: center; justify-content: space-between; padding: 12px 18px; border-bottom: 1px solid var(--border-c); background: rgba(0,245,255,.03); flex-shrink: 0; }
+  .viewer-title  { font-family: 'Orbitron', sans-serif; font-size: .8rem; letter-spacing: .08em; color: #fff; }
+  .viewer-close  { width: 32px; height: 32px; border-radius: 6px; border: 1px solid var(--border-c); color: var(--text-dim); font-size: 1rem; display: flex; align-items: center; justify-content: center; transition: border-color .2s, color .2s; cursor: pointer; background: transparent; flex-shrink: 0; }
+  .viewer-close:hover { border-color: var(--pink); color: var(--pink); }
+  .viewer-frame-wrap { flex: 1; position: relative; aspect-ratio: 16/9; background: #000; overflow: hidden; }
+  .viewer-frame-wrap iframe { width: 100%; height: 100%; border: none; display: block; }
+
+  /* ══ CIERRE ══════════════════════════════════════════════════════ */
+  .bday-footer-section { padding: 80px 0; position: relative; z-index: 2; border-top: 1px solid rgba(255,45,138,.15); background: linear-gradient(to bottom, transparent, rgba(212,0,255,.04)); }
+  .bday-finale-emoji { font-size: 4rem; margin-bottom: 20px; animation: float-cake 3s ease-in-out infinite; display: block; }
+  .bday-finale-title { font-family: 'Orbitron', sans-serif; font-size: clamp(1.2rem,3vw,2rem); font-weight: 900; color: #fff; margin-bottom: 16px; line-height: 1.4; }
+  .bday-finale-sub   { font-family: 'Orbitron', sans-serif; font-size: .72rem; letter-spacing: .2em; color: var(--text-dim); }
+
+  /* ══ RESPONSIVE ══════════════════════════════════════════════════ */
+  @media(max-width: 768px) {
+    .cd-unit { min-width: 65px; padding: 14px 16px; } .cd-num { font-size: 2rem; }
+    .gallery-grid { grid-template-columns: repeat(2,1fr); grid-auto-rows: 160px; }
+    .gallery-featured { grid-column: span 2; grid-row: span 1; }
+    .carta-wrap { padding: 32px 20px; }
+  }
+  @media(max-width: 480px) {
+    .cd-timer { gap: 4px; } .cd-unit { min-width: 56px; padding: 12px; } .cd-sep { font-size: 1.5rem; }
+    .gallery-grid { grid-template-columns: 1fr; } .gallery-featured { grid-column: span 1; }
+    .viewer-overlay { padding: 8px; }
+  }
+</style>
+
+<script define:vars={{ BIRTHDAY_ISO }}>
+  const targetDate      = new Date(BIRTHDAY_ISO).getTime();
+  const countdownScreen = document.getElementById('countdownScreen');
+  const bdayContent     = document.getElementById('bdayContent');
+
+  function pad(n) { return String(n).padStart(2, '0'); }
+
+  function tick() {
+    const diff = targetDate - Date.now();
+    if (diff <= 0) { reveal(); return; }
+    document.getElementById('cdDays').textContent  = pad(Math.floor(diff / 86400000));
+    document.getElementById('cdHours').textContent = pad(Math.floor((diff % 86400000) / 3600000));
+    document.getElementById('cdMins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
+    document.getElementById('cdSecs').textContent  = pad(Math.floor((diff % 60000) / 1000));
+  }
+
+  function reveal() {
+    clearInterval(timer);
+    countdownScreen.style.display = 'none';
+    bdayContent.style.display = 'block';
+    spawnStars('heroStars');
+    spawnConfetti();
+    initViewer();
+
+    // ── "Ver más" para dedicatorias largas ──────────────────────
+    const LONG_THRESHOLD = 370;
+    document.querySelectorAll('.dedic-card').forEach(card => {
+      const textoEl = card.querySelector('.dedic-texto');
+      if (!textoEl) return;
+      if ((textoEl.textContent || '').length <= LONG_THRESHOLD) return;
+
+      card.classList.add('dedic-long');
+      textoEl.style.cssText = 'max-height:7rem;overflow:hidden;transition:max-height 0.4s ease;font-size:.92rem;line-height:1.8;color:rgba(255,255,255,.78);font-style:italic;margin:0;word-break:break-word;white-space:pre-line;';
+
+      const btn = document.createElement('button');
+      btn.className = 'dedic-toggle';
+      // Todos los estilos en cssText para máxima especificidad — evita herencia del padre
+      btn.style.cssText = 'display:block;margin-top:12px;padding:5px 14px;background:transparent;border:1px solid #00f5ff;border-radius:4px;color:#00f5ff;font-family:Orbitron,sans-serif;font-size:.65rem;letter-spacing:.12em;cursor:pointer;text-transform:uppercase;';
+      btn.textContent = 'Ver más ↓';
+
+      let expanded = false;
+      btn.addEventListener('click', () => {
+        expanded = !expanded;
+        textoEl.style.maxHeight = expanded ? textoEl.scrollHeight + 'px' : '7rem';
+        btn.textContent = expanded ? 'Ver menos ↑' : 'Ver más ↓';
+        btn.style.color = expanded ? '#ff2d8a' : '#00f5ff';
+        btn.style.borderColor = expanded ? '#ff2d8a' : '#00f5ff';
+      });
+
+      // Append dentro de dedic-body (hermano del texto)
+      textoEl.parentElement.appendChild(btn);
+    });
+  }
+
+  tick();
+  const timer = setInterval(tick, 1000);
+  document.getElementById('cdUnlockBtn').addEventListener('click', reveal);
+
+  spawnStars('cntStars');
+
+  function spawnStars(id) {
+    const el = document.getElementById(id);
+    if (!el) return;
+    for (let i = 0; i < 60; i++) {
+      const s = document.createElement('div');
+      const size = Math.random() * 2.5 + 0.5;
+      s.style.cssText = `position:absolute;width:${size}px;height:${size}px;border-radius:50%;background:#fff;opacity:${Math.random()*.6+.1};top:${Math.random()*100}%;left:${Math.random()*100}%;animation:twinkle ${Math.random()*3+2}s ease-in-out ${Math.random()*3}s infinite alternate;`;
+      el.appendChild(s);
+    }
+  }
+
+  function spawnConfetti() {
+    const container = document.getElementById('confetti');
+    const colors = ['#00f5ff','#ff2d8a','#d400ff','#ffffff','#f5c518'];
+    for (let i = 0; i < 55; i++) {
+      const c = document.createElement('div');
+      const color = colors[Math.floor(Math.random() * colors.length)];
+      const size  = Math.random() * 6 + 3;
+      c.style.cssText = `position:absolute;width:${size}px;height:${size}px;background:${color};opacity:${Math.random()*.5+.2};left:${Math.random()*100}%;top:-10px;border-radius:${Math.random()>.5?'50%':'2px'};animation:confetti-fall ${Math.random()*8+5}s linear ${Math.random()*4}s infinite;`;
+      container.appendChild(c);
+    }
+  }
+
+  const styleEl = document.createElement('style');
+  styleEl.textContent = `
+    @keyframes twinkle { from{opacity:.1} to{opacity:.8} }
+    @keyframes confetti-fall { 0%{transform:translateY(-10px) rotate(0deg);opacity:.6} 100%{transform:translateY(110vh) rotate(720deg);opacity:0} }
+  `;
+  document.head.appendChild(styleEl);
+
+  function initViewer() {
+    const overlay  = document.getElementById('viewerOverlay');
+    const frame    = document.getElementById('viewerFrame');
+    const titleEl  = document.getElementById('viewerTitle');
+    const closeBtn = document.getElementById('viewerClose');
+
+    function openViewer(embedUrl, title) {
+      titleEl.textContent = title;
+      frame.src = embedUrl;
+      overlay.classList.add('open');
+      document.body.style.overflow = 'hidden';
+    }
+    function closeViewer() {
+      overlay.classList.remove('open');
+      frame.src = '';
+      document.body.style.overflow = '';
+    }
+
+    document.querySelectorAll('.gallery-item').forEach(item => {
+      item.addEventListener('click', () => openViewer(item.dataset.embed, item.dataset.caption));
+    });
+    document.querySelectorAll('.video-card').forEach(card => {
+      card.addEventListener('click', () => openViewer(card.dataset.embed, card.dataset.title));
+    });
+
+    closeBtn.addEventListener('click', closeViewer);
+    overlay.addEventListener('click', e => { if (e.target === overlay) closeViewer(); });
+    document.addEventListener('keydown', e => { if (e.key === 'Escape') closeViewer(); });
+  }
+</script>
