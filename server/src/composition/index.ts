@@ -156,7 +156,11 @@ export const faqUseCases: IFaqUseCases = {
         userRepository,
         idGenerator,
     ),
-    listFaqItems: new ListFaqItemsUseCase(faqItemRepository, faqTextRepository),
+    listFaqItems: new ListFaqItemsUseCase(
+        faqItemRepository,
+        faqTextRepository,
+        userRepository,
+    ),
     getFaqItem: new GetFaqItemUseCase(faqItemRepository, faqTextRepository),
     getFaqHistory: new GetFaqHistoryUseCase(faqHistoryRepository, faqItemRepository, userRepository),
 };
