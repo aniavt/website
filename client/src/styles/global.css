@@ -180,7 +180,7 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .faq-q:hover { background: rgba(0,245,255,.05); }
 .faq-q .arrow { font-size: 1.2rem; color: var(--cyan); transition: transform .3s; flex-shrink: 0; }
 .faq-item.open .faq-q .arrow { transform: rotate(45deg); }
-.faq-a { max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .3s; font-size: .92rem; color: var(--text-dim); line-height: 1.75; padding: 0 22px; }
+.faq-a { max-height: 0; overflow: hidden; transition: max-height .35s ease, padding .3s; font-size: .92rem; color: var(--text-dim); line-height: 1.75; padding: 0 22px; white-space: pre-line; }
 .faq-item.open .faq-a { max-height: 400px; padding: 0 22px 18px; }
 
 /* ── Comments ────────────────────────────────────────── */

@@ -16,6 +16,14 @@ export interface WeeklyScheduleDto {
   readonly fileContentType?: string | null;
 }
 
+export interface FaqItemPublicDto {
+  readonly id: string;
+  readonly query: string;
+  readonly answer: string;
+  readonly isActive: boolean;
+  readonly lastAction: string;
+}
+
 export async function getCurrentWeeklySchedule(): Promise<WeeklyScheduleDto | null> {
   let url: string;
 
@@ -41,5 +49,27 @@ export async function getCurrentWeeklySchedule(): Promise<WeeklyScheduleDto | nu
 
   const data = await res.json();
   return data;
+}
+
+export async function getFaqs(): Promise<FaqItemPublicDto[]> {
+  let url: string;
+
+  if (typeof window === "undefined") {
+    const g = typeof globalThis !== "undefined" ? (globalThis as { process?: { env?: Record<string, string> } }) : null;
+    const envUrl = g?.process?.env?.PUBLIC_SERVER_URL;
+    const base = envUrl || import.meta.env.PUBLIC_SERVER_URL || "";
+    url = `${base.replace(/\/+$/, "")}${g === null ? "/api" : ""}/faq?activeOnly=true`;
+  } else {
+    url = "/api/faq?activeOnly=true";
+  }
+
+  const res = await fetch(url);
+
+  if (!res.ok) {
+    throw new Error("faq_load_failed");
+  }
+
+  const data = await res.json();
+  return data as FaqItemPublicDto[];
 }
 
