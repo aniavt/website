@@ -29,7 +29,13 @@ services:
   db:
     image: mongo:8.0
     container_name: ania_db_mongo
-    env_file: 
+    healthcheck:
+      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
+      interval: 10s
+      timeout: 5s
+      retries: 5
+      start_period: 20s
+    env_file:
       - .env
     expose:
       - "27017"
@@ -41,7 +47,6 @@ services:
     networks:
       ania_network:
         ipv4_address: 172.20.0.100
-
 
   web:
     build:
@@ -77,8 +82,10 @@ services:
       ania_network:
         ipv4_address: 172.20.0.101
     depends_on:
-      - db
-      - s3
+      db:
+        condition: service_healthy
+      s3:
+        condition: service_started
 
   web_admin:
     build:
@@ -98,19 +105,19 @@ services:
 
   s3:
     # DOC:
-      # Primera vez (v2 no tiene "init"; asignar rol y aplicar layout):
-      #   docker exec ania_s3_garage /garage status   # ver ID del nodo
-      #   docker exec ania_s3_garage /garage layout assign -z dc1 -c 10G <NODE_ID>
-      #   docker exec ania_s3_garage /garage layout show   
-      #    --> anotar <version>
-      #   docker exec ania_s3_garage /garage layout apply --version <version>
+    # Primera vez (v2 no tiene "init"; asignar rol y aplicar layout):
+    #   docker exec ania_s3_garage /garage status   # ver ID del nodo
+    #   docker exec ania_s3_garage /garage layout assign -z dc1 -c 10G <NODE_ID>
+    #   docker exec ania_s3_garage /garage layout show
+    #    --> anotar <version>
+    #   docker exec ania_s3_garage /garage layout apply --version <version>
 
-      # Crear key S3 y (opcionalmente) un bucket
-      #   docker exec ania_s3_garage /garage key create myuser
-      #    --> anotar <KEY_ID>
-      #   docker exec ania_s3_garage /garage key allow <KEY_ID> --create-bucket
-      #   docker exec ania_s3_garage /garage bucket create <BUCKET_NAME>
-      #   docker exec ania_s3_garage /garage bucket allow <BUCKET_NAME> --key <KEY_ID> --read --write
+    # Crear key S3 y (opcionalmente) un bucket
+    #   docker exec ania_s3_garage /garage key create myuser
+    #    --> anotar <KEY_ID>
+    #   docker exec ania_s3_garage /garage key allow <KEY_ID> --create-bucket
+    #   docker exec ania_s3_garage /garage bucket create <BUCKET_NAME>
+    #   docker exec ania_s3_garage /garage bucket allow <BUCKET_NAME> --key <KEY_ID> --read --write
 
     build:
       context: ./garage
