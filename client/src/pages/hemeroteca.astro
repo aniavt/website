@@ -1,9 +1,13 @@
 ---
 // src/pages/hemeroteca.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
-import HemeCard from '../components/HemeCard.astro';
-import VideoModal from '../components/VideoModal.astro';
-import { hemeroteca } from '../data/hemeroteca';
+import type { VaultNodeDto } from '../lib/vault/types';
+import { fetchVaultChildren } from '../lib/vault/api';
+
+const parentIdParam = Astro.url.searchParams.get("parentId");
+const initialParentId: string | null = parentIdParam ?? null;
+
+const initialNodes: VaultNodeDto[] = await fetchVaultChildren(initialParentId);
 ---
 
 <BaseLayout title="Hemeroteca — Ania Starlight">
@@ -12,47 +16,629 @@ import { hemeroteca } from '../data/hemeroteca';
       <div class="section-label">Archivo audiovisual</div>
       <h2 class="section-title">Heme<span class="accent-c">roteca</span></h2>
       <p style="color:var(--text-dim);margin-bottom:32px;max-width:600px;line-height:1.7;font-size:.95rem">
-        Galería de reacciones, películas y contenido especial. Cada tarjeta abre el
-        reproductor de video o redirige al Drive correspondiente.
+        Contenido público organizado en el Bodega. Selecciona un elemento para ver y elegir su fuente.
       </p>
 
-      <!-- Filtros -->
-      <div class="filters" id="hemeFilters">
-        <button class="filter-btn active" data-hfilter="all">Todo</button>
-        <button class="filter-btn" data-hfilter="reaccion">Reacciones</button>
-        <button class="filter-btn" data-hfilter="pelicula">Películas</button>
-        <button class="filter-btn" data-hfilter="especial">Especiales</button>
-      </div>
-
-      <!-- Grid -->
-      <div class="heme-grid" id="hemeGrid">
-        {hemeroteca.map((item) => (
-          <div data-category={item.category}>
-            <HemeCard item={item} />
-          </div>
-        ))}
+      <!-- Grid raíz -->
+      <div
+        class="heme-grid"
+        id="hemeGrid"
+        data-current-parent-id={initialParentId ?? ""}>
+        {initialNodes.length === 0 ? (
+          <p style="color:var(--text-dim);font-size:.9rem">
+            No hay contenido en la raíz del Bodega.
+          </p>
+        ) : (
+          initialNodes.map((node) => (
+            <button
+              type="button"
+              class="heme-card"
+              data-node-id={node.id}
+              data-node-name={node.name}
+              data-node-type={node.type}
+            >
+              <div class="heme-thumb-wrap">
+                {node.thumbnailId ? (
+                  <img
+                    src={`/api/media/${node.thumbnailId}`}
+                    alt={node.name}
+                    class="heme-thumb"
+                    loading="lazy"
+                  />
+                ) : (
+                  <div class="heme-thumb placeholder">✦</div>
+                )}
+              </div>
+              <div class="heme-card-body">
+                <div class="heme-card-title">
+                  {node.type === "folder" ? `📁 ${node.name}` : node.name}
+                </div>
+                <div class="heme-card-meta">
+                  <span>
+                    {new Date(node.createdAt).toLocaleDateString("es-ES", {
+                      year: "numeric",
+                      month: "short",
+                      day: "2-digit",
+                    })}
+                  </span>
+                  <span>
+                    {node.type === "folder" ? "Abrir carpeta" : "Ver fuentes"}
+                  </span>
+                </div>
+              </div>
+            </button>
+          ))
+        )}
       </div>
     </div>
   </section>
 
-  <!-- Modal de video -->
-  <VideoModal />
+  <div id="hemeModal" class="heme-modal" aria-hidden="true">
+    <div class="heme-modal-backdrop"></div>
+    <div class="heme-modal-dialog" role="dialog" aria-modal="true" aria-labelledby="playerTitle">
+      <header class="player-header">
+        <div class="player-info">
+          <span class="player-ep-badge" id="playerBadge">ARCHIVO</span>
+          <h2 class="player-title" id="playerTitle">Cargando...</h2>
+        </div>
+        <button type="button" class="player-close" data-heme-close aria-label="Cerrar">✕</button>
+      </header>
+      <div class="heme-modal-body">
+        <div id="hemeSourcesList" class="heme-sources-list"></div>
+        <div class="player-container">
+          <iframe
+            id="playerFrame"
+            src=""
+            allow="autoplay; fullscreen"
+            allowfullscreen
+            frameborder="0"
+            style="display:none"
+          ></iframe>
+          <video
+            id="playerVideo"
+            controls
+            style="display:none"
+          ></video>
+          <div class="player-fallback" id="playerFallback">
+            <p>El video no pudo cargarse en el reproductor.</p>
+            <a id="playerFallbackLink" href="#" target="_blank" class="btn btn-cyan">
+              Abrir en nueva pestaña ↗
+            </a>
+          </div>
+        </div>
+      </div>
+      <footer class="heme-modal-footer">
+        <button type="button" class="btn btn-outline" data-heme-close>Cerrar</button>
+        <button type="button" class="btn btn-cyan" id="hemeOpenSourceBtn">Abrir fuente</button>
+      </footer>
+    </div>
+  </div>
 </BaseLayout>
 
-<script>
-  // Filtro de categorías
-  const btns  = document.querySelectorAll<HTMLButtonElement>('#hemeFilters .filter-btn');
-  const items = document.querySelectorAll<HTMLElement>('#hemeGrid [data-category]');
+<style is:global>
+  .heme-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(220px, 1fr));
+    gap: 16px;
+  }
+  .heme-card {
+    border-radius: var(--radius);
+    border: 1px solid var(--border-p);
+    background: radial-gradient(circle at top, rgba(0,245,255,.08), transparent 55%),
+                rgba(8,10,24,0.9);
+    padding: 14px 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: transform .2s ease, box-shadow .2s ease, border-color .2s ease;
+  }
+  .heme-card:hover {
+    transform: translateY(-3px);
+    box-shadow: var(--glow-p);
+    border-color: var(--cyan);
+  }
+  .heme-card-title {
+    font-size: .95rem;
+    font-weight: 600;
+    color: #fff;
+    margin-bottom: 4px;
+  }
+  .heme-card-path {
+    font-family: 'Fira Code', monospace;
+    font-size: .7rem;
+    color: var(--text-dim);
+    opacity: .85;
+    margin-bottom: 8px;
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+  }
+  .heme-card-meta {
+    display: flex;
+    justify-content: space-between;
+    font-size: .7rem;
+    color: var(--text-dim);
+  }
+  .heme-thumb-wrap {
+    width: 100%;
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    overflow: hidden;
+    margin-bottom: 10px;
+    background: linear-gradient(135deg, rgba(0,245,255,.12), rgba(212,0,255,.08));
+    display: flex;
+    align-items: center;
+    justify-content: center;
+  }
+  .heme-thumb {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+  .heme-thumb.placeholder {
+    font-size: 1.8rem;
+    color: var(--text-dim);
+  }
 
-  btns.forEach((btn) => {
-    btn.addEventListener('click', () => {
-      btns.forEach((b) => b.classList.remove('active'));
-      btn.classList.add('active');
-      const filter = btn.dataset.hfilter ?? 'all';
-      items.forEach((item) => {
-        item.style.display =
-          filter === 'all' || item.dataset.category === filter ? '' : 'none';
+  .heme-modal {
+    position: fixed;
+    inset: 0;
+    display: none;
+    align-items: center;
+    justify-content: center;
+    z-index: 40;
+  }
+  .heme-modal[aria-hidden="false"] {
+    display: flex;
+  }
+  .heme-modal-backdrop {
+    position: absolute;
+    inset: 0;
+    background: rgba(0,0,0,.7);
+    backdrop-filter: blur(4px);
+  }
+  .heme-modal-dialog {
+    position: relative;
+    z-index: 1;
+    max-width: 960px;
+    width: 100%;
+    margin: 16px;
+    border-radius: var(--radius);
+    border: 1px solid var(--border-p);
+    background: radial-gradient(circle at top, rgba(0,245,255,.08), transparent 55%),
+                #060714;
+    box-shadow: var(--glow-p);
+  }
+  .player-header,
+  .heme-modal-footer {
+    padding: 14px 18px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+  }
+  .heme-modal-body {
+    padding: 0 18px 16px;
+  }
+  .player-info { display: flex; align-items: center; gap: 12px; }
+  .player-ep-badge {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .65rem;
+    letter-spacing: .15em;
+    color: var(--cyan);
+    background: rgba(0,245,255,.1);
+    border: 1px solid rgba(0,245,255,.25);
+    padding: 4px 10px;
+    border-radius: 4px;
+  }
+  .player-title {
+    font-family: 'Orbitron', sans-serif;
+    font-size: .85rem;
+    letter-spacing: .06em;
+    color: #fff;
+  }
+  .player-close {
+    width: 32px; height: 32px;
+    border-radius: 6px;
+    border: 1px solid var(--border-c);
+    color: var(--text-dim);
+    font-size: 1rem;
+    display: flex; align-items: center; justify-content: center;
+    transition: border-color .2s, color .2s;
+    cursor: pointer;
+    background: transparent;
+  }
+  .player-close:hover { border-color: var(--pink); color: var(--pink); }
+  .heme-sources-list {
+    display: flex;
+    flex-direction: column;
+    gap: 8px;
+    max-height: 260px;
+    overflow-y: auto;
+  }
+  .heme-source-item {
+    border-radius: 6px;
+    border: 1px solid var(--border-p);
+    padding: 8px 10px;
+    display: flex;
+    align-items: flex-start;
+    gap: 8px;
+    background: rgba(6,8,24,.9);
+  }
+  .heme-source-item input {
+    margin-top: 4px;
+  }
+  .heme-source-main {
+    flex: 1;
+  }
+  .heme-source-url {
+    font-family: 'Fira Code', monospace;
+    font-size: .7rem;
+    color: var(--text-dim);
+    word-break: break-all;
+  }
+  .heme-source-meta {
+    font-size: .68rem;
+    color: var(--text-dim);
+    margin-top: 4px;
+  }
+  .player-container {
+    margin-top: 12px;
+    position: relative;
+    aspect-ratio: 16/9;
+    border-radius: 10px;
+    border: 1px solid var(--border-p);
+    background: #000;
+    overflow: hidden;
+  }
+  .player-container iframe,
+  .player-container video {
+    width: 100%;
+    height: 100%;
+    border: none;
+    border-radius: 0;
+    display: block;
+    background: #000;
+  }
+  .player-fallback {
+    position: absolute;
+    inset: 0;
+    display: none;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 16px;
+    background: rgba(8,12,24,.98);
+    color: var(--text-dim);
+    text-align: center;
+    border-radius: 8px;
+    padding: 18px;
+  }
+  .player-fallback.visible { display: flex; }
+</style>
+
+<script>
+  const grid = document.getElementById('hemeGrid');
+  const modal = document.getElementById('hemeModal');
+  const sourcesList = document.getElementById('hemeSourcesList');
+  const openBtn = document.getElementById('hemeOpenSourceBtn');
+  const playerTitle = document.getElementById('playerTitle');
+  const playerBadge = document.getElementById('playerBadge');
+  const playerFrame = document.getElementById('playerFrame') as HTMLIFrameElement | null;
+  const playerVideo = document.getElementById('playerVideo') as HTMLVideoElement | null;
+  const playerFallback = document.getElementById('playerFallback') as HTMLElement | null;
+  const playerFallbackLink = document.getElementById('playerFallbackLink') as HTMLAnchorElement | null;
+
+  let currentParentId: string | null = null;
+
+  if (grid) {
+    const url = new URL(window.location.href);
+    const pid = url.searchParams.get('parentId');
+    if (pid) {
+      currentParentId = pid;
+      loadChildren(currentParentId);
+    }
+  }
+
+  function closeModal() {
+    if (!modal) return;
+    modal.setAttribute('aria-hidden', 'true');
+    if (sourcesList) sourcesList.innerHTML = '';
+    if (playerFrame) playerFrame.src = '';
+    if (playerVideo) {
+      playerVideo.pause();
+      playerVideo.src = '';
+    }
+    if (playerFallback) playerFallback.classList.remove('visible');
+    document.body.style.overflow = '';
+  }
+
+  function toIframeUrl(url: string): string | null {
+    const lower = url.toLowerCase();
+    if (lower.startsWith('/api/media/')) return url; // el endpoint sirve el archivo (video/audio)
+    if (/\.(mp4|webm|mkv|ogg)(\?|$)/.test(lower)) return null; // video nativo (no iframe)
+
+    const driveMatch = url.match(/drive\.google\.com\/file\/d\/([^/]+)/);
+    if (driveMatch) return `https://drive.google.com/file/d/${driveMatch[1]}/preview`;
+
+    const driveOpen = url.match(/drive\.google\.com\/open\?id=([^&]+)/);
+    if (driveOpen) return `https://drive.google.com/file/d/${driveOpen[1]}/preview`;
+
+    const ytWatch = url.match(/youtube\.com\/watch\?v=([^&]+)/);
+    if (ytWatch) return `https://www.youtube.com/embed/${ytWatch[1]}?autoplay=1`;
+
+    const ytShort = url.match(/youtu\.be\/([^?]+)/);
+    if (ytShort) return `https://www.youtube.com/embed/${ytShort[1]}?autoplay=1`;
+
+    // Por defecto, intentamos iframe con el URL original
+    return url;
+  }
+
+  async function openForNode(nodeId: string, title: string, nodeType?: string) {
+    if (!modal || !sourcesList || !playerTitle || !playerBadge) return;
+
+    playerTitle.textContent = title;
+    playerBadge.textContent = (nodeType ? String(nodeType).toUpperCase() : 'ARCHIVO');
+    modal.setAttribute('aria-hidden', 'false');
+    sourcesList.innerHTML = '<p style="color:var(--text-dim);font-size:.8rem">Cargando fuentes...</p>';
+    if (playerFrame) playerFrame.src = '';
+    if (playerVideo) {
+      playerVideo.pause();
+      playerVideo.src = '';
+      playerVideo.style.display = 'none';
+    }
+    if (playerFrame) playerFrame.style.display = 'none';
+    if (playerFallback) playerFallback.classList.remove('visible');
+    document.body.style.overflow = 'hidden';
+
+    try {
+      const res = await fetch(`/api/vault/node/${nodeId}/sources`, { credentials: 'include' });
+      if (!res.ok) {
+        throw new Error('sources_load_failed');
+      }
+      const data = await res.json();
+      const sources = Array.isArray(data) ? data : [];
+
+      if (sources.length === 0) {
+        sourcesList.innerHTML = '<p style="color:var(--text-dim);font-size:.8rem">Este elemento no tiene fuentes configuradas.</p>';
+        renderPlayer('');
+        return;
+      }
+
+      sourcesList.innerHTML = '';
+      sources.forEach((s, idx) => {
+        const wrapper = document.createElement('label');
+        wrapper.className = 'heme-source-item';
+
+        const input = document.createElement('input');
+        input.type = 'radio';
+        input.name = 'heme-source';
+
+        // Para fuentes internas, s.url es el fileId -> lo convertimos a endpoint de media
+        const effectiveUrl =
+          s.type === 'internal'
+            ? `/api/media/${s.url}`
+            : s.url;
+
+        input.value = effectiveUrl;
+        if (idx === 0) input.checked = true;
+
+        const main = document.createElement('div');
+        main.className = 'heme-source-main';
+
+        const urlEl = document.createElement('div');
+        urlEl.className = 'heme-source-url';
+        urlEl.textContent = effectiveUrl;
+
+        const meta = document.createElement('div');
+        meta.className = 'heme-source-meta';
+        meta.textContent =
+          (s.type === 'external' ? 'Externa' : 'Interna') +
+          (s.server ? ` · ${s.server}` : '');
+
+        main.appendChild(urlEl);
+        main.appendChild(meta);
+        wrapper.appendChild(input);
+        wrapper.appendChild(main);
+        sourcesList.appendChild(wrapper);
       });
+
+      setupPreview();
+    } catch {
+      sourcesList.innerHTML = '<p style="color:var(--text-dim);font-size:.8rem">No se pudieron cargar las fuentes.</p>';
+      renderPlayer('');
+    }
+  }
+
+  function getSelectedSourceUrl() {
+    if (!sourcesList) return '';
+    const selected = sourcesList.querySelector('input[name="heme-source"]:checked') as HTMLInputElement | null;
+    return selected?.value ?? '';
+  }
+
+  function renderPlayer(url: string) {
+    if (!playerFrame || !playerVideo || !playerFallback || !playerFallbackLink) return;
+
+    const v = url?.trim() ?? '';
+    if (!v) {
+      playerFrame.src = '';
+      playerFrame.style.display = 'none';
+      playerVideo.pause();
+      playerVideo.src = '';
+      playerVideo.style.display = 'none';
+      playerFallbackLink.href = '#';
+      playerFallback.classList.add('visible');
+      return;
+    }
+
+    const lower = v.toLowerCase();
+
+    // Video directo (endpoint interno o extensiones típicas)
+    if (v.startsWith('/api/media/') || /\.(mp4|webm|mkv|ogg)(\?|$)/.test(lower)) {
+      const iframeSrc = v; // no usado
+      void iframeSrc;
+      playerFallback.classList.remove('visible');
+      playerFrame.src = '';
+      playerFrame.style.display = 'none';
+      playerVideo.src = v;
+      playerVideo.style.display = 'block';
+      return;
+    }
+
+    const iframeUrl = toIframeUrl(v);
+    if (!iframeUrl) {
+      playerFrame.src = '';
+      playerFrame.style.display = 'none';
+      playerVideo.pause();
+      playerVideo.src = '';
+      playerVideo.style.display = 'none';
+      playerFallbackLink.href = v;
+      playerFallback.classList.add('visible');
+      return;
+    }
+
+    playerFallback.classList.remove('visible');
+    playerVideo.pause();
+    playerVideo.src = '';
+    playerVideo.style.display = 'none';
+    playerFrame.src = iframeUrl;
+    playerFrame.style.display = 'block';
+  }
+
+  function setupPreview() {
+    if (!sourcesList) return;
+    sourcesList.addEventListener('change', () => {
+      renderPlayer(getSelectedSourceUrl());
     });
+    renderPlayer(getSelectedSourceUrl());
+  }
+
+  async function loadChildren(parentId: string | null) {
+    if (!grid) return;
+
+    const params = new URLSearchParams();
+    if (parentId !== null) params.set('parentId', parentId);
+
+    grid.innerHTML = '<p style="color:var(--text-dim);font-size:.9rem">Cargando contenido...</p>';
+
+    try {
+      const res = await fetch(`/api/vault/children${params.toString() ? `?${params}` : ''}`, {
+        credentials: 'include',
+      });
+      if (!res.ok) {
+        throw new Error('children_load_failed');
+      }
+      const nodes = await res.json();
+
+      if (!Array.isArray(nodes) || nodes.length === 0) {
+        grid.innerHTML = '<p style="color:var(--text-dim);font-size:.9rem">Esta carpeta está vacía.</p>';
+        return;
+      }
+
+      grid.innerHTML = '';
+      nodes.forEach((node: any) => {
+        const btn = document.createElement('button');
+        btn.type = 'button';
+        btn.className = 'heme-card';
+        btn.dataset.nodeId = node.id;
+        btn.dataset.nodeName = node.name;
+        btn.dataset.nodeType = node.type;
+
+        const thumbWrap = document.createElement('div');
+        thumbWrap.className = 'heme-thumb-wrap';
+
+        if (node.thumbnailId) {
+          const img = document.createElement('img');
+          img.src = `/api/media/${node.thumbnailId}`;
+          img.alt = node.name;
+          img.loading = 'lazy';
+          img.className = 'heme-thumb';
+          thumbWrap.appendChild(img);
+        } else {
+          const ph = document.createElement('div');
+          ph.className = 'heme-thumb placeholder';
+          ph.textContent = '✦';
+          thumbWrap.appendChild(ph);
+        }
+
+        const body = document.createElement('div');
+        body.className = 'heme-card-body';
+
+        const titleEl = document.createElement('div');
+        titleEl.className = 'heme-card-title';
+        titleEl.textContent = node.type === 'folder' ? `📁 ${node.name}` : node.name;
+
+        const meta = document.createElement('div');
+        meta.className = 'heme-card-meta';
+        meta.innerHTML = `
+          <span>${new Date(node.createdAt).toLocaleDateString('es-ES')}</span>
+          <span>${node.type === 'folder' ? 'Abrir carpeta' : 'Ver fuentes'}</span>
+        `;
+
+        body.appendChild(titleEl);
+        body.appendChild(meta);
+
+        btn.appendChild(thumbWrap);
+        btn.appendChild(body);
+        grid.appendChild(btn);
+      });
+    } catch {
+      grid.innerHTML = '<p style="color:var(--text-dim);font-size:.9rem">No se pudo cargar el contenido.</p>';
+    }
+  }
+
+  if (grid) {
+    grid.addEventListener('click', (ev) => {
+      const target = ev.target as HTMLElement | null;
+      if (!target) return;
+      const card = target.closest<HTMLButtonElement>('.heme-card');
+      if (!card) return;
+      const nodeId = card.dataset.nodeId;
+      const nodeType = card.dataset.nodeType;
+      const title = card.dataset.nodeName || '';
+
+      if (!nodeId || !nodeType) return;
+
+      if (nodeType === 'folder') {
+        currentParentId = nodeId;
+
+        const url = new URL(window.location.href);
+        if (currentParentId) {
+          url.searchParams.set('parentId', currentParentId);
+        } else {
+          url.searchParams.delete('parentId');
+        }
+        window.history.pushState({ parentId: currentParentId }, '', url.toString());
+
+        loadChildren(currentParentId);
+      } else {
+        openForNode(nodeId, title, nodeType);
+      }
+    });
+  }
+
+  document.addEventListener('click', (ev) => {
+    const target = ev.target as HTMLElement | null;
+    if (!target || !modal) return;
+    if (target.matches('[data-heme-close]') || target === modal) {
+      closeModal();
+    }
+  });
+
+  if (openBtn && sourcesList) {
+    openBtn.addEventListener('click', () => {
+      const selected = sourcesList.querySelector<HTMLInputElement>('input[name="heme-source"]:checked');
+      if (!selected) return;
+      const url = selected.value;
+      if (url) {
+        window.open(url, '_blank', 'noopener,noreferrer');
+      }
+    });
+  }
+
+  window.addEventListener('popstate', () => {
+    const url = new URL(window.location.href);
+    const pid = url.searchParams.get('parentId');
+    currentParentId = pid ?? null;
+    loadChildren(currentParentId);
   });
 </script>

@@ -2,7 +2,7 @@ import { BiMap } from "@lib/bi-map";
 
 
 const mask = (bit: number) => 1 << bit;
-export const namespaces = ["meta", "user", "faq", "weekly_schedule"] as const;
+export const namespaces = ["meta", "user", "faq", "weekly_schedule", "vault"] as const;
 
 export type PermissionNamespace = typeof namespaces[number];
 
@@ -85,23 +85,25 @@ export class Permission {
 }
 
 export class ManagePermission extends Permission {
-    static readonly META_MANAGE_PERMISSIONS = new this(mask(1));
-    static readonly MANAGE_USER = new this(mask(2));
-    static readonly MANAGE_FAQ  = new this(mask(3));
-    static readonly MANAGE_WEEKLY_SCHEDULE = new this(mask(4));
-
+    static readonly META_MANAGE_PERMISSIONS = new this(mask(this.getLastBitSlugMap() + 1));
+    static readonly MANAGE_USER = new this(mask(this.getLastBitSlugMap() + 2));
+    static readonly MANAGE_FAQ  = new this(mask(this.getLastBitSlugMap() + 3));
+    static readonly MANAGE_WEEKLY_SCHEDULE = new this(mask(this.getLastBitSlugMap() + 4));
+    static readonly MANAGE_VAULT = new this(mask(this.getLastBitSlugMap() + 5));
+    
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
         [this.getLastBitSlugMap() + 1, "meta_manage_permissions"],
         [this.getLastBitSlugMap() + 2, "manage_user"],
         [this.getLastBitSlugMap() + 3, "manage_faq"],
         [this.getLastBitSlugMap() + 4, "manage_weekly_schedule"],
+        [this.getLastBitSlugMap() + 5, "manage_vault"],
     ]);
 }
 
 export class UserPermission extends Permission {
-    static readonly READ_USER = new this(mask(1));
-    static readonly ACTIVATE_USER = new this(mask(2));
-    static readonly DEACTIVATE_USER = new this(mask(3));
+    static readonly READ_USER = new this(mask(this.getLastBitSlugMap() + 1));
+    static readonly ACTIVATE_USER = new this(mask(this.getLastBitSlugMap() + 2));
+    static readonly DEACTIVATE_USER = new this(mask(this.getLastBitSlugMap() + 3));
 
     static readonly MANAGE_USER = new this().add(
         this.READ_USER,
@@ -117,11 +119,11 @@ export class UserPermission extends Permission {
 }
 
 export class FAQPermission extends Permission {
-    static readonly READ_FAQ = new this(mask(1));
-    static readonly CREATE_FAQ = new this(mask(2));
-    static readonly DELETE_FAQ = new this(mask(3));
-    static readonly UPDATE_FAQ = new this(mask(4));
-    static readonly RESTORE_FAQ = new this(mask(5));
+    static readonly READ_FAQ = new this(mask(this.getLastBitSlugMap() + 1));
+    static readonly CREATE_FAQ = new this(mask(this.getLastBitSlugMap() + 2));
+    static readonly DELETE_FAQ = new this(mask(this.getLastBitSlugMap() + 3));
+    static readonly UPDATE_FAQ = new this(mask(this.getLastBitSlugMap() + 4));
+    static readonly RESTORE_FAQ = new this(mask(this.getLastBitSlugMap() + 5));
 
     static readonly MANAGE_FAQ = new this().add(
         this.READ_FAQ,
@@ -141,10 +143,10 @@ export class FAQPermission extends Permission {
 }
 
 export class WeeklySchedulePermission extends Permission {
-    static readonly CREATE_WEEKLY_SCHEDULE = new this(mask(1));
-    static readonly DELETE_WEEKLY_SCHEDULE = new this(mask(2));
-    static readonly UPDATE_WEEKLY_SCHEDULE = new this(mask(3));
-    static readonly READ_WEEKLY_SCHEDULE_HISTORY = new this(mask(4));
+    static readonly CREATE_WEEKLY_SCHEDULE = new this(mask(this.getLastBitSlugMap() + 1));
+    static readonly DELETE_WEEKLY_SCHEDULE = new this(mask(this.getLastBitSlugMap() + 2));
+    static readonly UPDATE_WEEKLY_SCHEDULE = new this(mask(this.getLastBitSlugMap() + 3));
+    static readonly READ_WEEKLY_SCHEDULE_HISTORY = new this(mask(this.getLastBitSlugMap() + 4));
 
     static readonly MANAGE_WEEKLY_SCHEDULE = new this().add(
         this.CREATE_WEEKLY_SCHEDULE,
@@ -158,5 +160,23 @@ export class WeeklySchedulePermission extends Permission {
         [this.getLastBitSlugMap() + 2, "delete_weekly_schedule"],
         [this.getLastBitSlugMap() + 3, "update_weekly_schedule"],
         [this.getLastBitSlugMap() + 4, "read_weekly_schedule_history"],
+    ]);
+}
+
+export class VaultPermission extends Permission {
+    static readonly CREATE_NODE = new this(mask(this.getLastBitSlugMap() + 1));
+    static readonly UPDATE_NODE = new this(mask(this.getLastBitSlugMap() + 2));
+    static readonly DELETE_NODE = new this(mask(this.getLastBitSlugMap() + 3));
+
+    static readonly MANAGE_VAULT = new this().add(
+        this.CREATE_NODE,
+        this.UPDATE_NODE,
+        this.DELETE_NODE,
+    );
+
+    protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
+        [this.getLastBitSlugMap() + 1, "create_node"],
+        [this.getLastBitSlugMap() + 2, "update_node"],
+        [this.getLastBitSlugMap() + 3, "delete_node"],
     ]);
 }

@@ -9,6 +9,7 @@ import {
   canManageUserPermissions,
   canManageFaqPermissions,
   canManageWeeklySchedulePermissions,
+  canManageVaultNodes,
   userHasPermission,
   type UserPermissions,
 } from "@store/auth";
@@ -88,7 +89,8 @@ export default function Users() {
     canManagePermissionsMeta.value ||
     canManageUserPermissions.value ||
     canManageFaqPermissions.value ||
-    canManageWeeklySchedulePermissions.value;
+    canManageWeeklySchedulePermissions.value ||
+    canManageVaultNodes.value;
 
   async function openPermissions(u: User) {
     if (!canManageAnyPermissions) return;
@@ -161,6 +163,12 @@ export default function Users() {
       slug: "read_weekly_schedule_history",
       label: "Ver historial de horario semanal",
     },
+  ];
+
+  const vaultPermissionsConfig: { slug: string; label: string }[] = [
+    { slug: "create_node", label: "Crear nodos" },
+    { slug: "update_node", label: "Actualizar nodos" },
+    { slug: "delete_node", label: "Eliminar nodos" },
   ];
 
   function userActions(u: User) {
@@ -246,9 +254,15 @@ export default function Users() {
         const managesPermissions =
           userHasPermission(u, "meta", "meta_manage_permissions") ||
           userHasPermission(u, "meta", "manage_user") ||
-          userHasPermission(u, "meta", "manage_faq");
+          userHasPermission(u, "meta", "manage_faq") ||
+          userHasPermission(u, "meta", "manage_weekly_schedule") ||
+          userHasPermission(u, "meta", "manage_vault");
+        const managesVault =
+          userHasPermission(u, "vault", "create_node") ||
+          userHasPermission(u, "vault", "update_node") ||
+          userHasPermission(u, "vault", "delete_node");
 
-        if (!managesUsers && !managesFaq && !managesPermissions) {
+        if (!managesUsers && !managesFaq && !managesPermissions && !managesVault) {
           return <span class="text-xs text-[var(--text-muted)]">—</span>;
         }
 
@@ -257,6 +271,7 @@ export default function Users() {
             {managesUsers && <Badge variant="admin">Usuarios</Badge>}
             {managesFaq && <Badge variant="admin">FAQ</Badge>}
             {managesPermissions && <Badge variant="root">Permisos</Badge>}
+            {managesVault && <Badge variant="admin">Vault</Badge>}
           </div>
         );
       },
@@ -436,6 +451,37 @@ export default function Users() {
                         onChange={(e) =>
                           togglePermission(
                             "weekly_schedule",
+                            p.slug,
+                            (e.target as HTMLInputElement).checked,
+                          )
+                        }
+                      />
+                      <span>{p.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Bodega</h3>
+              <div class="flex flex-col gap-1">
+                {vaultPermissionsConfig.map((p) => {
+                  const full = `vault.${p.slug}`;
+                  const checked = permissions.vault.includes(full);
+                  const canEdit = canManageVaultNodes.value;
+                  return (
+                    <label
+                      key={p.slug}
+                      class="flex items-center gap-2 text-sm text-[var(--text-secondary)]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={!canEdit}
+                        onChange={(e) =>
+                          togglePermission(
+                            "vault",
                             p.slug,
                             (e.target as HTMLInputElement).checked,
                           )

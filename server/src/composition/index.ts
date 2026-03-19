@@ -15,8 +15,36 @@ import { MongoDbFaqHistoryRepository } from "@infrastructure/FaqHistoryRepositor
 import { MongoDbFileRepository } from "@infrastructure/FileRepository/MongoDb";
 import { MongoDbWeeklyScheduleRepository } from "@infrastructure/WeeklyScheduleRepository/MongoDb";
 import { MongoDbWeeklyScheduleHistoryRepository } from "@infrastructure/WeeklyScheduleHistoryRepository/MongoDb";
+import { MongoDbVaultNodeRepository } from "@infrastructure/VaultRepository/MongoDbVaultNodeRepository";
+import { MongoDbVaultNodeSourceRepository } from "@infrastructure/VaultRepository/MongoDbVaultNodeSourceRepository";
+import { MongoDbVaultNodeTagInfoRepository } from "@infrastructure/VaultRepository/MongoDbVaultNodeTagInfoRepository";
+import { MongoDbVaultNodeTagRepository } from "@infrastructure/VaultRepository/MongoDbVaultNodeTagRepository";
 import { S3Client } from "@aws-sdk/client-s3";
 import { S3Service } from "@infrastructure/S3Service";
+import { VaultService } from "@domain/services/VaultService";
+import type { IVaultUseCases } from "@application/vault/IVaultUseCases";
+import { CreateTagUseCase } from "@application/vault/use-cases/CreateTag";
+import { RenameTagUseCase } from "@application/vault/use-cases/RenameTag";
+import { DeleteTagUseCase } from "@application/vault/use-cases/DeleteTag";
+import { ListTagsUseCase } from "@application/vault/use-cases/ListTags";
+import { FindNodesByTagUseCase } from "@application/vault/use-cases/FindNodesByTag";
+import { FindNodesByTagNameUseCase } from "@application/vault/use-cases/FindNodesByTagName";
+import { CreateFolderUseCase } from "@application/vault/use-cases/CreateFolder";
+import { CreateFileNodeUseCase } from "@application/vault/use-cases/CreateFileNode";
+import { RenameNodeUseCase } from "@application/vault/use-cases/RenameNode";
+import { MoveNodeUseCase } from "@application/vault/use-cases/MoveNode";
+import { DeleteNodeUseCase } from "@application/vault/use-cases/DeleteNode";
+import { GetNodeByParentAndNameUseCase } from "@application/vault/use-cases/GetNodeByParentAndName";
+import { GetChildrenUseCase } from "@application/vault/use-cases/GetChildren";
+import { AddTagToNodeUseCase } from "@application/vault/use-cases/AddTagToNode";
+import { RemoveTagFromNodeUseCase } from "@application/vault/use-cases/RemoveTagFromNode";
+import { GetTagsForNodeUseCase } from "@application/vault/use-cases/GetTagsForNode";
+import { GetSourcesForNodeUseCase } from "@application/vault/use-cases/GetSourcesForNode";
+import { SetThumbnailUseCase } from "@application/vault/use-cases/SetThumbnail";
+import { SetNodePublicUseCase } from "@application/vault/use-cases/SetNodePublic";
+import { AddSourceToNodeUseCase } from "@application/vault/use-cases/AddSourceToNode";
+import { UpdateSourceUseCase } from "@application/vault/use-cases/UpdateSource";
+import { DeleteSourceUseCase } from "@application/vault/use-cases/DeleteSource";
 
 // Use Cases
 import type { IUserUseCases } from "@application/users/IUserUseCases";
@@ -81,6 +109,10 @@ const faqHistoryRepository = new MongoDbFaqHistoryRepository(mongoClient);
 const fileRepository = new MongoDbFileRepository(mongoClient);
 const weeklyScheduleRepository = new MongoDbWeeklyScheduleRepository(mongoClient);
 const weeklyScheduleHistoryRepository = new MongoDbWeeklyScheduleHistoryRepository(mongoClient);
+const vaultNodeRepository = new MongoDbVaultNodeRepository(mongoClient);
+const vaultNodeSourceRepository = new MongoDbVaultNodeSourceRepository(mongoClient);
+const vaultNodeTagInfoRepository = new MongoDbVaultNodeTagInfoRepository(mongoClient);
+const vaultNodeTagRepository = new MongoDbVaultNodeTagRepository(mongoClient);
 
 const s3Region = Bun.env.S3_REGION;
 const s3Bucket = Bun.env.S3_BUCKET;
@@ -111,6 +143,39 @@ const s3SigningClient = new S3Client({
     }
 });
 const mediaService = new S3Service(s3Client, s3SigningClient, s3Bucket, idGenerator);
+const vaultService = new VaultService(
+    vaultNodeRepository,
+    vaultNodeSourceRepository,
+    vaultNodeTagInfoRepository,
+    vaultNodeTagRepository,
+    idGenerator,
+    fileRepository,
+);
+
+export const vaultUseCases: IVaultUseCases = {
+    createTag: new CreateTagUseCase(vaultService, userRepository),
+    renameTag: new RenameTagUseCase(vaultService, userRepository),
+    deleteTag: new DeleteTagUseCase(vaultService, userRepository),
+    listTags: new ListTagsUseCase(vaultService),
+    findNodesByTag: new FindNodesByTagUseCase(vaultService, userRepository),
+    findNodesByTagName: new FindNodesByTagNameUseCase(vaultService, userRepository),
+    createFolder: new CreateFolderUseCase(vaultService, userRepository),
+    createFileNode: new CreateFileNodeUseCase(vaultService, userRepository),
+    renameNode: new RenameNodeUseCase(vaultService, userRepository),
+    moveNode: new MoveNodeUseCase(vaultService, userRepository),
+    deleteNode: new DeleteNodeUseCase(vaultService, userRepository),
+    getNodeByParentAndName: new GetNodeByParentAndNameUseCase(vaultService, userRepository),
+    getChildren: new GetChildrenUseCase(vaultService, userRepository),
+    addTagToNode: new AddTagToNodeUseCase(vaultService, userRepository),
+    removeTagFromNode: new RemoveTagFromNodeUseCase(vaultService, userRepository),
+    getTagsForNode: new GetTagsForNodeUseCase(vaultService, userRepository),
+    getSourcesForNode: new GetSourcesForNodeUseCase(vaultService, userRepository),
+    setThumbnail: new SetThumbnailUseCase(vaultService, userRepository),
+    setNodePublic: new SetNodePublicUseCase(vaultService, userRepository),
+    addSourceToNode: new AddSourceToNodeUseCase(vaultService, userRepository),
+    updateSource: new UpdateSourceUseCase(vaultService, userRepository),
+    deleteSource: new DeleteSourceUseCase(vaultService, userRepository),
+};
 
 export const userUseCases: IUserUseCases = {
     create: new CreateUserUseCase(userRepository, passwordHasher, idGenerator),
@@ -214,7 +279,7 @@ export async function startHttpServer(): Promise<void> {
     await createFastifyServer(
         Number(Bun.env.PORT),
         hostname,
-        { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases },
+        { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases },
     );
 }
 

@@ -1,7 +1,7 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { SecureHasher } from "@domain/services/SecureHasher";
 import type { IdGenerator } from "@domain/services/IdGenerator";
-import { FAQPermission, ManagePermission, UserPermission, WeeklySchedulePermission } from "@domain/value-object/Permissions";
+import { FAQPermission, ManagePermission, UserPermission, VaultPermission, WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { UserEntity } from "@domain/entities/User";
 import { type Result, err, ok } from "@lib/result";
 import type { UserError } from "../errors";
@@ -45,11 +45,13 @@ export class CreateRootUseCase {
             ManagePermission.MANAGE_USER,
             ManagePermission.MANAGE_FAQ,
             ManagePermission.MANAGE_WEEKLY_SCHEDULE,
+            ManagePermission.MANAGE_VAULT,
         );
         
         user.permissions.user = new UserPermission().add(UserPermission.MANAGE_USER);
         user.permissions.faq = new FAQPermission().add(FAQPermission.MANAGE_FAQ);
         user.permissions.weekly_schedule = new WeeklySchedulePermission().add(WeeklySchedulePermission.MANAGE_WEEKLY_SCHEDULE);
+        user.permissions.vault = new VaultPermission().add(VaultPermission.MANAGE_VAULT);
 
         try {
             await this.userRepository.save(user);

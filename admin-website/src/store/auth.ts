@@ -2,13 +2,14 @@ import { signal, computed } from "@preact/signals";
 import { api } from "@utils";
 import { route } from "preact-router";
 
-export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule";
+export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule" | "vault";
 
 export interface UserPermissions {
   readonly meta: string[];
   readonly user: string[];
   readonly faq: string[];
   readonly weekly_schedule: string[];
+  readonly vault: string[];
 }
 
 export interface User {
@@ -42,6 +43,7 @@ export function hasPermission(namespace: PermissionNamespace, permission: string
     case "user": return userHasPermission(user.value, "meta", "manage_user");
     case "faq": return userHasPermission(user.value, "meta", "manage_faq");
     case "weekly_schedule": return userHasPermission(user.value, "meta", "manage_weekly_schedule");
+    case "vault": return userHasPermission(user.value, "meta", "manage_vault");
   }
 
   return false;
@@ -81,6 +83,18 @@ export const canManageUserPermissions = computed(() => hasPermission("meta", "ma
 export const canManageFaqPermissions = computed(() => hasPermission("meta", "manage_faq"));
 export const canManageWeeklySchedulePermissions = computed(() =>
   hasPermission("meta", "manage_weekly_schedule"),
+);
+
+export const canReadVault = computed(() =>
+  hasPermission("vault", "create_node") ||
+  hasPermission("vault", "update_node") ||
+  hasPermission("vault", "delete_node"),
+);
+
+export const canManageVaultNodes = computed(() =>
+  hasPermission("vault", "create_node") ||
+  hasPermission("vault", "update_node") ||
+  hasPermission("vault", "delete_node"),
 );
 
 export const isRootDerived = computed(
