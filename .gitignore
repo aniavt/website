@@ -2,6 +2,7 @@ data/
 .env
 node_modules/
 __pycache__/
+backup/
 
 
 # build output
