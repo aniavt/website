@@ -151,7 +151,10 @@ export default function Faq() {
               <span class="line-clamp-2">{item.query}</span>
             </button>
             {isExpanded && (
-              <div class="ml-5 rounded-md bg-[var(--bg-tertiary)] px-3 py-2 text-xs text-[var(--text-secondary)] border border-[var(--border-subtle)]">
+              <div
+                class="mt-2 rounded-lg bg-[var(--bg-tertiary)] px-4 py-3 text-sm leading-relaxed text-[var(--text-secondary)] border border-[var(--border-subtle)]"
+                style={{ whiteSpace: "pre-line" }}
+              >
                 {item.answer}
               </div>
             )}

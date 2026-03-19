@@ -4,6 +4,7 @@ import {
   canReadUsers,
   canManageFaqRead,
   canReadWeeklySchedule,
+  canReadVault,
 } from "@store/auth";
 
 interface NavItem {
@@ -20,6 +21,7 @@ export default function Sidebar() {
       href: "/admin/weekly-schedule",
       visible: canReadWeeklySchedule.value,
     },
+    { label: "Bodega", href: "/admin/vault", visible: canReadVault.value },
     { label: "Usuarios", href: "/admin/users", visible: canReadUsers.value },
     { label: "Perfil", href: "/admin/profile", visible: true },
   ];

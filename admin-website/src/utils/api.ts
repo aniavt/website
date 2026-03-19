@@ -110,6 +110,289 @@ export async function updateWeeklySchedule(
   return api.patch<WeeklyScheduleDto>(`/weekly-schedule/${id}`, input);
 }
 
+// Vault
+
+export type VaultNodeType = "file" | "folder";
+
+export interface VaultNodeDto {
+  readonly id: string;
+  readonly parentId: string | null;
+  readonly name: string;
+  readonly type: VaultNodeType;
+  readonly createdAt: string;
+  readonly thumbnailId: string | null;
+  readonly isPublic: boolean;
+}
+
+export interface VaultTagDto {
+  readonly id: string;
+  readonly name: string;
+}
+
+export interface VaultNodeSourceDto {
+  readonly id: string;
+  readonly nodeId: string;
+  readonly type: "external" | "internal";
+  readonly server: string | null;
+  readonly url: string;
+  readonly createdAt: string;
+}
+
+export async function listVaultChildren(
+  parentId: string | null,
+): Promise<VaultNodeDto[]> {
+  const params = new URLSearchParams();
+  if (parentId !== null) params.set("parentId", parentId);
+  const query = params.toString();
+  return api.get<VaultNodeDto[]>(`/vault/children${query ? `?${query}` : ""}`);
+}
+
+export async function getVaultNodeByParentAndName(
+  parentId: string | null,
+  name: string,
+): Promise<VaultNodeDto | null> {
+  const params = new URLSearchParams();
+  if (parentId !== null) params.set("parentId", parentId);
+  params.set("name", name);
+  const query = params.toString();
+  return api.get<VaultNodeDto | null>(`/vault/node-by-name?${query}`);
+}
+
+export interface CreateVaultFolderInput {
+  parentId: string | null;
+  name: string;
+  isPublic?: boolean;
+}
+
+export async function createVaultFolder(
+  input: CreateVaultFolderInput,
+): Promise<VaultNodeDto> {
+  return api.post<VaultNodeDto>("/vault/folders", input);
+}
+
+export interface CreateVaultFileNodeInput {
+  parentId: string | null;
+  name: string;
+  sourceType: "external" | "internal";
+  server: string | null;
+  urlOrFileId?: string;
+  file?: File;
+  isPublic?: boolean;
+}
+
+export async function createVaultFileNode(
+  input: CreateVaultFileNodeInput,
+): Promise<{ node: VaultNodeDto; source: VaultNodeSourceDto }> {
+  if (input.sourceType === "internal" && input.file) {
+    const formData = new FormData();
+    formData.set("name", input.name);
+    if (input.parentId !== null) {
+      formData.set("parentId", input.parentId);
+    }
+    if (input.server !== null) {
+      formData.set("server", input.server);
+    }
+    formData.set("sourceType", input.sourceType);
+    if (input.isPublic !== undefined) {
+      formData.set("isPublic", String(input.isPublic));
+    }
+    formData.set("file", input.file);
+
+    const res = await fetch(`${apiUrl}/vault/files`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "unknown_error" }));
+      throw new ApiError(res.status, data.error ?? "unknown_error");
+    }
+
+    return res.json() as Promise<{ node: VaultNodeDto; source: VaultNodeSourceDto }>;
+  }
+
+  return api.post<{ node: VaultNodeDto; source: VaultNodeSourceDto }>(
+    "/vault/files",
+    input,
+  );
+}
+
+export async function deleteVaultNode(id: string): Promise<void> {
+  await api.delete<undefined>(`/vault/node/${id}`);
+}
+
+export interface MoveVaultNodeInput {
+  nodeId: string;
+  newParentId: string | null;
+}
+
+export async function moveVaultNode(input: MoveVaultNodeInput): Promise<VaultNodeDto> {
+  return api.post<VaultNodeDto>("/vault/node/move", input);
+}
+
+export async function renameVaultNode(
+  nodeId: string,
+  newName: string,
+): Promise<VaultNodeDto> {
+  return api.post<VaultNodeDto>("/vault/node/rename", { nodeId, newName });
+}
+
+export async function setVaultNodePublic(
+  nodeId: string,
+  isPublic: boolean,
+): Promise<VaultNodeDto> {
+  return api.post<VaultNodeDto>("/vault/node/public", { nodeId, isPublic });
+}
+
+export async function setVaultThumbnail(
+  nodeId: string,
+  thumbnailFileId: string | null,
+): Promise<VaultNodeDto> {
+  return api.post<VaultNodeDto>("/vault/node/thumbnail", { nodeId, thumbnailFileId });
+}
+
+export async function listVaultTags(): Promise<VaultTagDto[]> {
+  return api.get<VaultTagDto[]>("/vault/tags");
+}
+
+export async function createVaultTag(name: string): Promise<VaultTagDto> {
+  return api.post<VaultTagDto>("/vault/tags", { name });
+}
+
+export async function renameVaultTag(
+  tagId: string,
+  newName: string,
+): Promise<VaultTagDto> {
+  return api.patch<VaultTagDto>(`/vault/tags/${tagId}`, { name: newName });
+}
+
+export async function deleteVaultTag(tagId: string): Promise<void> {
+  await api.delete<undefined>(`/vault/tags/${tagId}`);
+}
+
+export async function findVaultNodesByTagId(tagId: string): Promise<VaultNodeDto[]> {
+  const params = new URLSearchParams();
+  params.set("tagId", tagId);
+  const query = params.toString();
+  return api.get<VaultNodeDto[]>(`/vault/nodes?${query}`);
+}
+
+export async function findVaultNodesByTagName(
+  tagName: string,
+): Promise<VaultNodeDto[]> {
+  const params = new URLSearchParams();
+  params.set("tagName", tagName);
+  const query = params.toString();
+  return api.get<VaultNodeDto[]>(`/vault/nodes?${query}`);
+}
+
+export async function addTagToVaultNode(
+  nodeId: string,
+  tagId: string,
+): Promise<void> {
+  await api.post<undefined>("/vault/node/tag/add", { nodeId, tagId });
+}
+
+export async function removeTagFromVaultNode(
+  nodeId: string,
+  tagId: string,
+): Promise<void> {
+  await api.post<undefined>("/vault/node/tag/remove", { nodeId, tagId });
+}
+
+export async function getVaultTagsForNode(
+  nodeId: string,
+): Promise<VaultTagDto[]> {
+  return api.get<VaultTagDto[]>(`/vault/node/${nodeId}/tags`);
+}
+
+export async function getVaultSourcesForNode(
+  nodeId: string,
+): Promise<VaultNodeSourceDto[]> {
+  return api.get<VaultNodeSourceDto[]>(`/vault/node/${nodeId}/sources`);
+}
+
+export interface AddVaultSourceToNodeInput {
+  type: "external" | "internal";
+  server: string | null;
+  urlOrFileId?: string;
+  file?: File;
+}
+
+export interface UpdateVaultSourceInput {
+  type?: "external" | "internal";
+  server?: string | null;
+  urlOrFileId?: string;
+}
+
+export async function addVaultSourceToNode(
+  nodeId: string,
+  input: AddVaultSourceToNodeInput,
+): Promise<VaultNodeSourceDto> {
+  if (input.type === "internal" && input.file) {
+    const formData = new FormData();
+    formData.set("type", input.type);
+    if (input.server !== null) {
+      formData.set("server", input.server);
+    }
+    formData.set("file", input.file);
+
+    const res = await fetch(`${apiUrl}/vault/node/${nodeId}/sources`, {
+      method: "POST",
+      credentials: "include",
+      body: formData,
+    });
+
+    if (!res.ok) {
+      const data = await res.json().catch(() => ({ error: "unknown_error" }));
+      throw new ApiError(res.status, data.error ?? "unknown_error");
+    }
+
+    return res.json() as Promise<VaultNodeSourceDto>;
+  }
+
+  return api.post<VaultNodeSourceDto>(`/vault/node/${nodeId}/sources`, input);
+}
+
+export async function updateVaultSource(
+  sourceId: string,
+  input: UpdateVaultSourceInput,
+): Promise<VaultNodeSourceDto> {
+  return api.patch<VaultNodeSourceDto>(`/vault/sources/${sourceId}`, input);
+}
+
+export async function deleteVaultSource(sourceId: string): Promise<void> {
+  await api.delete<undefined>(`/vault/sources/${sourceId}`);
+}
+
+export interface UploadMediaResult {
+  readonly id: string;
+  readonly name: string;
+  readonly contentType: string;
+  readonly size: number;
+  readonly url: string;
+  readonly isPrivate: boolean;
+}
+
+export async function uploadMediaFile(file: File): Promise<UploadMediaResult> {
+  const formData = new FormData();
+  formData.set("file", file);
+
+  const res = await fetch(`${apiUrl}/media/upload`, {
+    method: "POST",
+    credentials: "include",
+    body: formData,
+  });
+
+  if (!res.ok) {
+    const data = await res.json().catch(() => ({ error: "unknown_error" }));
+    throw new ApiError(res.status, data.error ?? "unknown_error");
+  }
+
+  return res.json() as Promise<UploadMediaResult>;
+}
+
 interface UploadWeeklyScheduleInput {
   week: number;
   year: number;

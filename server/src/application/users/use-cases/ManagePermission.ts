@@ -6,6 +6,7 @@ import {
     type PermissionNamespace,
     UserPermission,
     WeeklySchedulePermission,
+    VaultPermission,
     type Permission,
 } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
@@ -46,6 +47,7 @@ export class ManagePermissionUseCase {
                 case "user": return UserPermission;
                 case "faq":  return FAQPermission;
                 case "weekly_schedule": return WeeklySchedulePermission;
+                case "vault": return VaultPermission;
             }
             return "permission_invalid_namespace";
         })();
@@ -77,6 +79,10 @@ export class ManagePermissionUseCase {
                 break;
             case "weekly_schedule":
                 if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_WEEKLY_SCHEDULE }))
+                    return err("permission_not_authorized");
+                break;
+            case "vault":
+                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_VAULT }))
                     return err("permission_not_authorized");
                 break;
         }

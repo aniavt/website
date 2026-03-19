@@ -2,6 +2,7 @@ import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
+import type { IVaultUseCases } from "@application/vault/IVaultUseCases";
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
@@ -11,6 +12,7 @@ import { registerUserRoutes } from "./routes/user";
 import { registerFaqRoutes } from "./routes/faq";
 import { registerWeeklyScheduleRoutes } from "./routes/weekly_schedule";
 import { registerMediaRoutes } from "./routes/media";
+import { registerVaultRoutes } from "./routes/vault";
 
 
 export interface FastifyServerDependencies {
@@ -18,6 +20,7 @@ export interface FastifyServerDependencies {
     faqUseCases: IFaqUseCases;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
     mediaUseCases: IMediaUseCases;
+    vaultUseCases: IVaultUseCases;
 }
 
 export async function createFastifyServer(
@@ -25,7 +28,7 @@ export async function createFastifyServer(
     listenHostname: string,
     deps: FastifyServerDependencies
 ): Promise<void> {
-    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases } = deps;
+    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases } = deps;
     const app = Fastify();
     const prefixUrl = (path: string) => path === "/" ? "" : path;
 
@@ -53,6 +56,7 @@ export async function createFastifyServer(
     registerFaqRoutes(app, prefixUrl, { userUseCases, faqUseCases });
     registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, weeklyScheduleUseCases, mediaUseCases });
     registerMediaRoutes(app, prefixUrl, { mediaUseCases });
+    registerVaultRoutes(app, prefixUrl, { userUseCases, vaultUseCases, mediaUseCases });
 
     await app.listen({ port: listenPort, host: listenHostname }).then(() => {
         console.log(`Server is running on port ${listenPort}`);

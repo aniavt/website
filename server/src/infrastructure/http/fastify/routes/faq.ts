@@ -3,7 +3,7 @@ import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
 import type { RegisterRouteFn } from "../types";
 import type { FaqError } from "@application/faq/errors";
-import { authenticate } from "../middlewares/auth";
+import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 
 export interface FaqRoutesDependencies {
     userUseCases: IUserUseCases;
@@ -84,12 +84,19 @@ export const registerFaqRoutes: RegisterRouteFn<FaqRoutesDependencies> = (app, p
         return reply.send(result.data);
     });
 
-    app.get<{ Querystring: { activeOnly?: string } }>(prefixUrl("/faq"), async (request, reply) => {
-        const activeOnly = request.query.activeOnly === "true";
-        const result = await faqUseCases.listFaqItems.execute({ activeOnly });
-        if (result.isError()) return sendFaqError(reply, result.error);
-        return reply.send(result.data);
-    });
+    app.get<{ Querystring: { activeOnly?: string } }>(
+        prefixUrl("/faq"),
+        { preHandler: optionalAuthenticate(userUseCases) },
+        async (request, reply) => {
+            const activeOnly = request.query.activeOnly === "true";
+            const requesterId = request.user?.id ?? null;
+            const result = !activeOnly
+                ? await faqUseCases.listFaqItems.execute(requesterId, { activeOnly })
+                : await faqUseCases.listFaqItems.execute(null, { activeOnly });
+            if (result.isError()) return sendFaqError(reply, result.error);
+            return reply.send(result.data);
+        },
+    );
 
     app.get<{ Params: { id: string } }>(prefixUrl("/faq/:id"), async (request, reply) => {
         const result = await faqUseCases.getFaqItem.execute(request.params.id);

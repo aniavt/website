@@ -1,7 +1,9 @@
 ---
 // src/pages/faq.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { faq } from '../data/config';
+import { getFaqs, type FaqItemPublicDto } from '../lib/api';
+
+const faqs: FaqItemPublicDto[] = await getFaqs();
 ---
 
 <BaseLayout title="FAQ & Staff — Ania Starlight">
@@ -15,13 +17,13 @@ import { faq } from '../data/config';
         <div>
           <h3 class="sub-heading">PREGUNTAS FRECUENTES</h3>
           <div class="faq-list" id="faqList">
-            {faq.map((item, i) => (
+            {faqs.map((item, i) => (
               <div class="faq-item" id={`faq-${i}`}>
                 <div class="faq-q" data-index={i}>
-                  <span>{item.q}</span>
+                  <span>{item.query}</span>
                   <span class="arrow">+</span>
                 </div>
-                <div class="faq-a">{item.a}</div>
+                <div class="faq-a">{item.answer}</div>
               </div>
             ))}
           </div>

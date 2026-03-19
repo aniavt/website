@@ -13,7 +13,7 @@ import Faq from "@pages/Faq";
 import Users from "@pages/Users";
 import Profile from "@pages/Profile";
 import WeeklySchedule from "@pages/WeeklySchedule";
-
+import Vault from "@pages/Vault";
 
 // Show vite.config.ts base path
 const basePath = (path: string) => `/admin${path === "/" ? "" : path}`;
@@ -94,7 +94,21 @@ export default function App() {
         component={() => (
           <PermissionGuard
             component={WeeklySchedule}
-            required={[{ namespace: "weekly_schedule", permission: "read_weekly_schedule_history" }]}
+            required={[
+              {
+                namespace: "weekly_schedule",
+                permission: "read_weekly_schedule_history",
+              },
+            ]}
+          />
+        )}
+      />
+      <Route
+        path={basePath("/vault")}
+        component={() => (
+          <PermissionGuard
+            component={Vault}
+            required={[{ namespace: "vault", permission: "create_node" }]}
           />
         )}
       />

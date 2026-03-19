@@ -5,6 +5,7 @@ import {
     UserPermission,
     FAQPermission,
     WeeklySchedulePermission,
+    VaultPermission,
 } from "@domain/value-object/Permissions";
 
 
@@ -26,6 +27,7 @@ type PermissionType =
     | { type: "user", permission: UserPermission }
     | { type: "faq", permission: FAQPermission }
     | { type: "weekly_schedule", permission: WeeklySchedulePermission }
+    | { type: "vault", permission: VaultPermission }
 
 export class UserEntity {
     readonly id: string;
@@ -64,6 +66,7 @@ export class UserEntity {
                 user: UserPermission.fromValue(Permission.NONE.valueOf()),
                 faq: FAQPermission.fromValue(Permission.NONE.valueOf()),
                 weekly_schedule: WeeklySchedulePermission.fromValue(Permission.NONE.valueOf()),
+                vault: VaultPermission.fromValue(Permission.NONE.valueOf()),
             }
         });
 
@@ -84,6 +87,7 @@ export class UserEntity {
                 user: UserPermission.fromValue(props.permissions.user),
                 faq: FAQPermission.fromValue(props.permissions.faq),
                 weekly_schedule: WeeklySchedulePermission.fromValue(props.permissions.weekly_schedule ?? Permission.NONE.valueOf()),
+                vault: VaultPermission.fromValue(props.permissions.vault ?? Permission.NONE.valueOf()),
             }
         });
     }
@@ -123,6 +127,7 @@ export class UserEntity {
             case "user": return this.permissions.meta.has(ManagePermission.MANAGE_USER);
             case "faq": return this.permissions.meta.has(ManagePermission.MANAGE_FAQ);
             case "weekly_schedule": return this.permissions.meta.has(ManagePermission.MANAGE_WEEKLY_SCHEDULE);
+            case "vault": return this.permissions.meta.has(ManagePermission.MANAGE_VAULT);
         }
         return false;
     }

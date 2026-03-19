@@ -1,33 +1,6 @@
 // src/data/config.ts
 // ✏️  EDITAR ESTE ARCHIVO para la configuración general del sitio
 
-// ── Preguntas frecuentes ──────────────────────────────
-export const faq = [
-  {
-    q: '¿Cuándo son los streams de Ania?',
-    a: 'Los streams son Lunes (Noche de Momazos), Martes (Reacciones & Animes) y Miércoles (Clips del Mes). Revisa el Calendario para los horarios exactos por país.',
-  },
-  {
-    q: '¿Dónde puedo ver las reacciones guardadas?',
-    a: 'Todas las reacciones archivadas están en la sección Hemeroteca. Cada tarjeta abre el video correspondiente o redirige al Drive.',
-  },
-  {
-    q: '¿Qué es el apartado de Manga?',
-    a: 'Es un proyecto de Xtremo + Ania donde podrás leer manga con OSTs configurables por capítulo. Está en desarrollo, ¡pronto disponible!',
-  },
-  {
-    q: '¿Cómo puedo sugerir un anime para ver?',
-    a: 'Déjanos un comentario en la sección FAQ & Staff o escríbenos en el Discord de la comunidad. ¡Leemos todo!',
-  },
-  {
-    q: '¿Quiénes manejan la página?',
-    a: 'La página es gestionada por el staff de Ania Starlight (Xtremo + Ania). Si ves algo roto o quieres sugerir algo, ¡avísanos!',
-  },
-  {
-    q: '¿La Hemeroteca tendrá contraseña?',
-    a: 'Sí, en el futuro algunas secciones de la Hemeroteca tendrán acceso exclusivo para la comunidad. Por ahora todo es libre.',
-  },
-];
 
 // ── Horario de streams ────────────────────────────────
 export type StreamDay = {
