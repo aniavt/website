@@ -5,6 +5,8 @@ services:
       dockerfile: docker/server/Dockerfile.dev
     container_name: ania_server_dev
     image: ania_server:dev
+    env_file:
+      - .env
     volumes:
       - ../server:/app
 
@@ -16,6 +18,7 @@ services:
     image: ania_web_admin:dev
     volumes:
       - ../admin-website:/app
+      - /app/node_modules
     environment:
       - NODE_ENV=development
       - VITE_API_NODE_ENV=development
