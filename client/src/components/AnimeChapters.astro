@@ -1,0 +1,101 @@
+---
+import type { ChapterDto } from "@/lib/anime";
+import AnimeChapter from "@/components/AnimeChapter.astro";
+
+interface Props {
+    chapters: ChapterDto[];
+    animeTitle: string;
+}
+
+const { chapters, animeTitle } = Astro.props as Props;
+---
+
+<section class="episodes-section">
+    <div class="container">
+        <h2 class="ep-section-title">
+            <span class="ep-title-bar"></span>
+            EPISODIOS
+        </h2>
+
+        {
+            chapters.length > 0 ? (
+                <div class="ep-grid">
+                    {chapters.map((chapter) => (
+                        <AnimeChapter
+                            chapter={chapter}
+                            animeTitle={animeTitle}
+                        />
+                    ))}
+                </div>
+            ) : (
+                <div class="no-episodes">
+                    <span>⏳</span>
+                    <p>Próximamente — aún no hay episodios disponibles.</p>
+                </div>
+            )
+        }
+    </div>
+</section>
+
+<style>
+    /* ── Episodes ── */
+
+    @media (max-width: 700px) {
+        .ep-grid {
+            grid-template-columns: 1fr;
+        }
+    }
+
+    .episodes-section {
+        padding: 48px 0 80px;
+    }
+    .ep-section-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 1rem;
+        font-weight: 900;
+        letter-spacing: 0.2em;
+        color: #fff;
+        display: flex;
+        align-items: center;
+        gap: 14px;
+        margin-bottom: 28px;
+    }
+    .ep-title-bar {
+        display: block;
+        width: 4px;
+        height: 24px;
+        border-radius: 2px;
+        background: linear-gradient(var(--cyan), var(--pink));
+    }
+
+    .ep-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+        gap: 16px;
+    }
+
+    .ep-duration {
+        position: absolute;
+        bottom: 8px;
+        right: 10px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.6rem;
+        background: rgba(4, 6, 14, 0.8);
+        padding: 3px 8px;
+        border-radius: 4px;
+        color: #fff;
+    }
+
+    .no-episodes {
+        display: flex;
+        flex-direction: column;
+        align-items: center;
+        gap: 16px;
+        padding: 60px 0;
+        color: var(--text-dim);
+        text-align: center;
+    }
+    .no-episodes span {
+        font-size: 3rem;
+    }
+</style>

@@ -12,4 +12,13 @@ export default defineConfig({
   experimental: {
     clientPrerender: true,
   },
+  vite: {
+    resolve: {
+      alias: {
+        "@layouts": "/src/layouts",
+        "@components": "/src/components",
+        "@lib": "/src/lib",
+      },
+    },
+  },
 });

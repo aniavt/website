@@ -41,5 +41,26 @@ export {
   updateVaultSource,
   deleteVaultSource,
   uploadMediaFile,
+  // Anime
+  type AnimeDto,
+  type AnimeLastAction,
+  type AnimeStatus,
+  type CreateAnimeInput,
+  type UpdateAnimeInput,
+  listAnimes,
+  getAnimeById,
+  createAnime,
+  updateAnime,
+  deleteAnime,
+  restoreAnime,
+  // Chapter
+  type ChapterDto,
+  type CreateChapterInput,
+  type UpdateChapterInput,
+  listChaptersByAnime,
+  createChapter,
+  updateChapter,
+  deleteChapter,
 } from "./api";
 export { t } from "./i18n";
+
