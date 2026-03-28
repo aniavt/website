@@ -597,8 +597,10 @@ function getDriveEmbed(url: string): string {
     document.getElementById('cdMins').textContent  = pad(Math.floor((diff % 3600000) / 60000));
     document.getElementById('cdSecs').textContent  = pad(Math.floor((diff % 60000) / 1000));
   }
-
+  let revealed = false;
   function reveal() {
+    if(revealed) return;
+    revealed = true;
     clearInterval(timer);
     countdownScreen.style.display = 'none';
     bdayContent.style.display = 'block';
@@ -636,8 +638,9 @@ function getDriveEmbed(url: string): string {
     });
   }
 
+  let timer = null;
   tick();
-  const timer = setInterval(tick, 1000);
+  timer = setInterval(tick, 1000);
   document.getElementById('cdUnlockBtn').addEventListener('click', reveal);
 
   spawnStars('cntStars');

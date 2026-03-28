@@ -53,7 +53,7 @@ export const socials = {
   youtube:    'https://youtube.com/@AniaStarLightVT',
   instagram:  'https://instagram.com/aniastarlightvt',
   tiktok:     'https://tiktok.com/@aniastarlightvt',
-  discord:    'https://discord.gg/INVITE',
+  discord:    'https://discord.com/invite/WmHv3F43p2',
   throne :    'https://throne.com/aniastarlight',
   streamlabs: 'https://streamlabs.com/aniastarlight/tip'
 };
