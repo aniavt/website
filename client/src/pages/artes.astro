@@ -1,0 +1,731 @@
+---
+// src/pages/artes.astro
+import BaseLayout from "../layouts/BaseLayout.astro";
+
+export type Arte = {
+  src: string;
+  artista: string; // nick del artista
+  prize?: "🥇" | "🥈" | "🥉" | null;
+};
+
+function limpiarNombre(path: string): string {
+  const nombre = path.split('/').pop()?.split('.')[0] ?? 'Artista';
+
+  const match = nombre.match(/@\w+/);
+  return match ? match[0] : nombre;
+}
+
+const allFiles = import.meta.glob("/public/images/artes/*", { eager: true });
+
+const imageExtensions = [".png", ".jpg", ".jpeg", ".webp", ".gif", ".avif"];
+const videoExtensions = [".mp4", ".webm", ".mov", ".m4v"];
+
+const allPaths = Object.keys(allFiles);
+
+const imagenes = allPaths
+  .filter((path) =>
+    imageExtensions.some((ext) => path.toLowerCase().endsWith(ext)),
+  )
+  .map((path) => ({
+    src: path.replace("/public", ""),
+    artista: limpiarNombre(path),
+    tipo: "imagen" as const,
+  }));
+
+const videos = allPaths
+  .filter((path) =>
+    videoExtensions.some((ext) => path.toLowerCase().endsWith(ext)),
+  )
+  .map((path) => ({
+    src: path.replace("/public", ""),
+    artista: limpiarNombre(path),
+    tipo: "video" as const,
+  }));
+
+const ARTES = [...imagenes, ...videos].sort((a, b) =>
+  a.src.localeCompare(b.src),
+);
+---
+
+<BaseLayout title="Galería de Artes — Ania Starlight">
+  <div class="artes-page">
+    <!-- Fondo -->
+    <div class="artes-bg"></div>
+
+    <!-- ── HERO ── -->
+    <section class="artes-hero">
+      <div class="container">
+        <div class="artes-eyebrow">
+          <span class="star">✦</span> Concurso de arte <span class="star"
+            >✦</span
+          >
+        </div>
+        <h1 class="artes-title">
+          <span class="line-white">Galería de</span>
+          <span class="line-gradient">Artes</span>
+        </h1>
+        <p class="artes-desc">
+          Arte creado por la comunidad de Ania Starlight. Gracias a todos los
+          artistas que participaron. 💜
+        </p>
+        <div class="artes-count" id="artesCount">
+          <span class="count-num">{ARTES.length}</span>
+          <span class="count-lbl">obras</span>
+        </div>
+      </div>
+    </section>
+
+    <section class="section-pad">
+      <div class="container">
+        {
+          ARTES.length > 0 ? (
+            <div class="masonry-grid" id="masonryGrid">
+              {ARTES.map((arte, i) => (
+                <div
+                  class={`masonry-item`}
+                  data-embed={arte.src}
+                  data-artista={arte.artista}
+                  data-tipo={arte.tipo}
+                  style={`animation-delay:${i * 0.05}s`}
+                >
+                  <div class="masonry-thumb">
+                    {arte.tipo === "video" ? (
+                      <>
+                        <video
+                          class="masonry-video"
+                          muted
+                          loop
+                          playsinline
+                          preload="auto"
+                          src={arte.src}
+                          onmouseenter="this.play()"
+                          onmouseleave="this.pause();this.currentTime=0"
+                        />
+                        <div class="video-badge">▶</div>
+                      </>
+                    ) : (
+                      <img
+                        src={arte.src}
+                        alt={`Arte de ${arte.artista}`}
+                        loading="lazy"
+                        onerror="this.style.display='none';this.nextElementSibling.style.display='flex'"
+                      />
+                    )}
+                    <div class="img-fallback" style="display:none">
+                      🎨
+                    </div>
+                    <div class="masonry-overlay">
+                      <div class="overlay-play">
+                        <svg
+                          width="20"
+                          height="20"
+                          viewBox="0 0 24 24"
+                          fill="none"
+                          stroke="white"
+                          stroke-width="2"
+                        >
+                          <circle cx="11" cy="11" r="8" />
+                          <path d="m21 21-4.35-4.35" />
+                        </svg>
+                      </div>
+                    </div>
+                  </div>
+                  <div class="masonry-info">
+                    <a
+                      href={`https://twitter.com/${arte.artista}`}
+                      target="_blank"
+                      rel="noopener"
+                      class="masonry-artista"
+                      onclick="event.stopPropagation()"
+                    >
+                      <svg
+                        width="13"
+                        height="13"
+                        viewBox="0 0 24 24"
+                        fill="currentColor"
+                      >
+                        <path d="M18.244 2.25h3.308l-7.227 8.26 8.502 11.24H16.17l-5.214-6.817L4.99 21.75H1.68l7.73-8.835L1.254 2.25H8.08l4.713 6.231zm-1.161 17.52h1.833L7.084 4.126H5.117z" />
+                      </svg>
+                      {arte.artista}
+                    </a>
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : (
+            <div class="empty-state">
+              <span class="empty-icon">🎨</span>
+              <h3 class="empty-title">Próximamente</h3>
+              <p class="empty-desc">
+                Los artes del concurso se revelarán aquí muy pronto.
+                <br />
+                ¡Gracias por la paciencia! ✦˚‧
+              </p>
+              <p class="empty-hint">
+                ✏️ Staff: agrega los artes en el array <code>ARTES</code> de
+                este archivo.
+              </p>
+            </div>
+          )
+        }
+      </div>
+    </section>
+
+    <div class="arte-modal" id="arteModal">
+      <div class="arte-modal-box">
+        <div class="arte-modal-header">
+          <div class="arte-modal-meta">
+            <span class="arte-modal-prize" id="modalPrize"></span>
+            <div>
+              <div class="arte-modal-artista" id="modalArtista"></div>
+              <div class="arte-modal-titulo" id="modalTitulo"></div>
+            </div>
+          </div>
+          <button class="arte-modal-close" id="arteModalClose">✕</button>
+        </div>
+        <div class="arte-modal-body">
+          <img id="arteModalImg" src="" alt="Arte" style="display:none" />
+          <video
+            id="arteModalVideo"
+            src=""
+            controls
+            style="display:none;width:100%;height:100%;object-fit:contain;"
+          ></video>
+        </div>
+      </div>
+    </div>
+  </div>
+</BaseLayout>
+
+<style>
+  .artes-page {
+    min-height: 100vh;
+    padding-top: var(--nav-h);
+    position: relative;
+    overflow-x: hidden;
+  }
+  .artes-bg {
+    position: fixed;
+    inset: 0;
+    z-index: 0;
+    pointer-events: none;
+    background:
+      radial-gradient(
+        ellipse 60% 50% at 85% 15%,
+        rgba(212, 0, 255, 0.08) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 50% 40% at 10% 85%,
+        rgba(0, 245, 255, 0.06) 0%,
+        transparent 50%
+      ),
+      radial-gradient(
+        ellipse 40% 40% at 50% 50%,
+        rgba(255, 45, 138, 0.04) 0%,
+        transparent 50%
+      );
+  }
+
+  /* ── Hero ── */
+  .artes-hero {
+    position: relative;
+    z-index: 2;
+    padding: 80px 0 60px;
+    text-align: center;
+    border-bottom: 1px solid rgba(0, 245, 255, 0.1);
+  }
+  .artes-eyebrow {
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.72rem;
+    letter-spacing: 0.28em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+  .star {
+    color: var(--pink);
+    animation: spin-slow 6s linear infinite;
+    display: inline-block;
+  }
+  @keyframes spin-slow {
+    to {
+      transform: rotate(360deg);
+    }
+  }
+
+  .artes-title {
+    font-family: "Orbitron", sans-serif;
+    font-weight: 900;
+    line-height: 1;
+    margin-bottom: 20px;
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    animation: fade-up 0.8s ease both;
+  }
+  @keyframes fade-up {
+    from {
+      opacity: 0;
+      transform: translateY(30px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+  .line-white {
+    font-size: clamp(2rem, 5vw, 3.5rem);
+    color: #fff;
+  }
+  .line-gradient {
+    font-size: clamp(3.5rem, 9vw, 7rem);
+    background: linear-gradient(90deg, var(--cyan), var(--magenta));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 25px rgba(0, 245, 255, 0.3));
+  }
+  .artes-desc {
+    font-size: 1rem;
+    color: var(--text-dim);
+    line-height: 1.7;
+    margin-bottom: 28px;
+  }
+  .artes-count {
+    display: inline-flex;
+    align-items: baseline;
+    gap: 8px;
+    background: rgba(0, 245, 255, 0.06);
+    border: 1px solid rgba(0, 245, 255, 0.2);
+    border-radius: 30px;
+    padding: 8px 20px;
+  }
+  .count-num {
+    font-family: "Orbitron", sans-serif;
+    font-size: 1.4rem;
+    font-weight: 900;
+    color: #fff;
+  }
+  .count-lbl {
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.65rem;
+    letter-spacing: 0.15em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
+
+  /* ── Masonry grid ── */
+  .masonry-grid {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 16px;
+    align-items: start;
+  }
+  .masonry-item {
+    break-inside: avoid;
+    margin-bottom: 16px;
+    border-radius: 12px;
+    overflow: hidden;
+    border: 1px solid var(--border-c);
+    cursor: pointer;
+    position: relative;
+    background: var(--card);
+    transition:
+      transform 0.3s,
+      box-shadow 0.3s,
+      border-color 0.3s;
+    animation: fade-up 0.5s ease both;
+  }
+  .masonry-item:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glow-c);
+    border-color: var(--cyan);
+  }
+  .masonry-item.has-prize {
+    border-color: rgba(212, 0, 255, 0.4);
+  }
+  .masonry-item.has-prize:hover {
+    box-shadow:
+      0 0 20px rgba(212, 0, 255, 0.4),
+      0 0 60px rgba(212, 0, 255, 0.15);
+    border-color: var(--magenta);
+  }
+  @media (max-width: 900px) {
+    .masonry-grid {
+      grid-template-columns: repeat(3, 1fr);
+    }
+  }
+  @media (max-width: 600px) {
+    .masonry-grid {
+      grid-template-columns: repeat(2, 1fr);
+    }
+  }
+  @media (max-width: 400px) {
+    .masonry-grid {
+      grid-template-columns: 1fr;
+    }
+  }
+
+  /* Thumbnail */
+  .masonry-thumb {
+    position: relative;
+    overflow: hidden;
+  }
+  .masonry-thumb img {
+    width: 100%;
+    height: auto;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    transition:
+      transform 0.4s,
+      opacity 0.3s;
+    opacity: 0;
+    background: linear-gradient(
+      135deg,
+      rgba(0, 245, 255, 0.05),
+      rgba(212, 0, 255, 0.05)
+    );
+  }
+  .masonry-thumb img.loaded {
+    opacity: 1;
+  }
+  .masonry-item:hover .masonry-thumb img {
+    transform: scale(1.04);
+  }
+  .img-fallback {
+    width: 100%;
+    aspect-ratio: 1;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3rem;
+    opacity: 0.3;
+  }
+
+  /* Overlay hover */
+  .masonry-overlay {
+    position: absolute;
+    inset: 0;
+    background: rgba(4, 6, 14, 0.5);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+  }
+  .masonry-item:hover .masonry-overlay {
+    opacity: 1;
+  }
+  .overlay-play {
+    width: 48px;
+    height: 48px;
+    border-radius: 50%;
+    background: rgba(0, 245, 255, 0.15);
+    border: 2px solid var(--cyan);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    box-shadow: var(--glow-c);
+  }
+
+  /* Info */
+  .masonry-info {
+    padding: 10px 12px 12px;
+    display: flex;
+    flex-direction: column;
+    gap: 3px;
+  }
+  .masonry-artista {
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.72rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.05em;
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    text-decoration: none;
+    transition: color 0.2s;
+  }
+  .masonry-artista:hover {
+    color: var(--cyan);
+  }
+  .prize-inline {
+    font-size: 1rem;
+  }
+  .masonry-titulo {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    font-style: italic;
+  }
+
+  /* ── Empty state ── */
+  .empty-state {
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    text-align: center;
+    gap: 16px;
+    padding: 80px 24px;
+  }
+  .empty-icon {
+    font-size: 4rem;
+  }
+  .empty-title {
+    font-family: "Orbitron", sans-serif;
+    font-size: 1.2rem;
+    color: #fff;
+  }
+  .empty-desc {
+    color: var(--text-dim);
+    line-height: 1.7;
+  }
+  .empty-hint {
+    font-size: 0.8rem;
+    color: var(--text-dim);
+    background: rgba(0, 245, 255, 0.04);
+    border: 1px solid var(--border-c);
+    border-radius: 8px;
+    padding: 12px 16px;
+  }
+  .empty-hint code {
+    color: var(--cyan);
+  }
+
+  /* ── Modal ── */
+  .arte-modal {
+    position: fixed;
+    inset: 0;
+    z-index: 3000;
+    background: rgba(4, 6, 14, 0.95);
+    backdrop-filter: blur(12px);
+    display: none;
+    align-items: center;
+    justify-content: center;
+    padding: 20px;
+  }
+  .arte-modal.open {
+    display: flex;
+  }
+
+  .arte-modal-box {
+    background: var(--dark2);
+    border: 1px solid var(--border-c);
+    border-radius: 16px;
+    overflow: hidden;
+    width: 100%;
+    max-width: 960px;
+    max-height: 92vh;
+    display: flex;
+    flex-direction: column;
+    animation: modal-in 0.25s ease both;
+  }
+  @keyframes modal-in {
+    from {
+      opacity: 0;
+      transform: scale(0.95) translateY(16px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
+
+  .arte-modal-header {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 14px 20px;
+    border-bottom: 1px solid var(--border-c);
+    background: rgba(0, 245, 255, 0.03);
+    flex-shrink: 0;
+  }
+  .arte-modal-meta {
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+  .arte-modal-prize {
+    font-size: 1.6rem;
+    line-height: 1;
+  }
+  .arte-modal-artista {
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.85rem;
+    font-weight: 700;
+    color: #fff;
+    letter-spacing: 0.06em;
+  }
+  .arte-modal-titulo {
+    font-size: 0.78rem;
+    color: var(--text-dim);
+    font-style: italic;
+    margin-top: 2px;
+  }
+  .arte-modal-close {
+    width: 34px;
+    height: 34px;
+    border-radius: 8px;
+    border: 1px solid var(--border-c);
+    background: transparent;
+    color: var(--text-dim);
+    font-size: 1rem;
+    cursor: pointer;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    transition:
+      border-color 0.2s,
+      color 0.2s;
+    flex-shrink: 0;
+  }
+  .arte-modal-close:hover {
+    border-color: var(--pink);
+    color: var(--pink);
+  }
+
+  .arte-modal-body {
+    flex: 1;
+    background: #000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    overflow: hidden;
+    max-height: 80vh;
+  }
+  .arte-modal-body img {
+    max-width: 100%;
+    max-height: 100%;
+    object-fit: contain;
+    display: block;
+  }
+
+  .masonry-video {
+    width: 100%;
+    aspect-ratio: 1 / 1;
+    object-fit: cover;
+    display: block;
+    transition: transform 0.4s;
+  }
+  .masonry-item:hover .masonry-video {
+    transform: scale(1.04);
+  }
+
+  .video-badge {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 2;
+    font-size: 0.65rem;
+    font-family: "Orbitron", sans-serif;
+    background: rgba(4, 6, 14, 0.8);
+    border: 1px solid rgba(0, 245, 255, 0.3);
+    color: var(--cyan);
+    padding: 3px 8px;
+    border-radius: 4px;
+    letter-spacing: 0.1em;
+  }
+
+  /* ── Responsive ── */
+  @media (max-width: 900px) {
+    .masonry-grid {
+      columns: 3 240px;
+    }
+  }
+  @media (max-width: 600px) {
+    .masonry-grid {
+      columns: 2 160px;
+    }
+  }
+  @media (max-width: 400px) {
+    .masonry-grid {
+      columns: 1;
+    }
+  }
+  @media (max-width: 600px) {
+    .arte-modal {
+      padding: 8px;
+    }
+  }
+</style>
+
+<script>
+  const modal = document.getElementById("arteModal")!;
+  const modalImg = document.getElementById("arteModalImg") as HTMLImageElement;
+  const modalVideo = document.getElementById(
+    "arteModalVideo",
+  ) as HTMLVideoElement;
+  const modalPrize = document.getElementById("modalPrize")!;
+  const modalArtista = document.getElementById("modalArtista")!;
+  const modalTitulo = document.getElementById("modalTitulo")!;
+  const closeBtn = document.getElementById("arteModalClose")!;
+
+  function openModal(
+    src: string,
+    artista: string,
+    titulo: string,
+    prize: string,
+    tipo: string,
+  ) {
+    modalPrize.textContent = prize;
+    modalArtista.textContent = artista;
+    modalTitulo.textContent = titulo;
+
+    if (tipo === "video") {
+      modalImg.style.display = "none";
+      modalVideo.style.display = "block";
+      modalVideo.src = src;
+      modalVideo.play();
+    } else {
+      modalVideo.style.display = "none";
+      modalImg.style.display = "block";
+      modalImg.src = src;
+    }
+
+    modal.classList.add("open");
+    document.body.style.overflow = "hidden";
+  }
+
+  function closeModal() {
+    modal.classList.remove("open");
+    modalImg.src = "";
+    modalVideo.src = "";
+    modalVideo.pause();
+    document.body.style.overflow = "";
+  }
+
+  document.querySelectorAll<HTMLElement>(".masonry-item").forEach((item) => {
+    item.addEventListener("click", () => {
+      openModal(
+        item.dataset.embed ?? "",
+        item.dataset.artista ?? "",
+        item.dataset.titulo ?? "",
+        item.dataset.prize ?? "",
+        item.dataset.tipo ?? "imagen",
+      );
+    });
+  });
+
+  closeBtn.addEventListener("click", closeModal);
+  modal.addEventListener("click", (e) => {
+    if (e.target === modal) closeModal();
+  });
+  document.addEventListener("keydown", (e) => {
+    if (e.key === "Escape") closeModal();
+  });
+
+  document
+    .querySelectorAll<HTMLImageElement>(".masonry-thumb img")
+    .forEach((img) => {
+      if (img.complete) {
+        img.classList.add("loaded");
+      } else {
+        img.addEventListener("load", () => img.classList.add("loaded"));
+      }
+    });
+</script>
