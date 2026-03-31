@@ -19,6 +19,8 @@ import { MongoDbVaultNodeRepository } from "@infrastructure/VaultRepository/Mong
 import { MongoDbVaultNodeSourceRepository } from "@infrastructure/VaultRepository/MongoDbVaultNodeSourceRepository";
 import { MongoDbVaultNodeTagInfoRepository } from "@infrastructure/VaultRepository/MongoDbVaultNodeTagInfoRepository";
 import { MongoDbVaultNodeTagRepository } from "@infrastructure/VaultRepository/MongoDbVaultNodeTagRepository";
+import { MongoDbAnimeRepository } from "@infrastructure/AnimeRepository/MongoDb";
+import { MongoDbChapterRepository } from "@infrastructure/ChapterRepository/MongoDb";
 import { S3Client } from "@aws-sdk/client-s3";
 import { S3Service } from "@infrastructure/S3Service";
 import { VaultService } from "@domain/services/VaultService";
@@ -70,6 +72,19 @@ import { ListFaqItemsUseCase } from "@application/faq/use-cases/ListFaqItems";
 import { GetFaqItemUseCase } from "@application/faq/use-cases/GetFaqItem";
 import { GetFaqHistoryUseCase } from "@application/faq/use-cases/GetFaqHistory";
 
+import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
+import { CreateAnimeUseCase } from "@application/anime/use-cases/CreateAnime";
+import { UpdateAnimeUseCase } from "@application/anime/use-cases/UpdateAnime";
+import { DeleteAnimeUseCase } from "@application/anime/use-cases/DeleteAnime";
+import { RestoreAnimeUseCase } from "@application/anime/use-cases/RestoreAnime";
+import { ListAnimesUseCase } from "@application/anime/use-cases/ListAnimes";
+import { GetAnimeByIdUseCase } from "@application/anime/use-cases/GetAnimeById";
+import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
+import { CreateChapterUseCase } from "@application/chapter/use-cases/CreateChapter";
+import { UpdateChapterUseCase } from "@application/chapter/use-cases/UpdateChapter";
+import { DeleteChapterUseCase } from "@application/chapter/use-cases/DeleteChapter";
+import { ListChaptersByAnimeUseCase } from "@application/chapter/use-cases/ListChaptersByAnime";
+
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
 import { CreateWeeklyScheduleUseCase } from "@application/weekly_schedule/use-cases/CreateWeeklySchedule";
 import { UpdateWeeklyScheduleUseCase } from "@application/weekly_schedule/use-cases/UpdateWeeklySchedule";
@@ -113,6 +128,8 @@ const vaultNodeRepository = new MongoDbVaultNodeRepository(mongoClient);
 const vaultNodeSourceRepository = new MongoDbVaultNodeSourceRepository(mongoClient);
 const vaultNodeTagInfoRepository = new MongoDbVaultNodeTagInfoRepository(mongoClient);
 const vaultNodeTagRepository = new MongoDbVaultNodeTagRepository(mongoClient);
+const animeRepository = new MongoDbAnimeRepository(mongoClient);
+const chapterRepository = new MongoDbChapterRepository(mongoClient);
 
 const s3Region = Bun.env.S3_REGION;
 const s3Bucket = Bun.env.S3_BUCKET;
@@ -184,7 +201,7 @@ export const userUseCases: IUserUseCases = {
     getByUsername: new GetUserByUsernameUseCase(userRepository),
     updatePassword: new UpdatePasswordUseCase(userRepository, passwordHasher),
     incrementSessionVersion: new IncrementSessionVersionUseCase(userRepository),
-    verifyPassword: new VerifyPasswordUseCase(userRepository,passwordHasher),
+    verifyPassword: new VerifyPasswordUseCase(userRepository, passwordHasher),
     activate: new ActivateUserUseCase(userRepository),
     deactivate: new DeactivateUserUseCase(userRepository),
     getById: new GetUserByIdUseCase(userRepository),
@@ -274,12 +291,28 @@ export const mediaUseCases: IMediaUseCases = {
     getFileUrl: new GetFileUrlUseCase(fileRepository, mediaService),
 };
 
+export const animeUseCases: IAnimeUseCases = {
+    createAnime: new CreateAnimeUseCase(animeRepository, userRepository, idGenerator),
+    updateAnime: new UpdateAnimeUseCase(animeRepository, userRepository),
+    deleteAnime: new DeleteAnimeUseCase(animeRepository, userRepository),
+    restoreAnime: new RestoreAnimeUseCase(animeRepository, userRepository),
+    listAnimes: new ListAnimesUseCase(animeRepository, userRepository),
+    getAnimeById: new GetAnimeByIdUseCase(animeRepository),
+};
+
+export const chapterUseCases: IChapterUseCases = {
+    createChapter: new CreateChapterUseCase(chapterRepository, animeRepository, userRepository, idGenerator),
+    updateChapter: new UpdateChapterUseCase(chapterRepository, userRepository),
+    deleteChapter: new DeleteChapterUseCase(chapterRepository, userRepository),
+    listChaptersByAnime: new ListChaptersByAnimeUseCase(chapterRepository),
+};
+
 export async function startHttpServer(): Promise<void> {
     const hostname = Bun.env.HOSTNAME || "0.0.0.0";
     await createFastifyServer(
         Number(Bun.env.PORT),
         hostname,
-        { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases },
+        { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases, animeUseCases, chapterUseCases },
     );
 }
 

@@ -1,0 +1,232 @@
+---
+const { anime, chapters, status } = Astro.props;
+---
+
+<div class="anime-hero">
+    {
+        anime.coverImageURL && (
+            <div
+                class="anime-hero-bg"
+                style={`background-image: url(${anime.coverImageURL})`}
+            />
+        )
+    }
+    <div class="anime-hero-overlay"></div>
+
+    <div class="container anime-hero-content">
+        <a href="/temporada" class="back-btn">
+            <svg
+                width="16"
+                height="16"
+                viewBox="0 0 24 24"
+                fill="none"
+                stroke="currentColor"
+                stroke-width="2"
+            >
+                <path d="M19 12H5M5 12l7-7M5 12l7 7"></path>
+            </svg>
+            Volver a Temporada
+        </a>
+
+        <div class="anime-hero-grid">
+            <div class="anime-cover-wrap">
+                <div class="anime-cover">
+                    {
+                        anime.coverImageURL ? (
+                            <img
+                                src={anime.coverImageURL}
+                                alt={anime.title}
+                                loading="lazy"
+                                transition:name={anime.coverImageURL}
+                            />
+                        ) : (
+                            <span class="cover-emoji">📺</span>
+                        )
+                    }
+                    <div class="cover-glow"></div>
+                </div>
+            </div>
+
+            <div class="anime-info">
+                <div class="anime-meta-top">
+                    <span class={`anime-status ${status.class}`}
+                        >{status.text}</span
+                    >
+                    <span class="anime-genre">{anime.genre}</span>
+                </div>
+                <h1 class="anime-title" transition:name={anime.title}>
+                    {anime.title}
+                </h1>
+                {
+                    anime.description && (
+                        <p class="anime-desc">{anime.description}</p>
+                    )
+                }
+                <div class="anime-stats">
+                    <div class="astat">
+                        <svg
+                            width="18"
+                            height="18"
+                            viewBox="0 0 24 24"
+                            fill="none"
+                            stroke="var(--pink)"
+                            stroke-width="2"
+                        >
+                            <rect x="2" y="7" width="20" height="14" rx="2"
+                            ></rect>
+                            <path
+                                d="M16 7V5a2 2 0 0 0-4 0v2M8 7V5a2 2 0 0 0-4 0v2"
+                            ></path>
+                        </svg>
+                        <div>
+                            <span class="astat-num">{chapters.length}</span>
+                            <span class="astat-lbl">Total episodios</span>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Hero ── */
+    .anime-hero {
+        position: relative;
+        overflow: hidden;
+        padding: 60px 0 48px;
+        min-height: 360px;
+        display: flex;
+        align-items: flex-end;
+    }
+    .anime-hero-bg {
+        position: absolute;
+        inset: 0;
+        background-size: cover;
+        background-position: center top;
+        filter: blur(18px) brightness(0.35) saturate(1.4);
+        transform: scale(1.1);
+    }
+    .anime-hero-overlay {
+        position: absolute;
+        inset: 0;
+        background: linear-gradient(
+            to bottom,
+            rgba(4, 6, 14, 0.4) 0%,
+            rgba(4, 6, 14, 0.7) 60%,
+            var(--dark) 100%
+        );
+    }
+    .anime-hero-content {
+        position: relative;
+        z-index: 2;
+        width: 100%;
+    }
+
+    .anime-hero-grid {
+        display: grid;
+        grid-template-columns: 220px 1fr;
+        gap: 40px;
+        align-items: flex-end;
+    }
+    .anime-cover {
+        width: 220px;
+        aspect-ratio: 0.68;
+        border-radius: 12px;
+        overflow: hidden;
+        border: 2px solid var(--border-c);
+        position: relative;
+        box-shadow:
+            0 20px 60px rgba(0, 0, 0, 0.6),
+            var(--glow-c);
+    }
+    .anime-cover img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+    }
+
+    .cover-glow {
+        position: absolute;
+        bottom: -20px;
+        left: 50%;
+        transform: translateX(-50%);
+        width: 80%;
+        height: 40px;
+        background: radial-gradient(
+            ellipse,
+            rgba(0, 245, 255, 0.3),
+            transparent 70%
+        );
+        filter: blur(12px);
+        pointer-events: none;
+    }
+    .anime-meta-top {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        margin-bottom: 16px;
+        flex-wrap: wrap;
+    }
+    .anime-genre {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.65rem;
+        letter-spacing: 0.2em;
+        color: var(--text-dim);
+        text-transform: uppercase;
+    }
+    .anime-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: clamp(1.8rem, 3.5vw, 3rem);
+        font-weight: 900;
+        color: #fff;
+        line-height: 1.1;
+        margin-bottom: 20px;
+    }
+    .anime-desc {
+        font-size: 0.97rem;
+        color: var(--text-dim);
+        line-height: 1.75;
+        max-width: 560px;
+        margin-bottom: 28px;
+    }
+    .anime-stats {
+        display: flex;
+        gap: 24px;
+        flex-wrap: wrap;
+    }
+    .astat {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+        background: rgba(255, 45, 138, 0.07);
+        border: 1px solid var(--border-p);
+        border-radius: 10px;
+        padding: 14px 20px;
+    }
+    .astat-num {
+        display: block;
+        font-family: "Orbitron", sans-serif;
+        font-size: 1.6rem;
+        font-weight: 900;
+        color: var(--pink);
+        line-height: 1;
+    }
+    .astat-lbl {
+        display: block;
+        font-size: 0.68rem;
+        letter-spacing: 0.15em;
+        color: var(--text-dim);
+        text-transform: uppercase;
+        margin-top: 2px;
+    }
+
+    @media (max-width: 700px) {
+        .anime-hero-grid {
+            grid-template-columns: 1fr;
+        }
+        .anime-cover {
+            width: 160px;
+        }
+    }
+</style>
