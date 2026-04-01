@@ -1,9 +1,9 @@
 ---
 // src/components/AnimeCard.astro
-import type { Anime } from "../data/animes";
+import { type AnimeDto, slugify } from "../lib/anime";
 
 interface Props {
-    anime: Anime;
+    anime: AnimeDto;
 }
 const { anime } = Astro.props;
 
@@ -14,25 +14,23 @@ const statusLabel = {
 };
 ---
 
-<!-- Card completa es clickeable → va a /temporada/[id] -->
-<a href={`/temporada/${anime.id}`} class="anime-card">
+<a href={`/temporada/${slugify(anime.title)}`} class="anime-card">
     <div class="anime-thumb">
         {
-            anime.image ? (
+            anime.coverImageURL ? (
                 <img
-                    src={anime.image}
+                    src={anime.coverImageURL}
                     alt={anime.title}
                     loading="lazy"
-                    transition:name={anime.image}
+                    transition:name={anime.coverImageURL}
                 />
             ) : (
-                <span class="emoji-placeholder">{anime.emoji}</span>
+                <span class="emoji-placeholder">📺</span>
             )
         }
         <div class={`anime-status status-${anime.status}`}>
             {statusLabel[anime.status]}
         </div>
-        <!-- Overlay hover -->
         <div class="card-hover-overlay">
             <span class="view-label">VER EPISODIOS →</span>
         </div>
@@ -40,12 +38,6 @@ const statusLabel = {
     <div class="anime-body">
         <h3 transition:name={anime.title}>{anime.title}</h3>
         <div class="meta">{anime.genre}</div>
-        <div class="ep-count">
-            <span class="ep-num">{anime.episodes.length}</span>
-            <span class="ep-lbl"
-                >episodio{anime.episodes.length !== 1 ? "s" : ""}</span
-            >
-        </div>
     </div>
 </a>
 
@@ -78,22 +70,5 @@ const statusLabel = {
         border: 1px solid var(--cyan);
         border-radius: 4px;
         box-shadow: var(--glow-c);
-    }
-
-    .ep-count {
-        display: flex;
-        align-items: baseline;
-        gap: 5px;
-        margin-top: 10px;
-    }
-    .ep-num {
-        font-family: "Orbitron", sans-serif;
-        font-size: 1.1rem;
-        font-weight: 900;
-        color: var(--cyan);
-    }
-    .ep-lbl {
-        font-size: 0.75rem;
-        color: var(--text-dim);
     }
 </style>

@@ -51,16 +51,30 @@ export default function Login() {
             <div class="mx-auto mb-5 flex h-14 w-14 items-center justify-center rounded-full bg-[var(--accent)]/20 text-xl font-bold text-[var(--accent)]">
               {user.value?.username[0].toUpperCase()}
             </div>
-            <h2 class="text-lg font-semibold text-[var(--text-primary)]">Ya has iniciado sesión</h2>
+            <h2 class="text-lg font-semibold text-[var(--text-primary)]">
+              Ya has iniciado sesión
+            </h2>
             <p class="mt-1 text-sm text-[var(--text-muted)]">
-              Hola, <span class="text-[var(--text-secondary)] font-medium">{user.value?.username}</span>
+              Hola,{" "}
+              <span class="text-[var(--text-secondary)] font-medium">
+                {user.value?.username}
+              </span>
             </p>
             <div class="mt-6 flex flex-col items-center gap-3">
               <div class="relative h-14 w-14">
                 <svg class="h-14 w-14 -rotate-90" viewBox="0 0 48 48">
-                  <circle cx="24" cy="24" r="20" fill="none" stroke="var(--border-subtle)" stroke-width="4" />
                   <circle
-                    cx="24" cy="24" r="20"
+                    cx="24"
+                    cy="24"
+                    r="20"
+                    fill="none"
+                    stroke="var(--border-subtle)"
+                    stroke-width="4"
+                  />
+                  <circle
+                    cx="24"
+                    cy="24"
+                    r="20"
                     fill="none"
                     stroke="var(--accent)"
                     stroke-width="4"
@@ -72,9 +86,15 @@ export default function Login() {
                   {countdown}
                 </span>
               </div>
-              <p class="text-xs text-[var(--text-muted)]">Redirigiendo a tu perfil...</p>
+              <p class="text-xs text-[var(--text-muted)]">
+                Redirigiendo a tu perfil...
+              </p>
             </div>
-            <Button variant="ghost" class="mt-4 w-full" onClick={() => route("/admin/profile")}>
+            <Button
+              variant="ghost"
+              class="mt-4 w-full"
+              onClick={() => route("/admin/profile")}
+            >
               Ir ahora
             </Button>
           </div>
@@ -89,12 +109,18 @@ export default function Login() {
       <div class="w-full max-w-sm">
         <div class="rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-8 shadow-2xl">
           <div class="mb-8 text-center">
-            <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">Ania Admin</h1>
-            <p class="text-sm text-[var(--text-muted)] mt-1">Inicia sesión para continuar</p>
+            <h1 class="text-2xl font-bold text-[var(--text-primary)] tracking-tight">
+              Ania Admin
+            </h1>
+            <p class="text-sm text-[var(--text-muted)] mt-1">
+              Inicia sesión para continuar
+            </p>
           </div>
 
           <form onSubmit={handleSubmit} class="flex flex-col gap-4">
             <Input
+              name="username"
+              id="username"
               label="Usuario"
               placeholder="Tu nombre de usuario"
               value={username}
@@ -102,6 +128,8 @@ export default function Login() {
               autoFocus
             />
             <Input
+              name="password"
+              id="password"
               label="Contraseña"
               type="password"
               placeholder="Tu contraseña"

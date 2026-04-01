@@ -1,0 +1,215 @@
+---
+import type { ChapterDto } from "@/lib/anime";
+interface Props {
+    chapter: ChapterDto;
+    animeTitle: string;
+}
+
+const { chapter, animeTitle } = Astro.props as Props;
+
+const label = chapter.title ?? `Episodio ${chapter.number}`;
+const badge = `EP ${String(chapter.number).padStart(2, "0")}`;
+const isNew =
+    new Date(chapter.createdAt).getTime() >
+    Date.now() - 7 * 24 * 60 * 60 * 1000;
+---
+
+<a
+    class="ep-card"
+    data-url={chapter.videoURL ?? ""}
+    data-label={label}
+    data-num={badge}
+    data-chapter-num={String(chapter.number)}
+    href={`/temporada/${animeTitle}/${chapter.number}`}
+>
+    <div class="ep-thumb">
+        {
+            chapter.coverImageURL ? (
+                <img src={chapter.coverImageURL} alt={label} loading="lazy" />
+            ) : (
+                <div class="ep-thumb-placeholder">
+                    <span class="ep-num-big">
+                        {String(chapter.number).padStart(2, "0")}
+                    </span>
+                </div>
+            )
+        }
+        <div class="ep-thumb-overlay">
+            <div class="play-circle">
+                <svg width="20" height="20" viewBox="0 0 24 24" fill="white">
+                    <polygon points="5,3 19,12 5,21"></polygon>
+                </svg>
+            </div>
+        </div>
+    </div>
+
+    <div class="ep-info">
+        <div class="ep-label-row">
+            <span class="ep-badge">{badge}</span>
+            {isNew && <span class="ep-new">NUEVO</span>}
+        </div>
+        <h3 class="ep-title">{label}</h3>
+        <span class="ep-date">
+            {
+                new Date(chapter.createdAt).toLocaleDateString("es-ES", {
+                    day: "numeric",
+                    month: "short",
+                    year: "numeric",
+                })
+            }
+        </span>
+    </div>
+
+    <div class="ep-arrow">▶</div>
+</a>
+
+<style>
+    .ep-card {
+        display: flex;
+        flex-direction: column;
+        background: var(--card);
+        border: 1px solid var(--border-c);
+        border-radius: var(--radius);
+        overflow: hidden;
+        cursor: pointer;
+        color: var(--text);
+        transition:
+            transform 0.3s,
+            border-color 0.3s,
+            box-shadow 0.3s;
+        position: relative;
+    }
+    .ep-card:hover {
+        transform: translateY(-5px);
+        border-color: var(--cyan);
+        box-shadow: var(--glow-c);
+    }
+
+    .ep-card.playing {
+        border-color: var(--cyan);
+        box-shadow: var(--glow-c);
+    }
+    .ep-card.playing .ep-arrow {
+        color: var(--cyan);
+    }
+
+    .ep-thumb {
+        aspect-ratio: 16/9;
+        position: relative;
+        overflow: hidden;
+        background: linear-gradient(
+            135deg,
+            rgba(0, 245, 255, 0.05),
+            rgba(212, 0, 255, 0.05)
+        );
+    }
+    .ep-thumb img {
+        width: 100%;
+        height: 100%;
+        object-fit: cover;
+        transition: transform 0.4s;
+    }
+    .ep-card:hover .ep-thumb img {
+        transform: scale(1.05);
+    }
+    .ep-thumb-placeholder {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+    }
+    .ep-num-big {
+        font-family: "Orbitron", sans-serif;
+        font-size: 3rem;
+        font-weight: 900;
+        color: rgba(0, 245, 255, 0.15);
+    }
+    .ep-thumb-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(4, 6, 14, 0.5);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .ep-card:hover .ep-thumb-overlay,
+    .ep-card.playing .ep-thumb-overlay {
+        opacity: 1;
+    }
+    .play-circle {
+        width: 52px;
+        height: 52px;
+        border-radius: 50%;
+        background: rgba(0, 245, 255, 0.2);
+        border: 2px solid var(--cyan);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        box-shadow: var(--glow-c);
+    }
+
+    .ep-info {
+        padding: 14px 16px;
+        flex: 1;
+    }
+    .ep-label-row {
+        display: flex;
+        align-items: center;
+        gap: 8px;
+        margin-bottom: 6px;
+    }
+    .ep-badge {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.6rem;
+        letter-spacing: 0.12em;
+        color: var(--cyan);
+        background: rgba(0, 245, 255, 0.08);
+        border: 1px solid rgba(0, 245, 255, 0.2);
+        padding: 2px 8px;
+        border-radius: 4px;
+    }
+    .ep-new {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.55rem;
+        letter-spacing: 0.12em;
+        color: var(--pink);
+        background: rgba(255, 45, 138, 0.1);
+        border: 1px solid var(--border-p);
+        padding: 2px 8px;
+        border-radius: 4px;
+        animation: pulse-new 2s ease infinite;
+    }
+
+    @keyframes pulse-new {
+        0%,
+        100% {
+            opacity: 1;
+        }
+        50% {
+            opacity: 0.5;
+        }
+    }
+    .ep-title {
+        font-size: 0.9rem;
+        font-weight: 600;
+        color: #fff;
+        margin-bottom: 4px;
+        line-height: 1.3;
+    }
+    .ep-date {
+        font-size: 0.72rem;
+        color: var(--text-dim);
+    }
+
+    .ep-arrow {
+        position: absolute;
+        bottom: 14px;
+        right: 14px;
+        font-size: 0.9rem;
+        color: var(--text-dim);
+        transition: color 0.2s;
+    }
+</style>

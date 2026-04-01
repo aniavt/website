@@ -1,86 +1,175 @@
 ---
 // src/components/Footer.astro
-import { socials } from '../data/config';
+import { socials } from "../data/config";
 ---
 
 <footer>
-  <div class="container">
-    <div class="footer-grid">
-      <div class="footer-brand">
-        <div class="footer-logo">
-          <div class="foot-star"></div>
-          <div>ANIA<br />STARLIGHT</div>
+    <div class="container">
+        <div class="footer-grid">
+            <div class="footer-brand">
+                <div class="footer-logo">
+                    <div class="foot-star"></div>
+                    <div>ANIA<br />STARLIGHT</div>
+                </div>
+                <p>
+                    VTuber Cyber Hikikomori creando experiencias únicas para la
+                    comunidad anime y gaming. ✦˚‧
+                </p>
+                <div class="footer-social">
+                    <a
+                        href={socials.twitter}
+                        target="_blank"
+                        rel="noopener"
+                        title="Twitter/X">𝕏</a
+                    >
+                    <a
+                        href={socials.twitch}
+                        target="_blank"
+                        rel="noopener"
+                        title="Twitch">🎮</a
+                    >
+                    <a
+                        href={socials.youtube}
+                        target="_blank"
+                        rel="noopener"
+                        title="YouTube">▶</a
+                    >
+                    <a
+                        href={socials.instagram}
+                        target="_blank"
+                        rel="noopener"
+                        title="Instagram">📸</a
+                    >
+                    <a
+                        href={socials.throne}
+                        target="_blank"
+                        rel="noopener"
+                        title="Throne"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M3 6l3 6h12l3-6-4.5 3L12 3 7.5 9 3 6zm1 8v4h16v-4H4z"
+                            ></path>
+                        </svg></a
+                    >
+                    <a
+                        href={socials.streamlabs}
+                        target="_blank"
+                        rel="noopener"
+                        title="Streamlabs"
+                    >
+                        <svg
+                            width="16"
+                            height="16"
+                            viewBox="0 0 24 24"
+                            fill="currentColor"
+                            xmlns="http://www.w3.org/2000/svg"
+                        >
+                            <path
+                                d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.199 3.501 2 6.43 2c1.922 0 3.753.895 4.937 2.306A6.554 6.554 0 0 1 17.57 2C20.499 2 23 4.199 23 7.191c0 4.105-5.371 8.863-11 14.402z"
+                            ></path>
+                            <path
+                                d="M12 8c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z"
+                                fill="var(--dark2)"></path>
+                        </svg>
+                    </a>
+                    <a
+                        href={socials.tiktok}
+                        target="_blank"
+                        rel="noopener"
+                        title="TikTok">🎵</a
+                    >
+                </div>
+            </div>
+
+            <div class="footer-col">
+                <h4>Navegación</h4>
+                <ul>
+                    <li><a href="/">Inicio</a></li>
+                    <li><a href="/temporada">Temporada</a></li>
+                    <li><a href="/manga">Manga</a></li>
+                    <li><a href="/varios">Animes Varios</a></li>
+                    <li><a href="/hemeroteca">Hemeroteca</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Comunidad</h4>
+                <ul>
+                    <li>
+                        <a href={socials.discord} target="_blank" rel="noopener"
+                            >Discord</a
+                        >
+                    </li>
+                    <li><a href="/faq">FAQ & Staff</a></li>
+                    <li><a href="#">#Anidraw</a></li>
+                    <li><a href="#">#Aniclips</a></li>
+                </ul>
+            </div>
+
+            <div class="footer-col">
+                <h4>Créditos</h4>
+                <ul>
+                    <li><a href="#">Design: ###</a></li>
+                    <li><a href="#">Art: ###</a></li>
+                    <li><a href="#">Web: ###</a></li>
+                </ul>
+            </div>
         </div>
-        <p>VTuber Cyber Hikikomori creando experiencias únicas para la comunidad anime y gaming. ✦˚‧</p>
-        <div class="footer-social">
-          <a href={socials.twitter}   target="_blank" rel="noopener" title="Twitter/X">𝕏</a>
-          <a href={socials.twitch}    target="_blank" rel="noopener" title="Twitch">🎮</a>
-          <a href={socials.youtube}   target="_blank" rel="noopener" title="YouTube">▶</a>
-          <a href={socials.instagram} target="_blank" rel="noopener" title="Instagram">📸</a>
-          <a href={socials.throne} target="_blank" rel="noopener" title="Throne">
-          <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-            <path d="M3 6l3 6h12l3-6-4.5 3L12 3 7.5 9 3 6zm1 8v4h16v-4H4z"/>
-          </svg></a>
-          <a href={socials.streamlabs} target="_blank" rel="noopener" title="Streamlabs">
-            <svg width="16" height="16" viewBox="0 0 24 24" fill="currentColor" xmlns="http://www.w3.org/2000/svg">
-              <path d="M12 21.593c-5.63-5.539-11-10.297-11-14.402C1 4.199 3.501 2 6.43 2c1.922 0 3.753.895 4.937 2.306A6.554 6.554 0 0 1 17.57 2C20.499 2 23 4.199 23 7.191c0 4.105-5.371 8.863-11 14.402z"/>
-              <path d="M12 8c0 2.21-1.79 4-4 4s-4-1.79-4-4 1.79-4 4-4 4 1.79 4 4z" fill="var(--dark2)"/>
-            </svg>
-          </a>
-          <a href={socials.tiktok}    target="_blank" rel="noopener" title="TikTok">🎵</a>
+
+        <div class="footer-bottom">
+            <p>
+                © Copyright <span>Ania Starlight</span> — Todos los derechos reservados
+            </p>
+            <p>
+                Diseñado por <span>###</span> · Distribuido por <span>###</span>
+            </p>
         </div>
-      </div>
-
-      <div class="footer-col">
-        <h4>Navegación</h4>
-        <ul>
-          <li><a href="/">Inicio</a></li>
-          <li><a href="/temporada">Temporada</a></li>
-          <li><a href="/manga">Manga</a></li>
-          <li><a href="/varios">Animes Varios</a></li>
-          <li><a href="/hemeroteca">Hemeroteca</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Comunidad</h4>
-        <ul>
-          <li><a href={socials.discord} target="_blank" rel="noopener">Discord</a></li>
-          <li><a href="/faq">FAQ & Staff</a></li>
-          <li><a href="#">#Anidraw</a></li>
-          <li><a href="#">#Aniclips</a></li>
-        </ul>
-      </div>
-
-      <div class="footer-col">
-        <h4>Créditos</h4>
-        <ul>
-          <li><a href="#">Design: >###</</a></li>
-          <li><a href="#">Art: >###</</a></li>
-          <li><a href="#">Web: >###</</a></li>
-        </ul>
-      </div>
     </div>
-
-    <div class="footer-bottom">
-      <p>© Copyright <span>Ania Starlight</span> — Todos los derechos reservados</p>
-      <p>Diseñado por <span>###</span> · Distribuido por <span>>###</</span></p>
-    </div>
-  </div>
 </footer>
 
 <style>
-  .footer-logo {
-    display: flex; align-items: center; gap: 10px;
-    font-family: 'Orbitron', sans-serif;
-    font-weight: 900; font-size: 1.1rem;
-    background: linear-gradient(120deg, #fff 30%, var(--cyan));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    letter-spacing: 0.04em; line-height: 1.2; margin-bottom: 4px;
-  }
-  .foot-star {
-    width: 22px; height: 22px; flex-shrink: 0;
-    background: conic-gradient(var(--cyan), var(--pink), var(--magenta), var(--cyan));
-    clip-path: polygon(50% 0%,61% 35%,98% 35%,68% 57%,79% 91%,50% 70%,21% 91%,32% 57%,2% 35%,39% 35%);
-  }
+    .footer-logo {
+        display: flex;
+        align-items: center;
+        gap: 10px;
+        font-family: "Orbitron", sans-serif;
+        font-weight: 900;
+        font-size: 1.1rem;
+        background: linear-gradient(120deg, #fff 30%, var(--cyan));
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        letter-spacing: 0.04em;
+        line-height: 1.2;
+        margin-bottom: 4px;
+    }
+    .foot-star {
+        width: 22px;
+        height: 22px;
+        flex-shrink: 0;
+        background: conic-gradient(
+            var(--cyan),
+            var(--pink),
+            var(--magenta),
+            var(--cyan)
+        );
+        clip-path: polygon(
+            50% 0%,
+            61% 35%,
+            98% 35%,
+            68% 57%,
+            79% 91%,
+            50% 70%,
+            21% 91%,
+            32% 57%,
+            2% 35%,
+            39% 35%
+        );
+    }
 </style>

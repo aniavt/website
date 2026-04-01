@@ -4,6 +4,8 @@ import { useState } from "preact/hooks";
 interface Props {
   label?: string;
   error?: string;
+  name?: string;
+  id?: string;
   type?: string;
   class?: string;
   value?: string;
@@ -12,15 +14,32 @@ interface Props {
   onInput?: JSX.GenericEventHandler<HTMLInputElement>;
 }
 
-export default function Input({ label, error, type, class: cls, value, placeholder, autoFocus, onInput }: Props) {
+export default function Input({
+  label,
+  error,
+  type,
+  class: cls,
+  value,
+  placeholder,
+  autoFocus,
+  name,
+  id,
+  onInput,
+}: Props) {
   const [show, setShow] = useState(false);
   const isPassword = type === "password";
 
   return (
     <div class={`flex flex-col gap-1.5 ${cls ?? ""}`}>
-      {label && <label class="text-sm font-medium text-[var(--text-secondary)]">{label}</label>}
+      {label && (
+        <label class="text-sm font-medium text-[var(--text-secondary)]">
+          {label}
+        </label>
+      )}
       <div class="relative">
         <input
+          name={name}
+          id={id}
           type={isPassword && show ? "text" : type}
           value={value}
           placeholder={placeholder}

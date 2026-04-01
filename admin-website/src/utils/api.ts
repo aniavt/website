@@ -441,3 +441,108 @@ export async function updateWeeklyScheduleFile(
 
   return res.json();
 }
+
+// Anime
+
+export type AnimeLastAction = "created" | "updated" | "deleted" | "restore";
+
+export type AnimeStatus = "watching" | "completed" | "upcoming";
+
+export interface AnimeDto {
+  readonly id: string;
+  readonly title: string;
+  readonly description?: string;
+  readonly coverImageURL?: string;
+  readonly genre: string;
+  readonly status: AnimeStatus;
+  readonly active: boolean;
+  readonly lastAction: AnimeLastAction;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface CreateAnimeInput {
+  title: string;
+  description?: string;
+  coverImageURL?: string;
+  genre: string;
+  status: AnimeStatus;
+}
+
+export interface UpdateAnimeInput {
+  title?: string;
+  description?: string;
+  coverImageURL?: string;
+  genre?: string;
+  status?: AnimeStatus;
+}
+
+export async function listAnimes(includeInactive = false): Promise<AnimeDto[]> {
+  const params = new URLSearchParams();
+  if (!includeInactive) params.set("activeOnly", "true");
+  const query = params.toString();
+  return api.get<AnimeDto[]>(`/anime${query ? `?${query}` : ""}`);
+}
+
+export async function getAnimeById(id: string): Promise<AnimeDto> {
+  return api.get<AnimeDto>(`/anime/${id}`);
+}
+
+export async function createAnime(input: CreateAnimeInput): Promise<AnimeDto> {
+  return api.post<AnimeDto>("/anime", input);
+}
+
+export async function updateAnime(id: string, input: UpdateAnimeInput): Promise<AnimeDto> {
+  return api.patch<AnimeDto>(`/anime/${id}`, input);
+}
+
+export async function deleteAnime(id: string): Promise<void> {
+  await api.delete<undefined>(`/anime/${id}`);
+}
+
+export async function restoreAnime(id: string): Promise<AnimeDto> {
+  return api.post<AnimeDto>(`/anime/${id}/restore`);
+}
+
+// Chapter
+
+export interface ChapterDto {
+  readonly id: string;
+  readonly animeId: string;
+  readonly number: number;
+  readonly title?: string;
+  readonly videoURL?: string;
+  readonly coverImageURL?: string;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface CreateChapterInput {
+  number: number;
+  title?: string;
+  videoURL?: string;
+  coverImageURL?: string;
+}
+
+export interface UpdateChapterInput {
+  number?: number;
+  title?: string;
+  videoURL?: string;
+  coverImageURL?: string;
+}
+
+export async function listChaptersByAnime(animeId: string): Promise<ChapterDto[]> {
+  return api.get<ChapterDto[]>(`/anime/${animeId}/chapters`);
+}
+
+export async function createChapter(animeId: string, input: CreateChapterInput): Promise<ChapterDto> {
+  return api.post<ChapterDto>(`/anime/${animeId}/chapters`, input);
+}
+
+export async function updateChapter(id: string, input: UpdateChapterInput): Promise<ChapterDto> {
+  return api.patch<ChapterDto>(`/chapters/${id}`, input);
+}
+
+export async function deleteChapter(id: string): Promise<void> {
+  await api.delete<undefined>(`/chapters/${id}`);
+}

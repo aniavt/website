@@ -2,7 +2,7 @@ import { signal, computed } from "@preact/signals";
 import { api } from "@utils";
 import { route } from "preact-router";
 
-export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule" | "vault";
+export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule" | "vault" | "anime";
 
 export interface UserPermissions {
   readonly meta: string[];
@@ -10,6 +10,7 @@ export interface UserPermissions {
   readonly faq: string[];
   readonly weekly_schedule: string[];
   readonly vault: string[];
+  readonly anime: string[];
 }
 
 export interface User {
@@ -44,6 +45,7 @@ export function hasPermission(namespace: PermissionNamespace, permission: string
     case "faq": return userHasPermission(user.value, "meta", "manage_faq");
     case "weekly_schedule": return userHasPermission(user.value, "meta", "manage_weekly_schedule");
     case "vault": return userHasPermission(user.value, "meta", "manage_vault");
+    case "anime": return userHasPermission(user.value, "meta", "manage_anime");
   }
 
   return false;
@@ -90,6 +92,12 @@ export const canReadVault = computed(() =>
   hasPermission("vault", "update_node") ||
   hasPermission("vault", "delete_node"),
 );
+
+export const canReadAnime = computed(() => hasPermission("anime", "read_anime"));
+export const canCreateAnime = computed(() => hasPermission("anime", "create_anime"));
+export const canUpdateAnime = computed(() => hasPermission("anime", "update_anime"));
+export const canDeleteAnime = computed(() => hasPermission("anime", "delete_anime"));
+export const canRestoreAnime = computed(() => hasPermission("anime", "restore_anime"));
 
 export const canManageVaultNodes = computed(() =>
   hasPermission("vault", "create_node") ||

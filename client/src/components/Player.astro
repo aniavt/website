@@ -1,0 +1,174 @@
+---
+interface Props {
+    iframeURL?: string | null;
+}
+
+const { iframeURL } = Astro.props as Props;
+
+const { animeName, id } = Astro.params;
+
+const showIframe = iframeURL && iframeURL.trim() !== "";
+
+let url = iframeURL;
+
+//Change the view string to preview
+if (url) {
+    url = url.replace("/view", "/preview");
+}
+---
+
+<div class="player-section" id="playerSection">
+    <div class="container">
+        <div class="player-wrap">
+            <div class="player-header">
+                <div class="player-info">
+                    <span class="player-ep-badge" id="playerBadge"
+                        >Episodio {id}</span
+                    >
+                </div>
+                <a href=`/temporada/${animeName}` id="playerCloseLink">
+                    <button
+                        class="player-close"
+                        id="playerClose"
+                        title="Cerrar reproductor">✕</button
+                    >
+                </a>
+            </div>
+            <div class="player-container">
+                {
+                    showIframe && (
+                        <iframe
+                            id="playerFrame"
+                            src={url!}
+                            allow="autoplay; fullscreen"
+                            allowfullscreen
+                            frameborder="0"
+                            style="display:block; width:100%; height:100%;"
+                        />
+                    )
+                }
+
+                {
+                    !showIframe && (
+                        <div
+                            class="player-fallback visible"
+                            id="playerFallback"
+                        >
+                            <p>El video no pudo cargarse en el reproductor.</p>
+                            <a
+                                id="playerFallbackLink"
+                                href="#"
+                                target="_blank"
+                                class="btn btn-cyan"
+                            >
+                                Abrir en nueva pestaña ↗
+                            </a>
+                        </div>
+                    )
+                }
+            </div>
+        </div>
+    </div>
+</div>
+
+<style>
+    /* ── Player ── */
+    .player-section {
+        background: var(--dark2);
+        border-top: 1px solid var(--border-c);
+        border-bottom: 1px solid var(--border-c);
+        padding: 28px 0;
+        position: sticky;
+        top: var(--nav-h);
+        z-index: 100;
+    }
+    .player-wrap {
+        background: var(--card);
+        border: 1px solid var(--border-c);
+        border-radius: 14px;
+        overflow: hidden;
+    }
+    .player-header {
+        display: flex;
+        align-items: center;
+        justify-content: space-between;
+        padding: 14px 20px;
+        border-bottom: 1px solid var(--border-c);
+        background: rgba(0, 245, 255, 0.03);
+    }
+    .player-info {
+        display: flex;
+        align-items: center;
+        gap: 12px;
+    }
+    .player-ep-badge {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.65rem;
+        letter-spacing: 0.15em;
+        color: var(--cyan);
+        background: rgba(0, 245, 255, 0.1);
+        border: 1px solid rgba(0, 245, 255, 0.25);
+        padding: 4px 10px;
+        border-radius: 4px;
+    }
+    .player-title {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.85rem;
+        letter-spacing: 0.06em;
+        color: #fff;
+    }
+    .player-close {
+        width: 32px;
+        height: 32px;
+        border-radius: 6px;
+        border: 1px solid var(--border-c);
+        color: var(--text-dim);
+        font-size: 1rem;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        transition:
+            border-color 0.2s,
+            color 0.2s;
+        cursor: pointer;
+        background: transparent;
+    }
+    .player-close:hover {
+        border-color: var(--pink);
+        color: var(--pink);
+    }
+
+    .player-container {
+        position: relative;
+        aspect-ratio: 16/9;
+        background: #000;
+    }
+    .player-container iframe,
+    .player-container video {
+        width: 100%;
+        height: 100%;
+        border: none;
+        display: block;
+    }
+    .player-fallback {
+        display: none;
+        position: absolute;
+        inset: 0;
+        flex-direction: column;
+        align-items: center;
+        justify-content: center;
+        gap: 16px;
+        background: var(--dark2);
+        color: var(--text-dim);
+        text-align: center;
+    }
+    .player-fallback.visible {
+        display: flex;
+    }
+
+    @media (max-width: 700px) {
+        .player-section {
+            position: static;
+        }
+    }
+</style>

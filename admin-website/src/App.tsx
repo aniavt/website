@@ -14,6 +14,7 @@ import Users from "@pages/Users";
 import Profile from "@pages/Profile";
 import WeeklySchedule from "@pages/WeeklySchedule";
 import Vault from "@pages/Vault";
+import Anime from "@pages/Anime";
 
 // Show vite.config.ts base path
 const basePath = (path: string) => `/admin${path === "/" ? "" : path}`;
@@ -109,6 +110,15 @@ export default function App() {
           <PermissionGuard
             component={Vault}
             required={[{ namespace: "vault", permission: "create_node" }]}
+          />
+        )}
+      />
+      <Route
+        path={basePath("/anime")}
+        component={() => (
+          <PermissionGuard
+            component={Anime}
+            required={[{ namespace: "anime", permission: "read_anime" }]}
           />
         )}
       />

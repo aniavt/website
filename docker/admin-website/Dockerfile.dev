@@ -1,7 +1,4 @@
 FROM oven/bun:1.3-alpine
-
 WORKDIR /app
-
 ENV NODE_ENV=development
-
 CMD ["sh", "-lc", "bun install && bun run dev"]
