@@ -51,7 +51,7 @@ const {
                     .querySelectorAll(".reveal:not(.shown)")
                     .forEach((el) => obs.observe(el));
             }
-            document.addEventListener("DOMContentLoaded", initReveal);
+            document.addEventListener("astro:page-load", initReveal);
 
             // Up button
             document
