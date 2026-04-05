@@ -1,6 +1,7 @@
 ---
 // src/components/HemeCard.astro
-import type { HemeItem } from '../data/hemeroteca';
+import { Image } from "astro:assets";
+import type { HemeItem } from "../data/hemeroteca";
 
 interface Props {
   item: HemeItem;
@@ -12,25 +13,36 @@ const { item } = Astro.props;
   class="heme-card"
   data-id={item.id}
   data-type={item.type}
-  data-url={item.url ?? ''}
-  data-drive={item.driveUrl ?? ''}
+  data-url={item.url ?? ""}
+  data-drive={item.driveUrl ?? ""}
   data-title={item.title}
   data-desc={item.desc}
   data-date={item.date}
 >
   <div class="heme-thumb">
-    {item.image
-      ? <img src={item.image} alt={item.title} loading="lazy" />
-      : <span>{item.emoji}</span>
+    {
+      item.image ? (
+        <Image
+          src={item.image}
+          alt={item.title}
+          width={332}
+          height={200}
+          loading="lazy"
+        />
+      ) : (
+        <span>{item.emoji}</span>
+      )
     }
     <div class="heme-overlay">
       <span class="btn btn-cyan" style="font-size:.65rem;padding:8px 16px">
-        {item.type === 'drive' ? '📁 Abrir Drive' : '▶ Ver Video'}
+        {item.type === "drive" ? "📁 Abrir Drive" : "▶ Ver Video"}
       </span>
     </div>
   </div>
-  <div class={`heme-type ${item.type === 'drive' ? 'heme-drive' : 'heme-video'}`}>
-    {item.type === 'drive' ? 'DRIVE' : 'VIDEO'}
+  <div
+    class={`heme-type ${item.type === "drive" ? "heme-drive" : "heme-video"}`}
+  >
+    {item.type === "drive" ? "DRIVE" : "VIDEO"}
   </div>
   <div class="heme-body">
     <h3>{item.title}</h3>

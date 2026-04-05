@@ -5,6 +5,9 @@ import AnimeCard from "@components/AnimeCard.astro";
 import { listAnimes } from "@lib/anime";
 
 const animes = await listAnimes();
+
+//Cantidad de imagenes que se mostrarán en el primer viewport del usuario:
+const imagesInInitialViewport = 12;
 ---
 
 <BaseLayout title="Temporada — Ania Starlight">
@@ -33,9 +36,12 @@ const animes = await listAnimes();
             <!-- Grid — renderizado en servidor, filtrado en cliente -->
             <div class="anime-grid" id="animeGrid">
                 {
-                    animes.map((anime) => (
+                    animes.map((anime, i) => (
                         <div data-status={anime.status}>
-                            <AnimeCard anime={anime} />
+                            <AnimeCard
+                                anime={anime}
+                                eager={i < imagesInInitialViewport}
+                            />
                         </div>
                     ))
                 }
