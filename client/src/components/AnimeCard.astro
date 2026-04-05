@@ -1,11 +1,13 @@
 ---
 // src/components/AnimeCard.astro
+import { Image } from "astro:assets";
 import { type AnimeDto, slugify } from "../lib/anime";
 
 interface Props {
     anime: AnimeDto;
+    eager?: boolean;
 }
-const { anime } = Astro.props;
+const { anime, eager = false } = Astro.props;
 
 const statusLabel = {
     watching: "Viendo",
@@ -18,10 +20,14 @@ const statusLabel = {
     <div class="anime-thumb">
         {
             anime.coverImageURL ? (
-                <img
+                <Image
                     src={anime.coverImageURL}
                     alt={anime.title}
-                    loading="lazy"
+                    decoding="async"
+                    loading={eager ? "eager" : "lazy"}
+                    fetchpriority={eager ? "high" : "auto"}
+                    width="332"
+                    height="475"
                     transition:name={anime.coverImageURL}
                 />
             ) : (
