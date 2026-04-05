@@ -1,20 +1,26 @@
 ---
 // src/pages/index.astro
-import BaseLayout from '../layouts/BaseLayout.astro';
-import { streams } from '../data/config';
-import aniaHero from '../assets/ania-hero.jpg';
-import { getCurrentWeeklySchedule } from '../lib/api';
-import { getMediaUrl, isImage, isVideo } from '../lib/media';
+import BaseLayout from "../layouts/BaseLayout.astro";
+import { Image } from "astro:assets";
+import { streams } from "../data/config";
+import aniaHero from "../assets/ania-hero.jpg";
+import { getCurrentWeeklySchedule } from "../lib/api";
+import { getMediaUrl, isImage, isVideo } from "../lib/media";
 
-const schaduleMediaUrlFallback = "/assets/under_construction.webp"
+const schaduleMediaUrlFallback = "/assets/under_construction.webp";
 const currentSchedule = await getCurrentWeeklySchedule().catch(() => null);
-const scheduleMediaUrl = currentSchedule ? getMediaUrl(currentSchedule.fileId) : schaduleMediaUrlFallback;
-const scheduleIsImage = currentSchedule ? isImage(currentSchedule.fileContentType) : true;
-const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentType) : false;
+const scheduleMediaUrl = currentSchedule
+  ? getMediaUrl(currentSchedule.fileId)
+  : schaduleMediaUrlFallback;
+const scheduleIsImage = currentSchedule
+  ? isImage(currentSchedule.fileContentType)
+  : true;
+const scheduleIsVideo = currentSchedule
+  ? isVideo(currentSchedule.fileContentType)
+  : false;
 ---
 
 <BaseLayout title="Ania Starlight — Inicio">
-
   <!-- ── Hero ── -->
   <section id="hero">
     <div class="hero-bg"></div>
@@ -38,27 +44,42 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
           <a href="/hemeroteca" class="btn btn-outline">Hemeroteca</a>
         </div>
         <div class="hero-stats">
-          <div class="hero-stat"><span class="num">3</span><span class="lbl">Streams/semana</span></div>
-          <div class="hero-stat"><span class="num">∞</span><span class="lbl">Animes vistos</span></div>
-          <div class="hero-stat"><span class="num">✦</span><span class="lbl">Comunidad</span></div>
+          <div class="hero-stat">
+            <span class="num">3</span><span class="lbl">Streams/semana</span>
+          </div>
+          <div class="hero-stat">
+            <span class="num">∞</span><span class="lbl">Animes vistos</span>
+          </div>
+          <div class="hero-stat">
+            <span class="num">✦</span><span class="lbl">Comunidad</span>
+          </div>
         </div>
       </div>
 
       <!-- LADO DERECHO: imagen -->
       <div class="hero-image-wrap">
         <div class="hero-image-glow"></div>
-        <img
-          src={aniaHero.src}
+        <Image
+          src={aniaHero}
           alt="Ania Starlight"
           class="hero-image"
+          loading="eager"
+          fetchpriority="high"
         />
       </div>
     </div>
 
     <div class="scroll-ind">
-      <svg width="14" height="22" viewBox="0 0 14 22" fill="none" stroke="#00f5ff" stroke-width="1.5">
-        <rect x="1" y="1" width="12" height="20" rx="6"/>
-        <circle cx="7" cy="6" r="1.8" fill="#00f5ff"/>
+      <svg
+        width="14"
+        height="22"
+        viewBox="0 0 14 22"
+        fill="none"
+        stroke="#00f5ff"
+        stroke-width="1.5"
+      >
+        <rect x="1" y="1" width="12" height="20" rx="6"></rect>
+        <circle cx="7" cy="6" r="1.8" fill="#00f5ff"></circle>
       </svg>
       <span>SCROLL</span>
     </div>
@@ -67,16 +88,15 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
   <!-- ── Ticker ── -->
   <div class="ticker">
     <span class="ticker-inner">
-      ✦ NOCHE DE MOMAZOS &amp; INTRO SEMANAL &nbsp;·&nbsp;
-      REACCIONES &amp; ANIMES SEMANALES &nbsp;·&nbsp;
-      CLIPS DEL MES &amp; PRE-ARCO DE BRASIL &nbsp;·&nbsp;
-      #ANIDRAW &nbsp;·&nbsp; #ANICLIPS &nbsp;·&nbsp; #ANISFW &nbsp;·&nbsp;
-      #ANIEDITS &nbsp;·&nbsp; @ANIASTARLIGHT &nbsp;&nbsp;&nbsp;&nbsp;
-      ✦ NOCHE DE MOMAZOS &amp; INTRO SEMANAL &nbsp;·&nbsp;
-      REACCIONES &amp; ANIMES SEMANALES &nbsp;·&nbsp;
-      CLIPS DEL MES &amp; PRE-ARCO DE BRASIL &nbsp;·&nbsp;
-      #ANIDRAW &nbsp;·&nbsp; #ANICLIPS &nbsp;·&nbsp; #ANISFW &nbsp;·&nbsp;
-      #ANIEDITS &nbsp;·&nbsp; @ANIASTARLIGHT &nbsp;&nbsp;&nbsp;&nbsp;
+      ✦ NOCHE DE MOMAZOS &amp; INTRO SEMANAL &nbsp;·&nbsp; REACCIONES &amp;
+      ANIMES SEMANALES &nbsp;·&nbsp; CLIPS DEL MES &amp; PRE-ARCO DE BRASIL
+      &nbsp;·&nbsp; #ANIDRAW &nbsp;·&nbsp; #ANICLIPS &nbsp;·&nbsp; #ANISFW
+      &nbsp;·&nbsp; #ANIEDITS &nbsp;·&nbsp; @ANIASTARLIGHT
+      &nbsp;&nbsp;&nbsp;&nbsp; ✦ NOCHE DE MOMAZOS &amp; INTRO SEMANAL
+      &nbsp;·&nbsp; REACCIONES &amp; ANIMES SEMANALES &nbsp;·&nbsp; CLIPS DEL
+      MES &amp; PRE-ARCO DE BRASIL &nbsp;·&nbsp; #ANIDRAW &nbsp;·&nbsp;
+      #ANICLIPS &nbsp;·&nbsp; #ANISFW &nbsp;·&nbsp; #ANIEDITS &nbsp;·&nbsp;
+      @ANIASTARLIGHT &nbsp;&nbsp;&nbsp;&nbsp;
     </span>
   </div>
 
@@ -84,60 +104,80 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
   <section class="section-pad">
     <div class="container">
       <div class="section-label center">Este Mes</div>
-      <h2 class="section-title center">Propuesta <span class="accent-p">Mensual</span></h2>
+      <h2 class="section-title center">
+        Propuesta <span class="accent-p">Mensual</span>
+      </h2>
 
       <div class="monthly-grid reveal">
         <!-- Calendario -->
         <div class="monthly-card">
           <div class="badge">MARZO 2025</div>
           <div class="monthly-card-img">
-            {scheduleIsVideo ? (
-              <video
-                src={scheduleMediaUrl}
-                controls
-                onerror={(event) => {
-                  const video = event.currentTarget as HTMLVideoElement;
-                  video.onerror = null;
-                  video.pause();
-                  video.style.display = 'none';
-                  const img = document.createElement('img');
-                  img.src = schaduleMediaUrlFallback;
-                  img.className = video.className;
-                  video.parentElement?.appendChild(img);
-                }}
-              />
-            ) : (
-              <img
-                src={scheduleMediaUrl}
-                alt={currentSchedule?.title?.trim() || "Calendario semanal"}
-                onerror={(event) => {
-                  const img = event.currentTarget as HTMLImageElement;
-                  img.onerror = null;
-                  img.src = schaduleMediaUrlFallback;
-                }}
-              />
-            )}
+            {
+              scheduleIsVideo ? (
+                <video
+                  src={scheduleMediaUrl}
+                  controls
+                  onerror={(event) => {
+                    const video = event.currentTarget as HTMLVideoElement;
+                    video.onerror = null;
+                    video.pause();
+                    video.style.display = "none";
+                    const img = document.createElement("img");
+                    img.src = schaduleMediaUrlFallback;
+                    img.className = video.className;
+                    video.parentElement?.appendChild(img);
+                  }}
+                />
+              ) : (
+                <img
+                  src={scheduleMediaUrl}
+                  alt={currentSchedule?.title?.trim() || "Calendario semanal"}
+                  onerror={(event) => {
+                    const img = event.currentTarget as HTMLImageElement;
+                    img.onerror = null;
+                    img.src = schaduleMediaUrlFallback;
+                  }}
+                />
+              )
+            }
           </div>
           <div class="monthly-card-body">
             <h3>{currentSchedule?.title?.trim() || "Calendario Semanal"}</h3>
-            <p class="schedule-desc">{currentSchedule?.description?.trim() || "Qué día se ve / juega cada cosa. Se actualiza cada semana."}</p>
+            <p class="schedule-desc">
+              {
+                currentSchedule?.description?.trim() ||
+                  "Qué día se ve / juega cada cosa. Se actualiza cada semana."
+              }
+            </p>
             <div style="margin-top:12px">
-              {currentSchedule?.tags?.length && currentSchedule.tags.map((tag) => (
-                  <span
-                    class="tag"
-                    style={`background-color:${tag.bgColor};color:${tag.txColor}`}
-                  >
-                    {tag.label}
-                  </span>
-                ))}
+              {
+                currentSchedule?.tags?.length &&
+                  currentSchedule.tags.map((tag) => (
+                    <span
+                      class="tag"
+                      style={`background-color:${tag.bgColor};color:${tag.txColor}`}
+                    >
+                      {tag.label}
+                    </span>
+                  ))
+              }
             </div>
           </div>
         </div>
 
         <!-- Metas -->
         <div class="monthly-card">
-          <div class="badge" style="background:rgba(0,245,255,.15);border-color:var(--cyan);color:var(--cyan);">METAS</div>
-          <div class="monthly-card-img" style="background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(0,136,255,.07))">
+          <div
+            class="badge"
+            style="background:rgba(0,245,255,.15);border-color:var(--cyan);color:var(--cyan);"
+          >
+            METAS
+          </div>
+          <div
+            class="monthly-card-img"
+            style="background:linear-gradient(135deg,rgba(0,245,255,.1),rgba(0,136,255,.07))"
+          >
             <!--
               ✏️ REEMPLAZAR por tu imagen:
               <img src="/images/metas-marzo.jpg" alt="Metas del Mes">
@@ -157,22 +197,27 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
 
       <!-- Stream cards -->
       <div class="stream-strip reveal">
-        {streams.map((s) => (
-          <div class="stream-card">
-            <span class="twitch-tag">⬡ TWITCH</span>
-            <div><span class="stream-live"></span></div>
-            <h3 set:html={s.title.replace('&', '&amp;')} />
-            <p>{s.desc}</p>
-            <div class="stream-times">
-              {s.times.map((t) => (
-                <div class="time-row">
-                  <span class="time-cc">{t.cc}</span>{t.time}
-                </div>
-              ))}
+        {
+          streams.map((s) => (
+            <div class="stream-card">
+              <span class="twitch-tag">⬡ TWITCH</span>
+              <div>
+                <span class="stream-live" />
+              </div>
+              <h3 set:html={s.title.replace("&", "&amp;")} />
+              <p>{s.desc}</p>
+              <div class="stream-times">
+                {s.times.map((t) => (
+                  <div class="time-row">
+                    <span class="time-cc">{t.cc}</span>
+                    {t.time}
+                  </div>
+                ))}
+              </div>
+              <div class="stream-day">≫ {s.day}</div>
             </div>
-            <div class="stream-day">≫ {s.day}</div>
-          </div>
-        ))}
+          ))
+        }
       </div>
     </div>
   </section>
@@ -182,92 +227,189 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
   /* ── Hero ── */
   #hero {
     min-height: 100vh;
-    display: flex; align-items: center;
-    position: relative; overflow: hidden;
+    display: flex;
+    align-items: center;
+    position: relative;
+    overflow: hidden;
     padding-top: var(--nav-h);
   }
   .hero-bg {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background:
-      radial-gradient(ellipse 80% 70% at 65% 55%, rgba(212,0,255,.1) 0%, transparent 55%),
-      radial-gradient(ellipse 60% 60% at 20% 50%, rgba(0,245,255,.07) 0%, transparent 50%),
+      radial-gradient(
+        ellipse 80% 70% at 65% 55%,
+        rgba(212, 0, 255, 0.1) 0%,
+        transparent 55%
+      ),
+      radial-gradient(
+        ellipse 60% 60% at 20% 50%,
+        rgba(0, 245, 255, 0.07) 0%,
+        transparent 50%
+      ),
       linear-gradient(150deg, #08061a 0%, #04060e 50%, #06030f 100%);
   }
   .hero-grid {
-    position: absolute; inset: 0;
+    position: absolute;
+    inset: 0;
     background-image:
-      linear-gradient(rgba(0,245,255,.04) 1px, transparent 1px),
-      linear-gradient(90deg, rgba(0,245,255,.04) 1px, transparent 1px);
+      linear-gradient(rgba(0, 245, 255, 0.04) 1px, transparent 1px),
+      linear-gradient(90deg, rgba(0, 245, 255, 0.04) 1px, transparent 1px);
     background-size: 56px 56px;
     animation: grid-drift 25s linear infinite;
   }
-  @keyframes grid-drift { to { transform: translateY(56px); } }
-  .hero-particles { position: absolute; inset: 0; overflow: hidden; pointer-events: none; }
+  @keyframes grid-drift {
+    to {
+      transform: translateY(56px);
+    }
+  }
+  .hero-particles {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    pointer-events: none;
+  }
   .hero-particles span {
-    position: absolute; width: 2px; height: 2px; border-radius: 50%;
-    background: var(--cyan); opacity: .4;
+    position: absolute;
+    width: 2px;
+    height: 2px;
+    border-radius: 50%;
+    background: var(--cyan);
+    opacity: 0.4;
     animation: float-p linear infinite;
   }
   @keyframes float-p {
-    0%   { transform: translateY(100vh) translateX(0); opacity: .4; }
-    100% { transform: translateY(-10vh) translateX(var(--dx)); opacity: 0; }
+    0% {
+      transform: translateY(100vh) translateX(0);
+      opacity: 0.4;
+    }
+    100% {
+      transform: translateY(-10vh) translateX(var(--dx));
+      opacity: 0;
+    }
   }
 
   /* ── Layout de 2 columnas ── */
   .hero-inner {
-    position: relative; z-index: 2;
-    width: 100%; max-width: 1140px;
-    margin: 0 auto; padding: 0 48px;
+    position: relative;
+    z-index: 2;
+    width: 100%;
+    max-width: 1140px;
+    margin: 0 auto;
+    padding: 0 48px;
     display: grid;
     grid-template-columns: 1fr 1fr;
     align-items: center;
     gap: 40px;
   }
 
-  .hero-content { animation: hero-in 1s ease both; }
-  @keyframes hero-in { from{opacity:0;transform:translateY(50px)}to{opacity:1;transform:none} }
+  .hero-content {
+    animation: hero-in 1s ease both;
+  }
+  @keyframes hero-in {
+    from {
+      opacity: 0;
+      transform: translateY(50px);
+    }
+    to {
+      opacity: 1;
+      transform: none;
+    }
+  }
 
   .hero-eyebrow {
-    font-family: 'Orbitron', sans-serif; font-size: .7rem;
-    letter-spacing: .3em; color: var(--cyan); text-transform: uppercase;
-    margin-bottom: 18px; display: flex; align-items: center; gap: 12px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.7rem;
+    letter-spacing: 0.3em;
+    color: var(--cyan);
+    text-transform: uppercase;
+    margin-bottom: 18px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
   }
-  .hero-eyebrow::before { content:''; width:36px; height:1px; background:var(--cyan); }
+  .hero-eyebrow::before {
+    content: "";
+    width: 36px;
+    height: 1px;
+    background: var(--cyan);
+  }
 
   .hero-title {
-    font-family: 'Orbitron', sans-serif;
+    font-family: "Orbitron", sans-serif;
     font-size: clamp(3rem, 5vw, 5rem);
-    font-weight: 900; line-height: 1;
+    font-weight: 900;
+    line-height: 1;
     margin-bottom: 24px;
-    white-space: nowrap;   /* ← fix del corte */
+    white-space: nowrap; /* ← fix del corte */
   }
-  .line1 { color: #fff; display: block; }
+  .line1 {
+    color: #fff;
+    display: block;
+  }
   .line2 {
     display: block;
     background: linear-gradient(90deg, var(--cyan), var(--magenta));
-    -webkit-background-clip: text; -webkit-text-fill-color: transparent;
-    filter: drop-shadow(0 0 20px rgba(0,245,255,.4));
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    filter: drop-shadow(0 0 20px rgba(0, 245, 255, 0.4));
   }
 
-  .hero-desc { font-size: 1.05rem; line-height: 1.75; color: var(--text-dim); margin-bottom: 40px; }
-  .hero-btns { display: flex; gap: 16px; flex-wrap: wrap; margin-bottom: 48px; }
-  .hero-stats { display: flex; gap: 32px; }
-  .hero-stat { display: flex; flex-direction: column; }
-  .num { font-family: 'Orbitron', sans-serif; font-size: 1.5rem; font-weight: 900; color: #fff; }
-  .lbl { font-size: .75rem; letter-spacing: .12em; color: var(--text-dim); text-transform: uppercase; }
+  .hero-desc {
+    font-size: 1.05rem;
+    line-height: 1.75;
+    color: var(--text-dim);
+    margin-bottom: 40px;
+  }
+  .hero-btns {
+    display: flex;
+    gap: 16px;
+    flex-wrap: wrap;
+    margin-bottom: 48px;
+  }
+  .hero-stats {
+    display: flex;
+    gap: 32px;
+  }
+  .hero-stat {
+    display: flex;
+    flex-direction: column;
+  }
+  .num {
+    font-family: "Orbitron", sans-serif;
+    font-size: 1.5rem;
+    font-weight: 900;
+    color: #fff;
+  }
+  .lbl {
+    font-size: 0.75rem;
+    letter-spacing: 0.12em;
+    color: var(--text-dim);
+    text-transform: uppercase;
+  }
 
   /* ── Imagen derecha ── */
   .hero-image-wrap {
     position: relative;
-    display: flex; justify-content: center; align-items: flex-end;
-    height: 80vh; max-height: 700px;
+    display: flex;
+    justify-content: center;
+    align-items: flex-end;
+    height: 80vh;
+    max-height: 700px;
     animation: hero-in 1.2s ease both;
   }
   .hero-image-glow {
-    position: absolute; bottom: 0; left: 50%;
+    position: absolute;
+    bottom: 0;
+    left: 50%;
     transform: translateX(-50%);
-    width: 70%; height: 40%;
-    background: radial-gradient(ellipse, rgba(0,245,255,.2) 0%, transparent 70%);
+    width: 70%;
+    height: 40%;
+    background: radial-gradient(
+      ellipse,
+      rgba(0, 245, 255, 0.2) 0%,
+      transparent 70%
+    );
     filter: blur(30px);
     pointer-events: none;
   }
@@ -276,98 +418,275 @@ const scheduleIsVideo = currentSchedule ? isVideo(currentSchedule.fileContentTyp
     width: auto;
     object-fit: contain;
     object-position: bottom;
-    position: relative; z-index: 1;
-    filter: drop-shadow(0 0 30px rgba(0,245,255,.25));
+    position: relative;
+    z-index: 1;
+    filter: drop-shadow(0 0 30px rgba(0, 245, 255, 0.25));
     animation: float-hero 4s ease-in-out infinite;
   }
   @keyframes float-hero {
-    0%,100% { transform: translateY(0); }
-    50%      { transform: translateY(-16px); }
+    0%,
+    100% {
+      transform: translateY(0);
+    }
+    50% {
+      transform: translateY(-16px);
+    }
   }
 
   /* ── Scroll indicator ── */
   .scroll-ind {
-    position: absolute; bottom: 28px; left: 50%; transform: translateX(-50%);
-    display: flex; flex-direction: column; align-items: center; gap: 6px;
-    opacity: .45; animation: bob 2.2s ease infinite; z-index: 3;
+    position: absolute;
+    bottom: 28px;
+    left: 50%;
+    transform: translateX(-50%);
+    display: flex;
+    flex-direction: column;
+    align-items: center;
+    gap: 6px;
+    opacity: 0.45;
+    animation: bob 2.2s ease infinite;
+    z-index: 3;
   }
-  @keyframes bob { 0%,100%{transform:translateX(-50%) translateY(0)} 50%{transform:translateX(-50%) translateY(8px)} }
-  .scroll-ind span { font-family: 'Orbitron', sans-serif; font-size: .6rem; letter-spacing: .25em; color: var(--cyan); }
+  @keyframes bob {
+    0%,
+    100% {
+      transform: translateX(-50%) translateY(0);
+    }
+    50% {
+      transform: translateX(-50%) translateY(8px);
+    }
+  }
+  .scroll-ind span {
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.25em;
+    color: var(--cyan);
+  }
 
   /* ── Responsive ── */
-  @media(max-width: 768px) {
-    .hero-inner { grid-template-columns: 1fr; padding: 0 24px; }
-    .hero-image-wrap { height: 45vh; }
-    .hero-title { white-space: normal; font-size: clamp(2.5rem, 10vw, 3.5rem); }
+  @media (max-width: 768px) {
+    .hero-inner {
+      grid-template-columns: 1fr;
+      padding: 0 24px;
+    }
+    .hero-image-wrap {
+      height: 45vh;
+    }
+    .hero-title {
+      white-space: normal;
+      font-size: clamp(2.5rem, 10vw, 3.5rem);
+    }
   }
 
   /* ── Monthly ── */
-  .monthly-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 24px; }
-  .monthly-card {
-    background: var(--card); border: 1px solid var(--border-p);
-    border-radius: var(--radius); overflow: hidden; position: relative;
-    transition: transform .3s, box-shadow .3s;
+  .monthly-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
   }
-  .monthly-card:hover { transform: translateY(-4px); box-shadow: var(--glow-p); }
+  .monthly-card {
+    background: var(--card);
+    border: 1px solid var(--border-p);
+    border-radius: var(--radius);
+    overflow: hidden;
+    position: relative;
+    transition:
+      transform 0.3s,
+      box-shadow 0.3s;
+  }
+  .monthly-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glow-p);
+  }
   .monthly-card-img {
-    width: 100%; aspect-ratio: 16/9;
-    background: linear-gradient(135deg, rgba(255,45,138,.12), rgba(212,0,255,.08));
-    display: flex; align-items: center; justify-content: center;
-    font-size: 3.5rem; position: relative;
+    width: 100%;
+    aspect-ratio: 16/9;
+    background: linear-gradient(
+      135deg,
+      rgba(255, 45, 138, 0.12),
+      rgba(212, 0, 255, 0.08)
+    );
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-size: 3.5rem;
+    position: relative;
     border-bottom: 1px solid var(--border-p);
   }
-  .monthly-card-img img { width:100%; height:100%; object-fit:cover; position:absolute; inset:0; }
-  .placeholder-label {
-    position: absolute; bottom: 10px; left: 12px;
-    font-family: 'Orbitron', sans-serif; font-size: .6rem;
-    letter-spacing: .15em; color: rgba(255,255,255,.25);
+  .monthly-card-img img {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    position: absolute;
+    inset: 0;
   }
-  .monthly-card-body { padding: 20px 22px; }
-  .monthly-card-body h3 { font-family: 'Orbitron', sans-serif; font-size: .85rem; letter-spacing: .06em; color: #fff; margin-bottom: 8px; }
-  .monthly-card-body p  { font-size: .88rem; color: var(--text-dim); line-height: 1.6; }
-  .monthly-card-body .schedule-desc { white-space: pre-line; }
+  .placeholder-label {
+    position: absolute;
+    bottom: 10px;
+    left: 12px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.6rem;
+    letter-spacing: 0.15em;
+    color: rgba(255, 255, 255, 0.25);
+  }
+  .monthly-card-body {
+    padding: 20px 22px;
+  }
+  .monthly-card-body h3 {
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.85rem;
+    letter-spacing: 0.06em;
+    color: #fff;
+    margin-bottom: 8px;
+  }
+  .monthly-card-body p {
+    font-size: 0.88rem;
+    color: var(--text-dim);
+    line-height: 1.6;
+  }
+  .monthly-card-body .schedule-desc {
+    white-space: pre-line;
+  }
   .badge {
-    position: absolute; top: 12px; right: 12px;
-    font-family: 'Orbitron', sans-serif; font-size: .58rem; letter-spacing: .12em;
-    padding: 4px 10px; border-radius: 4px;
-    background: rgba(255,45,138,.2); border: 1px solid var(--pink); color: var(--pink);
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.58rem;
+    letter-spacing: 0.12em;
+    padding: 4px 10px;
+    border-radius: 4px;
+    background: rgba(255, 45, 138, 0.2);
+    border: 1px solid var(--pink);
+    color: var(--pink);
   }
 
   /* ── Streams ── */
-  .stream-strip { display: grid; grid-template-columns: repeat(3,1fr); gap: 18px; margin-top: 48px; }
-  .stream-card {
-    background: linear-gradient(135deg,rgba(255,45,138,.1),rgba(212,0,255,.05));
-    border: 1px solid var(--border-p); border-radius: var(--radius);
-    padding: 20px; position: relative;
-    transition: transform .3s, box-shadow .3s;
+  .stream-strip {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 18px;
+    margin-top: 48px;
   }
-  .stream-card:hover { transform: translateY(-4px); box-shadow: var(--glow-p); }
-  .stream-card::before { content:''; position:absolute;top:0;left:0;width:3px;height:100%;background:linear-gradient(var(--pink),var(--magenta)); }
-  .stream-live { width:8px;height:8px;border-radius:50%;background:var(--pink);display:inline-block;margin-right:6px;animation:pulse-live 1.5s ease infinite;box-shadow:0 0 8px var(--pink); }
-  @keyframes pulse-live{0%,100%{opacity:1;transform:scale(1)}50%{opacity:.4;transform:scale(.7)}}
-  .stream-card h3 { font-family:'Orbitron',sans-serif;font-size:.75rem;letter-spacing:.06em;color:#fff;margin:6px 0 8px;padding-right:50px;text-transform:uppercase; }
-  .stream-card p  { font-size:.75rem;color:var(--text-dim);line-height:1.55;text-transform:uppercase;letter-spacing:.04em; }
-  .stream-times { display:grid;grid-template-columns:1fr 1fr;gap:4px;margin-top:12px; }
-  .time-row { display:flex;align-items:center;gap:6px;font-size:.68rem;font-family:'Orbitron',sans-serif; }
-  .time-cc  { color:var(--cyan);min-width:18px; }
-  .stream-day { text-align:right;font-family:'Orbitron',sans-serif;font-size:.7rem;color:var(--pink);letter-spacing:.12em;margin-top:10px; }
-  .twitch-tag { position:absolute;top:12px;right:12px;font-size:.6rem;color:rgba(224,230,240,.3);font-family:'Orbitron',sans-serif; }
+  .stream-card {
+    background: linear-gradient(
+      135deg,
+      rgba(255, 45, 138, 0.1),
+      rgba(212, 0, 255, 0.05)
+    );
+    border: 1px solid var(--border-p);
+    border-radius: var(--radius);
+    padding: 20px;
+    position: relative;
+    transition:
+      transform 0.3s,
+      box-shadow 0.3s;
+  }
+  .stream-card:hover {
+    transform: translateY(-4px);
+    box-shadow: var(--glow-p);
+  }
+  .stream-card::before {
+    content: "";
+    position: absolute;
+    top: 0;
+    left: 0;
+    width: 3px;
+    height: 100%;
+    background: linear-gradient(var(--pink), var(--magenta));
+  }
+  .stream-live {
+    width: 8px;
+    height: 8px;
+    border-radius: 50%;
+    background: var(--pink);
+    display: inline-block;
+    margin-right: 6px;
+    animation: pulse-live 1.5s ease infinite;
+    box-shadow: 0 0 8px var(--pink);
+  }
+  @keyframes pulse-live {
+    0%,
+    100% {
+      opacity: 1;
+      transform: scale(1);
+    }
+    50% {
+      opacity: 0.4;
+      transform: scale(0.7);
+    }
+  }
+  .stream-card h3 {
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.75rem;
+    letter-spacing: 0.06em;
+    color: #fff;
+    margin: 6px 0 8px;
+    padding-right: 50px;
+    text-transform: uppercase;
+  }
+  .stream-card p {
+    font-size: 0.75rem;
+    color: var(--text-dim);
+    line-height: 1.55;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .stream-times {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 4px;
+    margin-top: 12px;
+  }
+  .time-row {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-size: 0.68rem;
+    font-family: "Orbitron", sans-serif;
+  }
+  .time-cc {
+    color: var(--cyan);
+    min-width: 18px;
+  }
+  .stream-day {
+    text-align: right;
+    font-family: "Orbitron", sans-serif;
+    font-size: 0.7rem;
+    color: var(--pink);
+    letter-spacing: 0.12em;
+    margin-top: 10px;
+  }
+  .twitch-tag {
+    position: absolute;
+    top: 12px;
+    right: 12px;
+    font-size: 0.6rem;
+    color: rgba(224, 230, 240, 0.3);
+    font-family: "Orbitron", sans-serif;
+  }
 
-  @media(max-width:700px){
-    .hero-content { padding: 0 24px; }
-    .monthly-grid { grid-template-columns: 1fr; }
-    .stream-strip  { grid-template-columns: 1fr; }
+  @media (max-width: 700px) {
+    .hero-content {
+      padding: 0 24px;
+    }
+    .monthly-grid {
+      grid-template-columns: 1fr;
+    }
+    .stream-strip {
+      grid-template-columns: 1fr;
+    }
   }
 </style>
 
 <script>
   // Partículas del hero
-  const cont = document.getElementById('heroParticles');
+  const cont = document.getElementById("heroParticles");
   if (cont) {
     for (let i = 0; i < 20; i++) {
-      const s = document.createElement('span');
-      const dx = (Math.random() - .5) * 140 + 'px';
-      s.style.cssText = `left:${Math.random()*100}%;bottom:-10px;animation-duration:${8+Math.random()*12}s;animation-delay:${Math.random()*14}s;--dx:${dx};`;
+      const s = document.createElement("span");
+      const dx = (Math.random() - 0.5) * 140 + "px";
+      s.style.cssText = `left:${Math.random() * 100}%;bottom:-10px;animation-duration:${8 + Math.random() * 12}s;animation-delay:${Math.random() * 14}s;--dx:${dx};`;
       cont.appendChild(s);
     }
   }
