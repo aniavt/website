@@ -932,7 +932,7 @@ export default function Anime() {
          >
             <div class="flex flex-col gap-4">
                {canCreateAnime.value && (
-                  <div class="flex justify-end">
+                  <div class="flex justify-end sticky top-0 z-10 bg-[var(--bg-secondary)] pb-2">
                      <Button variant="primary" onClick={() => setChapterCreateOpen(true)}>
                         Nuevo capítulo
                      </Button>

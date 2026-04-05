@@ -25,8 +25,8 @@ export default function Modal({ open, onClose, title, children, wide }: Props) {
   return (
     <div class="fixed inset-0 z-40 flex items-center justify-center">
       <div class="absolute inset-0 bg-black/60" onClick={onClose} />
-      <div class={`relative z-50 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-2xl mx-4 ${wide ? "max-w-5xl" : "max-w-lg"}`}>
-        <div class="flex items-center justify-between mb-4">
+      <div class={`relative z-50 w-full rounded-xl border border-[var(--border-subtle)] bg-[var(--bg-secondary)] p-6 shadow-2xl mx-4 flex flex-col max-h-[90vh] ${wide ? "max-w-5xl" : "max-w-lg"}`}>
+        <div class="flex items-center justify-between mb-4 shrink-0">
           <h2 class="text-lg font-semibold text-[var(--text-primary)]">{title}</h2>
           <button
             onClick={onClose}
@@ -35,7 +35,9 @@ export default function Modal({ open, onClose, title, children, wide }: Props) {
             &times;
           </button>
         </div>
-        {children}
+        <div class="overflow-y-auto">
+          {children}
+        </div>
       </div>
     </div>
   );
