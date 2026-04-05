@@ -38,6 +38,8 @@ const { anime, chapters, status } = Astro.props;
                             <Image
                                 src={anime.coverImageURL}
                                 alt={anime.title}
+                                width={332}
+                                height={475}
                                 loading="eager"
                                 fetchpriority="high"
                                 transition:name={anime.coverImageURL}
