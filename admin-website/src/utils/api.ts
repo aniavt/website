@@ -459,6 +459,7 @@ export interface AnimeDto {
   readonly lastAction: AnimeLastAction;
   readonly createdAt: string;
   readonly updatedAt: string;
+  readonly isSeasonalAnime: boolean;
 }
 
 export interface CreateAnimeInput {
@@ -467,6 +468,7 @@ export interface CreateAnimeInput {
   coverImageURL?: string;
   genre: string;
   status: AnimeStatus;
+  isSeasonalAnime:boolean
 }
 
 export interface UpdateAnimeInput {
@@ -475,6 +477,7 @@ export interface UpdateAnimeInput {
   coverImageURL?: string;
   genre?: string;
   status?: AnimeStatus;
+  isSeasonalAnime:boolean
 }
 
 export async function listAnimes(includeInactive = false): Promise<AnimeDto[]> {

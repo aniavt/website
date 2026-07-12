@@ -17,6 +17,7 @@ const animeSchema = new mongoose.Schema({
    },
    createdAt: { type: Date, required: true },
    updatedAt: { type: Date, required: true },
+   isSeasonalAnime : { type : Boolean, required: true}
 });
 
 interface AnimeDocument {
@@ -30,6 +31,7 @@ interface AnimeDocument {
    lastAction: AnimeLastAction;
    createdAt: Date;
    updatedAt: Date;
+   isSeasonalAnime:boolean;
 }
 
 animeSchema.index({ active: 1 });
@@ -46,6 +48,7 @@ function toDocument(entity: Anime): AnimeDocument {
       lastAction: entity.lastAction,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      isSeasonalAnime : entity.isSeasonalAnime
    };
 }
 
@@ -72,9 +75,12 @@ export class MongoDbAnimeRepository implements AnimeRepository {
    }
 
    async findAll(options?: AnimeFindAllOptions): Promise<Anime[]> {
-      const query: { active?: boolean } = {};
+      const query: { active?: boolean, isSeasonalAnime?:boolean } = {};
       if (options?.active !== undefined) {
          query.active = options.active;
+      }
+      if(options?.isSeasonalAnime !== undefined){
+         query.isSeasonalAnime = options.isSeasonalAnime
       }
       const docs = await this.model.find(query).exec();
       return docs.map((doc) => Anime.fromPersistence(doc));

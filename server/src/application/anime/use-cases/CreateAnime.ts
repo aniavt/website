@@ -14,6 +14,7 @@ export interface CreateAnimeInput {
   coverImageURL?: string;
   genre: string;
   status: "watching" | "completed" | "upcoming";
+  isSeasonalAnime: boolean
 }
 
 export class CreateAnimeUseCase {
@@ -36,6 +37,7 @@ export class CreateAnimeUseCase {
       title: input.title,
       description: input.description,
       coverImageURL: input.coverImageURL,
+      isSeasonalAnime: input.isSeasonalAnime,
       genre: input.genre,
       status: input.status,
       active: true,

@@ -39,6 +39,7 @@ const createAnimeSchema: FastifySchema = {
          coverImageURL: { type: "string" },
          genre: { type: "string" },
          status: { type: "string", enum: ["watching", "completed", "upcoming"] },
+         isSeasonalAnime : { type : "boolean"}
       },
       additionalProperties: false,
    },
@@ -53,6 +54,7 @@ const updateAnimeSchema: FastifySchema = {
          coverImageURL: { type: "string" },
          genre: { type: "string" },
          status: { type: "string", enum: ["watching", "completed", "upcoming"] },
+         isSeasonalAnime : { type : "boolean"}
       },
       additionalProperties: false,
    },
@@ -67,7 +69,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
       prefixUrl("/anime"),
       { preHandler: authenticate(userUseCases), schema: createAnimeSchema },
       async (request, reply) => {
-         const body = request.body as { title: string; description?: string; coverImageURL?: string; genre: string; status: "watching" | "completed" | "upcoming" };
+         const body = request.body as { title: string; description?: string; coverImageURL?: string; genre: string; status: "watching" | "completed" | "upcoming", isSeasonalAnime : boolean };
          const result = await animeUseCases.createAnime.execute(request.user!.id, body);
          if (result.isError()) return sendAnimeError(reply, result.error);
          return reply.status(201).send(result.data);
@@ -78,7 +80,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
       prefixUrl("/anime/:id"),
       { preHandler: authenticate(userUseCases), schema: updateAnimeSchema },
       async (request, reply) => {
-         const body = request.body as { title?: string; description?: string; coverImageURL?: string; genre?: string; status?: "watching" | "completed" | "upcoming" };
+         const body = request.body as { title?: string; description?: string; coverImageURL?: string; genre?: string; status?: "watching" | "completed" | "upcoming", isSeasonalAnime : boolean };
          const result = await animeUseCases.updateAnime.execute(request.user!.id, {
             id: request.params.id,
             ...body,
@@ -114,13 +116,14 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
       },
    );
 
-   app.get<{ Querystring: { activeOnly?: string } }>(
+   app.get<{ Querystring: { activeOnly?: string, isSeasonalAnime?:boolean } }>(
       prefixUrl("/anime"),
       { preHandler: optionalAuthenticate(userUseCases) },
       async (request, reply) => {
          const activeOnly = request.query.activeOnly === "true";
+         const isSeasonalAnime = request.query.isSeasonalAnime
          const requesterId = activeOnly ? null : (request.user?.id ?? null);
-         const result = await animeUseCases.listAnimes.execute(requesterId, { activeOnly });
+         const result = await animeUseCases.listAnimes.execute(requesterId, { activeOnly,isSeasonalAnime });
          if (result.isError()) return sendAnimeError(reply, result.error);
          return reply.send(result.data);
       },

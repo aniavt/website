@@ -8,6 +8,7 @@ import { toAnimeDto } from "../dto";
 
 export interface ListAnimesOptions {
    activeOnly?: boolean;
+   isSeasonalAnime?:boolean
 }
 
 export class ListAnimesUseCase {
@@ -25,10 +26,12 @@ export class ListAnimesUseCase {
          }) === true;
 
       const effectiveActiveOnly = options?.activeOnly === true || !canSeeInactive;
+      const isSeasonalAnime = options?.isSeasonalAnime
 
-      const animes = await this.animeRepository.findAll(
-         effectiveActiveOnly ? { active: true } : undefined,
-      );
+      const animes = await this.animeRepository.findAll({
+         ...(effectiveActiveOnly && { active: true }),
+         ...(isSeasonalAnime !== undefined && { isSeasonalAnime }),
+      });
 
       return ok(animes.map(toAnimeDto));
    }

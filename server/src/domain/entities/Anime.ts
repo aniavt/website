@@ -13,6 +13,7 @@ export interface AnimeProps {
   lastAction: AnimeLastAction;
   createdAt: Date;
   updatedAt: Date;
+  isSeasonalAnime:boolean;
 }
 
 export class Anime {
@@ -26,6 +27,7 @@ export class Anime {
   lastAction: AnimeLastAction;
   createdAt: Date;
   updatedAt: Date;
+  isSeasonalAnime:boolean
 
   constructor(props: AnimeProps) {
     this.id = props.id;
@@ -38,6 +40,7 @@ export class Anime {
     this.lastAction = props.lastAction;
     this.createdAt = props.createdAt;
     this.updatedAt = props.updatedAt;
+    this.isSeasonalAnime = props.isSeasonalAnime;
   }
 
   static fromPersistence(props: AnimeProps): Anime {

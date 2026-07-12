@@ -2,6 +2,7 @@ import type { Anime } from "@domain/entities/Anime";
 
 export interface AnimeFindAllOptions {
   active?: boolean;
+  isSeasonalAnime?:boolean
 }
 
 export interface AnimeRepository {

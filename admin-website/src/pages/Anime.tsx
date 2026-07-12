@@ -51,6 +51,7 @@ export default function Anime() {
    const [createGenre, setCreateGenre] = useState("");
    const [createStatus, setCreateStatus] = useState<"watching" | "completed" | "upcoming">("upcoming");
    const [createLoading, setCreateLoading] = useState(false);
+   const [createIsSeasonalAnime, setCreateIsSeasonalAnime] = useState<boolean>(false)
 
    // ── Edit anime modal ────────────────────────────────────────────────────────
    const [editTarget, setEditTarget] = useState<AnimeDto | null>(null);
@@ -62,6 +63,7 @@ export default function Anime() {
    const [editGenre, setEditGenre] = useState("");
    const [editStatus, setEditStatus] = useState<"watching" | "completed" | "upcoming">("upcoming");
    const [editLoading, setEditLoading] = useState(false);
+   const [editIsSeasonalAnime, setEditIsSeasonalAnime] = useState<boolean>(false)
 
    // ── Delete anime confirm modal ──────────────────────────────────────────────
    const [confirmTarget, setConfirmTarget] = useState<AnimeDto | null>(null);
@@ -208,6 +210,7 @@ export default function Anime() {
       setCreateCoverPreviewUrl(null);
       setCreateGenre("");
       setCreateStatus("upcoming");
+      setCreateIsSeasonalAnime(true)
    }
 
    async function submitCreate(e: Event) {
@@ -230,6 +233,7 @@ export default function Anime() {
             coverImageURL,
             genre: createGenre.trim(),
             status: createStatus,
+            isSeasonalAnime: createIsSeasonalAnime
          };
          await createAnime(input);
          addToast("Anime creado correctamente", "success");
@@ -258,6 +262,7 @@ export default function Anime() {
       setEditCoverPreviewUrl(null);
       setEditGenre(item.genre);
       setEditStatus(item.status);
+      setEditIsSeasonalAnime(item.isSeasonalAnime)
    }
 
    async function submitEdit(e: Event) {
@@ -276,6 +281,7 @@ export default function Anime() {
             coverImageURL,
             genre: editGenre.trim() || undefined,
             status: editStatus,
+            isSeasonalAnime: editIsSeasonalAnime
          };
          await updateAnime(editTarget.id, input);
          addToast("Anime actualizado correctamente", "success");
@@ -679,6 +685,15 @@ export default function Anime() {
                      placeholder="Opcional"
                   />
                </label>
+               <label class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                  <input
+                     type="checkbox"
+                     checked={createIsSeasonalAnime}
+                     onChange={(e) => setCreateIsSeasonalAnime(e.currentTarget.checked)}
+                     class="rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]"
+                  />
+                  ¿Anime de temporada?
+               </label>
                <label class="flex flex-col gap-1 text-sm text-[var(--text-secondary)]">
                   <span>Género <span class="text-[var(--error)]">*</span></span>
                   <input
@@ -799,6 +814,15 @@ export default function Anime() {
                      class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none min-h-[80px]"
                      placeholder="Opcional"
                   />
+               </label>
+               <label class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
+                  <input
+                     type="checkbox"
+                     checked={editIsSeasonalAnime}
+                     onChange={(e) => setEditIsSeasonalAnime(e.currentTarget.checked)}
+                     class="rounded border border-[var(--border-subtle)] bg-[var(--bg-tertiary)]"
+                  />
+                  ¿Anime de temporada?
                </label>
                <label class="flex flex-col gap-1 text-sm text-[var(--text-secondary)]">
                   <span>Género</span>

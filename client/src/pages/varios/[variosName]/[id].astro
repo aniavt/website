@@ -1,0 +1,58 @@
+---
+import AnimeChapters from "@/components/AnimeChapters.astro";
+import AnimeHero from "@/components/AnimeHero.astro";
+import Player from "@/components/Player.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getAnimeBySlug, listChaptersByAnime } from "@/lib/anime";
+
+interface Props {
+    iframeURL?: string;
+    anime: any;
+}
+
+const { iframeURL } = Astro.props as Props;
+const { id, animeName } = Astro.params;
+
+const anime = await getAnimeBySlug(animeName!);
+if (!anime) {
+    return Astro.redirect("/404");
+}
+const chapters = await listChaptersByAnime(anime.id);
+const chapter = chapters.find((ch) => String(ch.number) === id);
+if (!chapter) {
+    return Astro.redirect("/404");
+}
+
+const statusLabel: Record<string, { text: string; class: string }> = {
+    watching: { text: "Viendo", class: "status-watching" },
+    completed: { text: "Completado", class: "status-completed" },
+    upcoming: { text: "Próximamente", class: "status-upcoming" },
+};
+const st = statusLabel[anime.status] ?? {
+    text: anime.status,
+    class: "status-upcoming",
+};
+---
+
+<BaseLayout title={`${animeName} — ${id} — Ania Starlight`}>
+    <AnimeHero
+        anime={anime}
+        status={st}
+        chapters={chapters}
+        transition:name="anime-hero"
+    />
+    <Player iframeURL={chapter.videoURL!} />
+    <AnimeChapters
+        chapters={chapters}
+        animeTitle={animeName!}
+        transition:name="anime-chapter"
+    />
+</BaseLayout>
+
+<script>
+    document.addEventListener("astro:page-load", () => {
+        document
+            .querySelector("#playerSection")
+            ?.scrollIntoView({ behavior: "smooth" });
+    });
+</script>

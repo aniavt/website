@@ -13,6 +13,7 @@ export interface UpdateAnimeInput {
    coverImageURL?: string;
    genre?: string;
    status?: "watching" | "completed" | "upcoming";
+   isSeasonalAnime:boolean
 }
 
 export class UpdateAnimeUseCase {
@@ -38,6 +39,7 @@ export class UpdateAnimeUseCase {
       if (input.coverImageURL !== undefined) anime.coverImageURL = input.coverImageURL;
       if (input.genre !== undefined) anime.genre = input.genre;
       if (input.status !== undefined) anime.status = input.status;
+      anime.isSeasonalAnime = input.isSeasonalAnime
       anime.lastAction = "updated";
       anime.updatedAt = new Date();
 

@@ -1,24 +1,18 @@
 ---
-// src/pages/temporada.astro
-import BaseLayout from "@layouts/BaseLayout.astro";
-import AnimeCard from "@components/AnimeCard.astro";
-import { listAnimes } from "@lib/anime";
+// src/pages/varios.astro
+import BaseLayout from '@/layouts/BaseLayout.astro'; 
+import VariosCard from '@/components/VariosCard.astro';
+import { listAnimes } from '@/lib/varios';
 
-const animes = await listAnimes();
-
-//Cantidad de imagenes que se mostrarán en el primer viewport del usuario:
-const imagesInInitialViewport = 12;
+const varios = await listAnimes();
 ---
 
-<BaseLayout title="Temporada — Ania Starlight">
+<BaseLayout title="Animes Varios — Ania Starlight">
     <section class="section-pad" style="padding-top: calc(var(--nav-h) + 60px)">
         <div class="container">
-            <div class="section-label">Animes en curso</div>
-            <h2 class="section-title">
-                Temporada <span class="accent-c">Actual</span>
-            </h2>
+            <div class="section-label">Fuera de temporada</div>
+            <h2 class="section-title">Animes <span class="accent-c">Varios</span></h2>
 
-            <!-- Filtros (client-side) -->
             <div class="filters" id="animeFilters">
                 <button class="filter-btn active" data-filter="all"
                     >Todos</button
@@ -36,12 +30,9 @@ const imagesInInitialViewport = 12;
             <!-- Grid — renderizado en servidor, filtrado en cliente -->
             <div class="anime-grid" id="animeGrid">
                 {
-                    animes.map((anime, i) => (
-                        <div data-status={anime.status}>
-                            <AnimeCard
-                                anime={anime}
-                                eager={i < imagesInInitialViewport}
-                            />
+                    varios.map((vario) => (
+                        <div data-status={vario.status}>
+                            <VariosCard varios={vario} />
                         </div>
                     ))
                 }

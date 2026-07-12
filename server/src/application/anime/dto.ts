@@ -11,6 +11,7 @@ export interface AnimeDto {
    readonly lastAction: string;
    readonly createdAt: Date;
    readonly updatedAt: Date;
+   readonly isSeasonalAnime: boolean;
 }
 
 export function toAnimeDto(entity: Anime): AnimeDto {
@@ -25,5 +26,6 @@ export function toAnimeDto(entity: Anime): AnimeDto {
       lastAction: entity.lastAction,
       createdAt: entity.createdAt,
       updatedAt: entity.updatedAt,
+      isSeasonalAnime : entity?.isSeasonalAnime
    };
 }

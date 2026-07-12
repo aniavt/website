@@ -153,6 +153,20 @@ button { cursor: pointer; border: none; background: none; font-family: inherit; 
 .anime-body { padding: 14px 16px; }
 .anime-body h3 { font-family: 'Orbitron', sans-serif; font-size: .78rem; letter-spacing: .04em; color: #fff; margin-bottom: 6px; line-height: 1.3; }
 .anime-body .meta { font-size: .75rem; color: var(--text-dim); margin-bottom: 10px; }
+.varios-body { padding: 14px 16px; }
+.varios-body h3 { font-family: 'Orbitron', sans-serif; font-size: .78rem; letter-spacing: .04em; color: #fff; margin-bottom: 6px; line-height: 1.3; }
+.varios-body .meta { font-size: .75rem; color: var(--text-dim); margin-bottom: 10px; }
+.varios-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(200px, 1fr)); gap: 20px; }
+.varios-card { background: var(--card); border: 1px solid var(--border-c); border-radius: var(--radius); overflow: hidden; transition: transform .3s, border-color .3s, box-shadow .3s; position: relative; }
+.varios-card:hover { transform: translateY(-6px); border-color: var(--cyan); box-shadow: var(--glow-c); }
+.varios-thumb { aspect-ratio: .7; background: linear-gradient(135deg, rgba(0,245,255,.08), rgba(212,0,255,.06)); display: flex; align-items: center; justify-content: center; font-size: 3.5rem; position: relative; overflow: hidden; }
+.varios-thumb img { width: 100%; height: 100%; object-fit: cover; position: absolute; inset: 0; }
+.varios-thumb .emoji-placeholder { opacity: .25; }
+.varios-status { position: absolute; top: 10px; left: 10px; font-family: 'Orbitron', sans-serif; font-size: .55rem; letter-spacing: .12em; padding: 3px 8px; border-radius: 3px; text-transform: uppercase; }
+.varios-status.inline { position: static; top: auto; left: auto; }
+.varios-body { padding: 14px 16px; }
+.varios-body h3 { font-family: 'Orbitron', sans-serif; font-size: .78rem; letter-spacing: .04em; color: #fff; margin-bottom: 6px; line-height: 1.3; }
+.varios-body .meta { font-size: .75rem; color: var(--text-dim); margin-bottom: 10px; }
 .ep-list { margin-top: 12px; display: flex; flex-direction: column; gap: 6px; }
 .ep-item { display: flex; align-items: center; justify-content: space-between; padding: 6px 10px; border-radius: 5px; background: rgba(0,245,255,.04); border: 1px solid rgba(0,245,255,.1); font-size: .75rem; transition: background .2s, border-color .2s; cursor: pointer; text-decoration: none; color: var(--text); }
 .ep-item:hover { background: rgba(0,245,255,.1); border-color: var(--cyan); color: var(--cyan); }

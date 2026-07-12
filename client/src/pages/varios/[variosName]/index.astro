@@ -1,0 +1,75 @@
+---
+import AnimeHero from "@/components/AnimeHero.astro";
+import AnimeChapters from "@/components/AnimeChapters.astro";
+import BaseLayout from "@/layouts/BaseLayout.astro";
+import { getAnimeBySlug, listChaptersByAnime } from "@/lib/anime";
+import { ACTION_ERROR_CODES } from "astro:actions";
+
+const { animeName } = Astro.params;
+const anime = await getAnimeBySlug(animeName!);
+if (!anime) {
+    return Astro.redirect("/404");
+}
+const chapters = await listChaptersByAnime(anime.id);
+
+const statusLabel: Record<string, { text: string; class: string }> = {
+    watching: { text: "Viendo", class: "status-watching" },
+    completed: { text: "Completado", class: "status-completed" },
+    upcoming: { text: "Próximamente", class: "status-upcoming" },
+};
+const st = statusLabel[anime.status] ?? {
+    text: anime.status,
+    class: "status-upcoming",
+};
+---
+
+<BaseLayout title={`${anime.title} — Ania Starlight`}>
+    <div class="detail-page">
+        <!-- ── HERO ── -->
+        <AnimeHero anime={anime} status={st} chapters={chapters} />
+        <!-- ── LISTA DE EPISODIOS ── -->
+        <AnimeChapters
+            chapters={chapters}
+            animeTitle={animeName!}
+            transition:name="anime-chapter"
+        />
+    </div>
+</BaseLayout>
+
+<style>
+    .detail-page {
+        min-height: 100vh;
+        padding-top: var(--nav-h);
+    }
+
+    .back-btn {
+        display: inline-flex;
+        align-items: center;
+        gap: 8px;
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.68rem;
+        letter-spacing: 0.15em;
+        color: var(--text-dim);
+        margin-bottom: 32px;
+        transition: color 0.2s;
+        text-transform: uppercase;
+    }
+    .back-btn:hover {
+        color: var(--cyan);
+    }
+
+    .cover-emoji {
+        width: 100%;
+        height: 100%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        font-size: 5rem;
+        opacity: 0.4;
+        background: linear-gradient(
+            135deg,
+            rgba(0, 245, 255, 0.06),
+            rgba(212, 0, 255, 0.06)
+        );
+    }
+</style>

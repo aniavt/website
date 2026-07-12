@@ -1,0 +1,74 @@
+---
+// src/components/AnimeCard.astro
+import { type VariosDto, slugify } from "../lib/varios";
+
+interface Props {
+    varios: VariosDto;
+}
+const { varios } = Astro.props;
+
+const statusLabel = {
+    watching: "Viendo",
+    completed: "Completado",
+    upcoming: "Próximo",
+};
+---
+
+<a href={`/varios/${slugify(varios.title)}`} class="varios-card">
+    <div class="varios-thumb">
+        {
+            varios.coverImageURL ? (
+                <img
+                    src={varios.coverImageURL}
+                    alt={varios.title}
+                    loading="lazy"
+                    transition:name={varios.coverImageURL}
+                />
+            ) : (
+                <span class="emoji-placeholder">📺</span>
+            )
+        }
+        <div class={`varios-status status-${varios.status}`}>
+            {statusLabel[varios.status]}
+        </div>
+        <div class="card-hover-overlay">
+            <span class="view-label">VER EPISODIOS →</span>
+        </div>
+    </div>
+    <div class="varios-body">
+        <h3 transition:name={varios.title}>{varios.title}</h3>
+        <div class="meta">{varios.genre}</div>
+    </div>
+</a>
+
+<style>
+    .varios-card {
+        display: block;
+        text-decoration: none;
+    }
+
+    .card-hover-overlay {
+        position: absolute;
+        inset: 0;
+        background: rgba(0, 245, 255, 0.1);
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        opacity: 0;
+        transition: opacity 0.3s;
+    }
+    .varios-card:hover .card-hover-overlay {
+        opacity: 1;
+    }
+    .view-label {
+        font-family: "Orbitron", sans-serif;
+        font-size: 0.65rem;
+        letter-spacing: 0.18em;
+        color: var(--cyan);
+        background: rgba(4, 6, 14, 0.8);
+        padding: 8px 16px;
+        border: 1px solid var(--cyan);
+        border-radius: 4px;
+        box-shadow: var(--glow-c);
+    }
+</style>
