@@ -50,8 +50,8 @@ export const streams: StreamDay[] = [
 export const socials = {
   twitter:    'https://twitter.com/aniastarlight',
   twitch:     'https://twitch.tv/aniastarlight',
-  youtube:    'https://youtube.com/@AniaStarLightVT',
-  instagram:  'https://instagram.com/aniastarlightvt',
+  youtube:    'https://youtube.com/@aniastarlight',
+  instagram:  'https://instagram.com/aniastarlight',
   tiktok:     'https://tiktok.com/@aniastarlightvt',
   discord:    'https://discord.com/invite/WmHv3F43p2',
   throne :    'https://throne.com/aniastarlight',
