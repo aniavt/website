@@ -3,7 +3,7 @@
 import BaseLayout from "../layouts/BaseLayout.astro";
 import { Image } from "astro:assets";
 import { streams } from "../data/config";
-import aniaHero from "../assets/ania-hero.jpg";
+import aniaPortada from "../assets/ania-portada.jpg";
 import { getCurrentWeeklySchedule } from "../lib/api";
 import { getMediaUrl, isImage, isVideo } from "../lib/media";
 
@@ -60,7 +60,7 @@ const scheduleIsVideo = currentSchedule
       <div class="hero-image-wrap">
         <div class="hero-image-glow"></div>
         <Image
-          src={aniaHero}
+          src={aniaPortada}
           alt="Ania Starlight"
           class="hero-image"
           loading="eager"
