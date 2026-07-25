@@ -2,7 +2,7 @@ import { signal, computed } from "@preact/signals";
 import { api } from "@utils";
 import { route } from "preact-router";
 
-export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule" | "vault" | "anime";
+export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule" | "vault" | "anime" | "navItems";
 
 export interface UserPermissions {
   readonly meta: string[];
@@ -11,6 +11,7 @@ export interface UserPermissions {
   readonly weekly_schedule: string[];
   readonly vault: string[];
   readonly anime: string[];
+  readonly navItems : string[];
 }
 
 export interface User {
@@ -46,6 +47,7 @@ export function hasPermission(namespace: PermissionNamespace, permission: string
     case "weekly_schedule": return userHasPermission(user.value, "meta", "manage_weekly_schedule");
     case "vault": return userHasPermission(user.value, "meta", "manage_vault");
     case "anime": return userHasPermission(user.value, "meta", "manage_anime");
+    case "navItems" : return userHasPermission(user.value, "meta", "manage_navItems");
   }
 
   return false;
@@ -104,6 +106,12 @@ export const canManageVaultNodes = computed(() =>
   hasPermission("vault", "update_node") ||
   hasPermission("vault", "delete_node"),
 );
+
+export const canReadNavItems = computed(() => hasPermission("navItems", "restore_navItems"));
+export const canCreateNavItems = computed(() => hasPermission("navItems", "create_navItems"));
+export const canUpdateNavItems = computed(() => hasPermission("navItems", "update_navItems"));
+export const canDeleteNavItems = computed(() => hasPermission("navItems", "delete_navItems"));
+export const canRestoreNavItems = computed(() => hasPermission("navItems", "restore_navItems"));
 
 export const isRootDerived = computed(
   () =>

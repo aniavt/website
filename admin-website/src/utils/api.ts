@@ -546,3 +546,57 @@ export async function updateChapter(id: string, input: UpdateChapterInput): Prom
 export async function deleteChapter(id: string): Promise<void> {
   await api.delete<undefined>(`/chapters/${id}`);
 }
+
+// Nav Items
+
+export type NavItemsLastAction = "created" | "updated" | "deleted" | "restore";
+
+export interface NavItemsDto {
+  readonly id: string;
+  readonly title: string;
+  readonly path: string;
+  readonly position: number;
+  readonly active: boolean;
+  readonly lastAction: NavItemsLastAction;
+  readonly createdAt: string;
+  readonly updatedAt: string;
+}
+
+export interface CreateNavItemsInput {
+  title: string;
+  path: string;
+  position: number;
+}
+
+export interface UpdateNavItemsInput {
+  title: string;
+  path: string;
+  position: number;
+}
+
+export async function listNavItems(includeInactive = false): Promise<NavItemsDto[]> {
+  const params = new URLSearchParams();
+  if (!includeInactive) params.set("activeOnly", "true");
+  const query = params.toString();
+  return api.get<NavItemsDto[]>(`/navItems${query ? `?${query}` : ""}`);
+}
+
+export async function getNavItemsById(id: string): Promise<NavItemsDto> {
+  return api.get<NavItemsDto>(`/navItems/${id}`);
+}
+
+export async function createNavItems(input: CreateNavItemsInput): Promise<NavItemsDto> {
+  return api.post<NavItemsDto>("/navItems", input);
+}
+
+export async function updateNavItems(id: string, input: UpdateNavItemsInput): Promise<NavItemsDto> {
+  return api.patch<NavItemsDto>(`/navItems/${id}`, input);
+}
+
+export async function deleteNavItems(id: string): Promise<void> {
+  await api.delete<undefined>(`/navItems/${id}`);
+}
+
+export async function restoreNavItems(id: string): Promise<NavItemsDto> {
+  return api.post<NavItemsDto>(`/navItems/${id}/restore`);
+}

@@ -14,6 +14,7 @@ export interface UserDto {
         readonly weekly_schedule: string[];
         readonly vault: string[];
         readonly anime: string[];
+        readonly navItems: string[];
     };
 }
 
@@ -32,6 +33,7 @@ export function toUserDto(user: UserEntity): UserDto {
             weekly_schedule: user.permissions.weekly_schedule.getSlugs("weekly_schedule"),
             vault: user.permissions.vault.getSlugs("vault"),
             anime: user.permissions.anime.getSlugs("anime"),
+            navItems: user.permissions. navItems.getSlugs("navItems"),
         },
     };
 }

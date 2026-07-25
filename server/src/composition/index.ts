@@ -101,9 +101,18 @@ import { UploadFileUseCase } from "@application/media/use-cases/UploadFile";
 import { DeleteFileUseCase } from "@application/media/use-cases/DeleteFile";
 import { GetFileUrlUseCase } from "@application/media/use-cases/GetFileUrl";
 
+import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
+import { CreateNavItemsUseCase } from "@application/navItems/use-cases/CreateNavItems";
+import { UpdateNavItemsUseCase } from "@application/navItems/use-cases/UpdateNavItems";
+import { DeleteNavItemsUseCase } from "@application/navItems/use-cases/DeleteNavItems";
+import { RestoreNavItemsUseCase } from "@application/navItems/use-cases/RestoreNavItems";
+import { ListNavItemsUseCase } from "@application/navItems/use-cases/ListNavItems";
+import { GetNavItemsByIdUseCase } from "@application/navItems/use-cases/GetNavItemsById";
+
 // Application external entries
 import { createFastifyServer } from "@infrastructure/http/fastify";
 import { createCli } from "@infrastructure/cli";
+import { MongoDbNavItemsRepository } from "@infrastructure/NavItemsRepository/MongoDb";
 
 
 // Mongo Client
@@ -130,6 +139,7 @@ const vaultNodeTagInfoRepository = new MongoDbVaultNodeTagInfoRepository(mongoCl
 const vaultNodeTagRepository = new MongoDbVaultNodeTagRepository(mongoClient);
 const animeRepository = new MongoDbAnimeRepository(mongoClient);
 const chapterRepository = new MongoDbChapterRepository(mongoClient);
+const navItemsRepository = new MongoDbNavItemsRepository(mongoClient)
 
 const s3Region = Bun.env.S3_REGION;
 const s3Bucket = Bun.env.S3_BUCKET;
@@ -307,12 +317,21 @@ export const chapterUseCases: IChapterUseCases = {
     listChaptersByAnime: new ListChaptersByAnimeUseCase(chapterRepository),
 };
 
+export const navItemsUseCases: INavItemsUseCases = {
+    createNavItems: new CreateNavItemsUseCase(userRepository, idGenerator, navItemsRepository),
+    updateNavItems: new UpdateNavItemsUseCase(userRepository, navItemsRepository),
+    deleteNavItems: new DeleteNavItemsUseCase(userRepository, navItemsRepository),
+    restoreNavItems: new RestoreNavItemsUseCase(userRepository, navItemsRepository),
+    listNavItemss: new ListNavItemsUseCase(userRepository, navItemsRepository),
+    getNavItemsById: new GetNavItemsByIdUseCase(navItemsRepository),
+};
+
 export async function startHttpServer(): Promise<void> {
     const hostname = Bun.env.HOSTNAME || "0.0.0.0";
     await createFastifyServer(
         Number(Bun.env.PORT),
         hostname,
-        { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases, animeUseCases, chapterUseCases },
+        { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases, animeUseCases, chapterUseCases, navItemsUseCases },
     );
 }
 

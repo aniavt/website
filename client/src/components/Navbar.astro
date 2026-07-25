@@ -1,12 +1,17 @@
 ---
 // src/components/Navbar.astro
+import { type NavItemsDto, slugify, listNavItems } from "../lib/navItems";
+
+const items = await listNavItems();
+
 const navLinks = [
-  { href: '/',            label: 'Inicio' },
-  { href: '/temporada',   label: 'Temporada' },
-  { href: '/manga',       label: 'Manga' },
-  { href: '/varios',      label: 'Animes Varios' },
-  { href: '/faq',         label: 'FAQ & Staff' },
-  { href: '/hemeroteca',  label: 'Hemeroteca' },
+  { href: "/", label: "Inicio" },
+  ...items
+    .sort((a, b) => a.position - b.position)
+    .map((item) => ({
+      href: "/" + item.path,
+      label: item.title,
+    })),
 ];
 
 const currentPath = Astro.url.pathname.replace(/\/$/, '') || '/';
