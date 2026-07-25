@@ -5,6 +5,7 @@ import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { IVaultUseCases } from "@application/vault/IVaultUseCases";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
+import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
@@ -17,6 +18,7 @@ import { registerMediaRoutes } from "./routes/media";
 import { registerVaultRoutes } from "./routes/vault";
 import { registerAnimeRoutes } from "./routes/anime";
 import { registerChapterRoutes } from "./routes/chapter";
+import { registerNavItemsRoutes } from "./routes/navItems";
 
 
 export interface FastifyServerDependencies {
@@ -27,6 +29,7 @@ export interface FastifyServerDependencies {
     vaultUseCases: IVaultUseCases;
     animeUseCases: IAnimeUseCases;
     chapterUseCases: IChapterUseCases;
+    navItemsUseCases: INavItemsUseCases;
 }
 
 export async function createFastifyServer(
@@ -34,7 +37,7 @@ export async function createFastifyServer(
     listenHostname: string,
     deps: FastifyServerDependencies
 ): Promise<void> {
-    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases, animeUseCases, chapterUseCases } = deps;
+    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases, animeUseCases, chapterUseCases, navItemsUseCases } = deps;
     const app = Fastify({ bodyLimit: 2 * 1024 * 1024 * 1024 }); // 2 GB
     const prefixUrl = (path: string) => path === "/" ? "" : path;
 
@@ -65,6 +68,7 @@ export async function createFastifyServer(
     registerVaultRoutes(app, prefixUrl, { userUseCases, vaultUseCases, mediaUseCases });
     registerAnimeRoutes(app, prefixUrl, { userUseCases, animeUseCases });
     registerChapterRoutes(app, prefixUrl, { userUseCases, chapterUseCases });
+    registerNavItemsRoutes(app, prefixUrl, { userUseCases, navItemsUseCases });
 
     await app.listen({ port: listenPort, host: listenHostname }).then(() => {
         console.log(`Server is running on port ${listenPort}`);

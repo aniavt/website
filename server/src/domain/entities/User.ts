@@ -7,6 +7,7 @@ import {
     WeeklySchedulePermission,
     VaultPermission,
     AnimePermission,
+    NavItemsPermission
 } from "@domain/value-object/Permissions";
 
 
@@ -30,6 +31,7 @@ type PermissionType =
     | { type: "weekly_schedule", permission: WeeklySchedulePermission }
     | { type: "vault", permission: VaultPermission }
     | { type: "anime", permission: AnimePermission }
+    | { type: "navItems", permission: NavItemsPermission }
 
 export class UserEntity {
     readonly id: string;
@@ -70,6 +72,7 @@ export class UserEntity {
                 weekly_schedule: WeeklySchedulePermission.fromValue(Permission.NONE.valueOf()),
                 vault: VaultPermission.fromValue(Permission.NONE.valueOf()),
                 anime: AnimePermission.fromValue(Permission.NONE.valueOf()),
+                navItems : NavItemsPermission.fromValue(Permission.NONE.valueOf()),
             }
         });
 
@@ -92,6 +95,7 @@ export class UserEntity {
                 weekly_schedule: WeeklySchedulePermission.fromValue(props.permissions.weekly_schedule ?? Permission.NONE.valueOf()),
                 vault: VaultPermission.fromValue(props.permissions.vault ?? Permission.NONE.valueOf()),
                 anime: AnimePermission.fromValue(props.permissions.anime ?? Permission.NONE.valueOf()),
+                navItems : NavItemsPermission.fromValue(props.permissions.navItems ?? Permission.NONE.valueOf())
             }
         });
     }
@@ -133,6 +137,7 @@ export class UserEntity {
             case "weekly_schedule": return this.permissions.meta.has(ManagePermission.MANAGE_WEEKLY_SCHEDULE);
             case "vault": return this.permissions.meta.has(ManagePermission.MANAGE_VAULT);
             case "anime": return this.permissions.meta.has(ManagePermission.MANAGE_ANIME);
+            case "navItems": return this.permissions.meta.has(ManagePermission.MANAGE_NAVITEMS);
         }
         return false;
     }

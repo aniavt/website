@@ -165,6 +165,14 @@ export default function Users() {
     },
   ];
 
+  const navItemsPermissionsConfig: { slug: string; label: string }[] = [
+    { slug: "read_navItems", label: "Ver Navegacion" },
+    { slug: "create_navItems", label: "Crear Navegacion" },
+    { slug: "delete_navItems", label: "Eliminar Navegacion" },
+    { slug: "update_navItems", label: "Actualizar Navegacion"},
+    { slug: "restore_navItems", label: "Restaurar Navegacion" },
+  ];
+
   const vaultPermissionsConfig: { slug: string; label: string }[] = [
     { slug: "create_node", label: "Crear nodos" },
     { slug: "update_node", label: "Actualizar nodos" },
@@ -451,6 +459,39 @@ export default function Users() {
                         onChange={(e) =>
                           togglePermission(
                             "weekly_schedule",
+                            p.slug,
+                            (e.target as HTMLInputElement).checked,
+                          )
+                        }
+                      />
+                      <span>{p.label}</span>
+                    </label>
+                  );
+                })}
+              </div>
+            </div>
+
+            <div>
+              <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">
+                Navegacion
+              </h3>
+              <div class="flex flex-col gap-1">
+                {navItemsPermissionsConfig.map((p) => {
+                  const full = `navItems.${p.slug}`;
+                  const checked = permissions.navItems.includes(full);
+                  const canEdit = canManageUserPermissions.value;
+                  return (
+                    <label
+                      key={p.slug}
+                      class="flex items-center gap-2 text-sm text-[var(--text-secondary)]"
+                    >
+                      <input
+                        type="checkbox"
+                        checked={checked}
+                        disabled={!canEdit}
+                        onChange={(e) =>
+                          togglePermission(
+                            "navItems",
                             p.slug,
                             (e.target as HTMLInputElement).checked,
                           )

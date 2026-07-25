@@ -8,6 +8,7 @@ import {
     WeeklySchedulePermission,
     VaultPermission,
     type Permission,
+    NavItemsPermission,
 } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { UserEntity } from "@domain/entities/User";
@@ -47,6 +48,7 @@ export class ManagePermissionUseCase {
                 case "user": return UserPermission;
                 case "faq":  return FAQPermission;
                 case "weekly_schedule": return WeeklySchedulePermission;
+                case "navItems": return NavItemsPermission;
                 case "vault": return VaultPermission;
             }
             return "permission_invalid_namespace";
@@ -84,6 +86,11 @@ export class ManagePermissionUseCase {
             case "vault":
                 if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_VAULT }))
                     return err("permission_not_authorized");
+                break;
+
+            case "navItems":
+                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_NAVITEMS }))
+                        return err("permission_not_authorized");
                 break;
         }
 

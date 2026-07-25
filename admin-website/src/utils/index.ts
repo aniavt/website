@@ -61,6 +61,15 @@ export {
   createChapter,
   updateChapter,
   deleteChapter,
+  // NavItems
+  type NavItemsDto,
+  type CreateNavItemsInput,
+  type UpdateNavItemsInput,
+  listNavItems,
+  createNavItems,
+  updateNavItems,
+  deleteNavItems,
+  restoreNavItems,
 } from "./api";
 export { t } from "./i18n";
 

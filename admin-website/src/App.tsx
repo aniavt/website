@@ -15,6 +15,7 @@ import Profile from "@pages/Profile";
 import WeeklySchedule from "@pages/WeeklySchedule";
 import Vault from "@pages/Vault";
 import Anime from "@pages/Anime";
+import NavItems from "@pages/NavItems";
 
 // Show vite.config.ts base path
 const basePath = (path: string) => `/admin${path === "/" ? "" : path}`;
@@ -123,6 +124,15 @@ export default function App() {
         )}
       />
       <Route path={basePath("/profile")} component={() => <AuthGuard component={Profile} />} />
+      <Route
+        path={basePath("/navItems")}
+        component={() => (
+          <PermissionGuard
+            component={NavItems}
+            required={[{ namespace: "navItems", permission: "read_navItems" }]}
+          />
+        )}
+      />
     </Router>
   );
 }

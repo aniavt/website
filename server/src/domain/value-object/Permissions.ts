@@ -2,7 +2,7 @@ import { BiMap } from "@lib/bi-map";
 
 
 const mask = (bit: number) => 1 << bit;
-export const namespaces = ["meta", "user", "faq", "weekly_schedule", "vault", "anime"] as const;
+export const namespaces = ["meta", "user", "faq", "weekly_schedule", "vault", "anime", "navItems"] as const;
 
 export type PermissionNamespace = typeof namespaces[number];
 
@@ -91,6 +91,7 @@ export class ManagePermission extends Permission {
     static readonly MANAGE_WEEKLY_SCHEDULE = new this(mask(this.getLastBitSlugMap() + 4));
     static readonly MANAGE_VAULT = new this(mask(this.getLastBitSlugMap() + 5));
     static readonly MANAGE_ANIME = new this(mask(this.getLastBitSlugMap() + 6));
+    static readonly MANAGE_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 7));
 
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
         [this.getLastBitSlugMap() + 1, "meta_manage_permissions"],
@@ -99,6 +100,7 @@ export class ManagePermission extends Permission {
         [this.getLastBitSlugMap() + 4, "manage_weekly_schedule"],
         [this.getLastBitSlugMap() + 5, "manage_vault"],
         [this.getLastBitSlugMap() + 6, "manage_anime"],
+        [this.getLastBitSlugMap() + 7, "manage_navItems"],
     ]);
 }
 
@@ -204,5 +206,29 @@ export class AnimePermission extends Permission {
         [this.getLastBitSlugMap() + 3, "delete_anime"],
         [this.getLastBitSlugMap() + 4, "update_anime"],
         [this.getLastBitSlugMap() + 5, "restore_anime"],
+    ]);
+}
+
+export class NavItemsPermission extends Permission {
+    static readonly READ_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 1));
+    static readonly CREATE_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 2));
+    static readonly DELETE_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 3));
+    static readonly UPDATE_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 4));
+    static readonly RESTORE_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 5));
+
+    static readonly MANAGE_NAVITEMS = new this().add(
+        this.READ_NAVITEMS,
+        this.CREATE_NAVITEMS,
+        this.DELETE_NAVITEMS,
+        this.UPDATE_NAVITEMS,
+        this.RESTORE_NAVITEMS,
+    );
+
+    protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
+        [this.getLastBitSlugMap() + 1, "read_navItems"],
+        [this.getLastBitSlugMap() + 2, "create_navItems"],
+        [this.getLastBitSlugMap() + 3, "delete_navItems"],
+        [this.getLastBitSlugMap() + 4, "update_navItems"],
+        [this.getLastBitSlugMap() + 5, "restore_navItems"],
     ]);
 }
