@@ -1,6 +1,7 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
 import { api, ApiError } from "@utils/api";
 import { t } from "@utils/i18n";
+import { formatDate } from "@utils/labels";
 import { addToast } from "@store/toast";
 import type { UserPermissions } from "@ania/api-contract/user";
 import {
@@ -288,7 +289,7 @@ export default function Users() {
     {
       key: "createdAt",
       header: "Creado",
-      render: (u) => <span class="text-xs text-[var(--text-muted)]">{new Date(u.createdAt).toLocaleDateString()}</span>,
+      render: (u) => <span class="text-xs text-[var(--text-muted)]">{formatDate(u.createdAt)}</span>,
       class: "w-28",
     },
     {

@@ -27,6 +27,7 @@ import {
   ApiError,
 } from "@utils/api";
 import { t } from "@utils/i18n";
+import { formatDate, lastActionLabel } from "@utils/labels";
 
 type ScheduleTag = { label: string; bgColor: string; txColor: string };
 
@@ -87,13 +88,6 @@ export default function WeeklySchedule() {
   const [editingTarget, setEditingTarget] = useState<WeeklyScheduleDto | null>(null);
   const [viewOpen, setViewOpen] = useState(false);
   const [viewTarget, setViewTarget] = useState<WeeklyScheduleDto | null>(null);
-
-  const historyActionLabels: Record<string, string> = {
-    created: "Creado",
-    updated: "Actualizado",
-    deleted: "Eliminado",
-    restored: "Restaurado",
-  };
 
   const fetchItems = useCallback(async () => {
     if (!canReadWeeklySchedule.value) {
@@ -806,11 +800,11 @@ export default function WeeklySchedule() {
               >
                 <div>
                   <div class="font-medium text-[var(--text-primary)]">
-                    {historyActionLabels[h.action] ?? h.action} por {h.byUsername}
+                    {lastActionLabel[h.action] ?? h.action} por {h.byUsername}
                   </div>
                 </div>
                 <div class="text-xs text-[var(--text-muted)]">
-                  {new Date(h.timestamp).toLocaleString()}
+                  {formatDate(h.timestamp, { withTime: true })}
                 </div>
               </div>
             ))}

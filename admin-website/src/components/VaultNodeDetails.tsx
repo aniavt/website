@@ -27,6 +27,7 @@ import {
   ApiError,
 } from "@utils/api";
 import { t } from "@utils/i18n";
+import { formatDate } from "@utils/labels";
 
 interface VaultNodeDetailsProps {
   node: VaultNodeDto | null;
@@ -288,7 +289,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
             </div>
             <div class="flex justify-between gap-2">
               <dt class="font-medium">Creado</dt>
-              <dd>{node.createdAt ? new Date(node.createdAt).toLocaleString() : "—"}</dd>
+              <dd>{formatDate(node.createdAt, { withTime: true })}</dd>
             </div>
             <div class="flex justify-between gap-2">
               <dt class="font-medium">Thumbnail</dt>
@@ -433,7 +434,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
                   </span>
                 </div>
                 <span class="text-[10px] text-[var(--text-muted)] whitespace-nowrap">
-                  {new Date(s.createdAt).toLocaleString()}
+                  {formatDate(s.createdAt, { withTime: true })}
                 </span>
                 {canEdit && (
                   <div class="flex items-center gap-1">

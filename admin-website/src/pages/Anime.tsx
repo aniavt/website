@@ -27,6 +27,7 @@ import {
    uploadMediaFile,
    ApiError,
 } from "@utils/api";
+import { lastActionLabel } from "@utils/labels";
 
 const LIMIT = 15;
 
@@ -99,15 +100,6 @@ export default function Anime() {
    // Chapter delete confirm
    const [chapterDeleteTarget, setChapterDeleteTarget] = useState<ChapterDto | null>(null);
    const [chapterDeleteLoading, setChapterDeleteLoading] = useState(false);
-
-   // ── Labels ──────────────────────────────────────────────────────────────────
-
-   const lastActionLabel: Record<string, string> = {
-      created: "Creado",
-      updated: "Actualizado",
-      deleted: "Eliminado",
-      restore: "Restaurado",
-   };
 
    // ── Cover/video preview effects ─────────────────────────────────────────────
    useEffect(() => {

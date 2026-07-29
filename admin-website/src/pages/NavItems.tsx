@@ -25,6 +25,7 @@ import {
    restoreNavItems,
    ApiError,
 } from "@utils/api";
+import { lastActionLabel } from "@utils/labels";
 
 const LIMIT = 15;
 
@@ -56,15 +57,6 @@ export default function NavItems() {
 
    // ── Restore loading ─────────────────────────────────────────────────────────
    const [restoreLoadingId, setRestoreLoadingId] = useState<string | null>(null);
-
-   // ── Labels ──────────────────────────────────────────────────────────────────
-
-   const lastActionLabel: Record<string, string> = {
-      created: "Creado",
-      updated: "Actualizado",
-      deleted: "Eliminado",
-      restore: "Restaurado",
-   };
 
    // ── Fetch animes ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
    const fetchItems = useCallback(async () => {

@@ -18,6 +18,7 @@ import {
 } from "@store/auth";
 import { api, ApiError } from "@utils/api";
 import { t } from "@utils/i18n";
+import { formatDate } from "@utils/labels";
 import { addToast } from "@store/toast";
 import Layout from "@components/Layout";
 import Button from "@components/Button";
@@ -103,7 +104,7 @@ export default function Profile() {
           </div>
           <div>
             <h2 class="text-lg font-semibold text-[var(--text-primary)]">{u.username}</h2>
-            <p class="text-xs text-[var(--text-muted)]">Miembro desde {new Date(u.createdAt).toLocaleDateString()}</p>
+            <p class="text-xs text-[var(--text-muted)]">Miembro desde {formatDate(u.createdAt)}</p>
           </div>
         </div>
         <div class="flex flex-col gap-2">

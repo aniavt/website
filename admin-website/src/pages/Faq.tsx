@@ -2,12 +2,12 @@ import { useState, useEffect, useCallback } from "preact/hooks";
 import type {
   FaqItemPublicDto,
   FaqHistoryEntryDto,
-  FaqHistoryAction,
   CreateFaqItemInput,
   UpdateFaqItemInput,
 } from "@ania/api-contract/faq";
 import { api, ApiError } from "@utils/api";
 import { t } from "@utils/i18n";
+import { formatDate, lastActionLabel } from "@utils/labels";
 import { addToast } from "@store/toast";
 import {
   canManageFaqRead,
@@ -116,13 +116,6 @@ export default function Faq() {
       setHistoryLoading(false);
     }
   }
-
-  const actionLabels: Record<FaqHistoryAction, string> = {
-    created: "Creado",
-    updated: "Actualizado",
-    deleted: "Eliminado",
-    restore: "Restaurado",
-  };
 
   const columns: Column<FaqItemPublicDto>[] = [
     {
@@ -259,12 +252,12 @@ export default function Faq() {
               <div key={entry.id} class="flex items-center justify-between rounded-lg bg-[var(--bg-tertiary)] px-4 py-3 border border-[var(--border-subtle)]">
                 <div>
                   <span class="text-sm font-medium text-[var(--text-primary)]">
-                    {actionLabels[entry.action]}
+                    {lastActionLabel[entry.action] ?? entry.action}
                   </span>
                   <span class="text-xs text-[var(--text-muted)] ml-2">por {entry.byUsername}</span>
                 </div>
                 <span class="text-xs text-[var(--text-muted)]">
-                  {new Date(entry.timestamp).toLocaleString()}
+                  {formatDate(entry.timestamp, { withTime: true })}
                 </span>
               </div>
             ))}
