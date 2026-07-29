@@ -4,13 +4,9 @@ import { VaultPermission } from "@domain/value-object/Permissions";
 import { err, type Result } from "@lib/result";
 import type { VaultError } from "../errors";
 import type { VaultNodeSourceEntity } from "@domain/entities/Vault";
+import type { AddVaultSourceToNodeInput } from "../dto";
 
-export interface AddSourceToNodeInput {
-    nodeId: string;
-    type: "external" | "internal";
-    server: string | null;
-    urlOrFileId: string;
-}
+export type AddSourceToNodeInput = AddVaultSourceToNodeInput & { nodeId: string };
 
 export class AddSourceToNodeUseCase {
     constructor(
@@ -31,7 +27,12 @@ export class AddSourceToNodeUseCase {
 
         if (!canUpdate) return err("vault_not_authorized");
 
-        return await this.vaultService.addSourceToNode(input);
+        if (!input.urlOrFileId) return err("vault_invalid_input");
+
+        return await this.vaultService.addSourceToNode({
+            ...input,
+            urlOrFileId: input.urlOrFileId,
+        });
     }
 }
 

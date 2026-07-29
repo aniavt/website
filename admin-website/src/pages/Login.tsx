@@ -1,6 +1,7 @@
 import { useState, useEffect } from "preact/hooks";
 import { login, isAuthenticated, user } from "@store/auth";
-import { ApiError, t } from "@utils";
+import { ApiError } from "@utils/api";
+import { t } from "@utils/i18n";
 import Button from "@components/Button";
 import Input from "@components/Input";
 import ToastContainer from "@components/Toast";

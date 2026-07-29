@@ -5,13 +5,9 @@ import { UserEntity } from "@domain/entities/User";
 import { type Result, err, ok } from "@lib/result";
 import type { UserError } from "../errors";
 import { validatePassword, validateUsername } from "../utils";
-import { type UserDto, toUserDto } from "../dto";
+import { type UserDto, toUserDto, type CreateUserInput } from "../dto";
 
-
-export interface CreateUserInput {
-    username: string;
-    password: string;
-}
+export type { CreateUserInput };
 
 export class CreateUserUseCase {
     constructor(

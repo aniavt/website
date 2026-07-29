@@ -16,7 +16,8 @@ import {
   canManageUserPermissions,
   canManageFaqPermissions,
 } from "@store/auth";
-import { api, ApiError, t } from "@utils";
+import { api, ApiError } from "@utils/api";
+import { t } from "@utils/i18n";
 import { addToast } from "@store/toast";
 import Layout from "@components/Layout";
 import Button from "@components/Button";

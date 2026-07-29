@@ -4,13 +4,9 @@ import { VaultPermission } from "@domain/value-object/Permissions";
 import { err, type Result } from "@lib/result";
 import type { VaultError } from "../errors";
 import type { VaultNodeSourceEntity } from "@domain/entities/Vault";
+import type { UpdateVaultSourceInput } from "../dto";
 
-export interface UpdateSourceInput {
-    sourceId: string;
-    type?: "external" | "internal";
-    server?: string | null;
-    urlOrFileId?: string;
-}
+export type UpdateSourceInput = UpdateVaultSourceInput & { sourceId: string };
 
 export class UpdateSourceUseCase {
     constructor(

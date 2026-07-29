@@ -4,15 +4,11 @@ import type { IdGenerator } from "@domain/services/IdGenerator";
 import { NavItemsPermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { NavItemsError } from "../errors";
-import { toNavItemsDto, type NavItemsDto } from "../dto";
+import { toNavItemsDto, type NavItemsDto, type CreateNavItemsInput } from "../dto";
 import { NavItems } from "@domain/entities/NavItems";
 import type { NavItemsRepository } from "@domain/repositories/NavItemsRepository";
 
-export interface CreateNavItemsInput {
-  title: string;
-  path: string;
-  position: number;
-}
+export type { CreateNavItemsInput };
 
 export class CreateNavItemsUseCase {
   constructor(

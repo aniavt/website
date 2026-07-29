@@ -1,7 +1,7 @@
 ---
 // src/pages/hemeroteca.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
-import type { VaultNodeDto } from '../lib/vault/types';
+import type { VaultNodeDto } from '@ania/api-contract/vault';
 import { fetchVaultChildren } from '../lib/vault/api';
 
 const parentIdParam = Astro.url.searchParams.get("parentId");

@@ -1,12 +1,4 @@
-export interface NavItemsDto {
-  readonly id: string;
-  readonly title: string;
-  readonly path: string;
-  readonly position: number;
-  readonly active: boolean;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
+import type { NavItemsDto } from "@ania/api-contract/nav-items";
 
 export function slugify(title: string): string {
   return title

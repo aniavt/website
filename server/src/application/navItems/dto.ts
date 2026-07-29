@@ -1,15 +1,7 @@
 import type { NavItems } from "@domain/entities/NavItems";
+import type { NavItemsDto } from "@ania/api-contract/nav-items";
 
-export interface NavItemsDto {
-   readonly id: string;
-   readonly title: string;
-   readonly path: string;
-   readonly position: number;
-   readonly active: boolean;
-   readonly lastAction: string;
-   readonly createdAt: Date;
-   readonly updatedAt: Date;
-}
+export type { NavItemsDto, NavItemsLastAction, CreateNavItemsInput, UpdateNavItemsInput } from "@ania/api-contract/nav-items";
 
 export function toNavItemsDto(entity: NavItems): NavItemsDto {
    return {
@@ -19,7 +11,7 @@ export function toNavItemsDto(entity: NavItems): NavItemsDto {
       position: entity.position,
       active: entity.active,
       lastAction: entity.lastAction,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
    };
 }

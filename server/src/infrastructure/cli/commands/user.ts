@@ -6,8 +6,8 @@ import type { PaginationOptions } from "@domain/repositories/UserRepository";
 
 function printUser(data: UserDto) {
   console.log(`User: ${data.username} (${data.id})`);
-  console.log(`  Created: ${data.createdAt.toISOString()}`);
-  console.log(`  Updated: ${data.updatedAt.toISOString()}`);
+  console.log(`  Created: ${data.createdAt}`);
+  console.log(`  Updated: ${data.updatedAt}`);
   console.log(`  Is Active: ${data.isActive}`);
   console.log(`  Permissions: ${data.permissions.user.join(", ")}`);
   console.log(`  FAQ Permissions: ${data.permissions.faq.join(", ")}`);

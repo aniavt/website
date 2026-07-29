@@ -1,41 +1,21 @@
 import type { FaqText } from "@domain/entities/FaqText";
 import type { FaqItem } from "@domain/entities/FaqItem";
 import type { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
+import type {
+    FaqTextDto,
+    FaqItemDto,
+    FaqItemPublicDto,
+    FaqHistoryEntryDto,
+} from "@ania/api-contract/faq";
 
-
-export interface FaqTextDto {
-    readonly id: string;
-    readonly value: string;
-}
-
-/** Internal: ids para versionado. No exponer al cliente. */
-export interface FaqItemDto {
-    readonly id: string;
-    readonly queryId: string;
-    readonly answerId: string;
-    readonly isActive: boolean;
-    readonly lastAction: string;
-}
-
-/** Respuesta pública: query y answer como texto. */
-export interface FaqItemPublicDto {
-    readonly id: string;
-    readonly query: string;
-    readonly answer: string;
-    readonly isActive: boolean;
-    readonly lastAction: string;
-}
-
-export interface FaqHistoryEntryDto {
-    readonly id: string;
-    readonly faqId: string;
-    readonly queryId: string;
-    readonly answerId: string;
-    readonly action: string;
-    readonly by: string;
-    readonly byUsername: string;
-    readonly timestamp: Date;
-}
+export type {
+    FaqTextDto,
+    FaqItemDto,
+    FaqItemPublicDto,
+    FaqHistoryEntryDto,
+    CreateFaqItemInput,
+    UpdateFaqItemInput,
+} from "@ania/api-contract/faq";
 
 export function toFaqTextDto(entity: FaqText): FaqTextDto {
     return { id: entity.id, value: entity.value };
@@ -70,6 +50,6 @@ export function toFaqHistoryEntryDto(entity: FaqHistoryEntry, byUsername: string
         action: entity.action,
         by: entity.by,
         byUsername,
-        timestamp: entity.timestamp,
+        timestamp: entity.timestamp.toISOString(),
     };
 }

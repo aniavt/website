@@ -1,35 +1,18 @@
 import type { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import type { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
+import type {
+    WeeklyScheduleTagDto,
+    WeeklyScheduleDto,
+    WeeklyScheduleHistoryEntryDto,
+} from "@ania/api-contract/weekly-schedule";
 
-export interface WeeklyScheduleTagDto {
-    readonly label: string;
-    readonly bgColor: string;
-    readonly txColor: string;
-}
-
-export interface WeeklyScheduleDto {
-    readonly id: string;
-    readonly week: number;
-    readonly year: number;
-    readonly fileId: string;
-    readonly isDeleted: boolean;
-    readonly title: string;
-    readonly description: string;
-    readonly tags: readonly WeeklyScheduleTagDto[];
-    readonly fileContentType?: string | null;
-}
-
-export interface WeeklyScheduleHistoryEntryDto {
-    readonly id: string;
-    readonly scheduleId: string;
-    readonly week: number;
-    readonly year: number;
-    readonly fileId: string;
-    readonly action: string;
-    readonly by: string;
-    readonly byUsername: string;
-    readonly timestamp: Date;
-}
+export type {
+    WeeklyScheduleTagDto,
+    WeeklyScheduleDto,
+    WeeklyScheduleHistoryEntryDto,
+    CreateWeeklyScheduleInput,
+    UpdateWeeklyScheduleInput,
+} from "@ania/api-contract/weekly-schedule";
 
 export function toWeeklyScheduleDto(schedule: WeeklySchedule, fileContentType?: string | null): WeeklyScheduleDto {
     return {
@@ -58,6 +41,6 @@ export function toWeeklyScheduleHistoryEntryDto(
         action: entry.action,
         by: entry.by,
         byUsername,
-        timestamp: entry.timestamp,
+        timestamp: entry.timestamp.toISOString(),
     };
 }

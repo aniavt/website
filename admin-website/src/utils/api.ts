@@ -1,4 +1,39 @@
 import { apiUrl } from "@config";
+import type {
+  WeeklyScheduleDto,
+  WeeklyScheduleHistoryEntryDto,
+  UpdateWeeklyScheduleInput,
+} from "@ania/api-contract/weekly-schedule";
+import type {
+  VaultNodeDto,
+  VaultTagDto,
+  VaultNodeSourceDto,
+  CreateVaultFolderInput,
+  CreateVaultFileNodeInput as CreateVaultFileNodeBody,
+  MoveVaultNodeInput,
+  AddVaultSourceToNodeInput as AddVaultSourceToNodeBody,
+  UpdateVaultSourceInput,
+} from "@ania/api-contract/vault";
+import type { UploadMediaResult } from "@ania/api-contract/media";
+import type {
+  AnimeDto,
+  CreateAnimeInput,
+  UpdateAnimeInput,
+} from "@ania/api-contract/anime";
+import type {
+  ChapterDto,
+  CreateChapterInput,
+  UpdateChapterInput,
+} from "@ania/api-contract/chapter";
+import type {
+  NavItemsDto,
+  CreateNavItemsInput,
+  UpdateNavItemsInput,
+} from "@ania/api-contract/nav-items";
+
+/** Client-only: contract body + optional File for multipart. */
+export type CreateVaultFileNodeInput = CreateVaultFileNodeBody & { file?: File; urlOrFileId?: string };
+export type AddVaultSourceToNodeInput = AddVaultSourceToNodeBody & { file?: File; urlOrFileId?: string };
 
 class ApiError extends Error {
   status: number;
@@ -38,36 +73,6 @@ export const api = {
 
 export { ApiError };
 
-export interface WeeklyScheduleTagDto {
-  readonly label: string;
-  readonly bgColor: string;
-  readonly txColor: string;
-}
-
-export interface WeeklyScheduleDto {
-  readonly id: string;
-  readonly week: number;
-  readonly year: number;
-  readonly fileId: string;
-  readonly isDeleted: boolean;
-  readonly title: string;
-  readonly description: string;
-  readonly tags: readonly WeeklyScheduleTagDto[];
-  readonly fileContentType?: string | null;
-}
-
-export interface WeeklyScheduleHistoryEntryDto {
-  readonly id: string;
-  readonly scheduleId: string;
-  readonly week: number;
-  readonly year: number;
-  readonly fileId: string;
-  readonly action: string;
-  readonly by: string;
-  readonly byUsername: string;
-  readonly timestamp: string;
-}
-
 export async function listWeeklySchedules(
   year?: number,
   includeDeleted: boolean = false,
@@ -97,12 +102,6 @@ export async function restoreWeeklySchedule(id: string): Promise<WeeklyScheduleD
   return api.post<WeeklyScheduleDto>(`/weekly-schedule/${id}/restore`);
 }
 
-export interface UpdateWeeklyScheduleInput {
-  title?: string;
-  description?: string;
-  tags?: { label: string; bgColor: string; txColor: string }[];
-}
-
 export async function updateWeeklySchedule(
   id: string,
   input: UpdateWeeklyScheduleInput,
@@ -111,32 +110,6 @@ export async function updateWeeklySchedule(
 }
 
 // Vault
-
-export type VaultNodeType = "file" | "folder";
-
-export interface VaultNodeDto {
-  readonly id: string;
-  readonly parentId: string | null;
-  readonly name: string;
-  readonly type: VaultNodeType;
-  readonly createdAt: string;
-  readonly thumbnailId: string | null;
-  readonly isPublic: boolean;
-}
-
-export interface VaultTagDto {
-  readonly id: string;
-  readonly name: string;
-}
-
-export interface VaultNodeSourceDto {
-  readonly id: string;
-  readonly nodeId: string;
-  readonly type: "external" | "internal";
-  readonly server: string | null;
-  readonly url: string;
-  readonly createdAt: string;
-}
 
 export async function listVaultChildren(
   parentId: string | null,
@@ -158,26 +131,10 @@ export async function getVaultNodeByParentAndName(
   return api.get<VaultNodeDto | null>(`/vault/node-by-name?${query}`);
 }
 
-export interface CreateVaultFolderInput {
-  parentId: string | null;
-  name: string;
-  isPublic?: boolean;
-}
-
 export async function createVaultFolder(
   input: CreateVaultFolderInput,
 ): Promise<VaultNodeDto> {
   return api.post<VaultNodeDto>("/vault/folders", input);
-}
-
-export interface CreateVaultFileNodeInput {
-  parentId: string | null;
-  name: string;
-  sourceType: "external" | "internal";
-  server: string | null;
-  urlOrFileId?: string;
-  file?: File;
-  isPublic?: boolean;
 }
 
 export async function createVaultFileNode(
@@ -220,11 +177,6 @@ export async function createVaultFileNode(
 
 export async function deleteVaultNode(id: string): Promise<void> {
   await api.delete<undefined>(`/vault/node/${id}`);
-}
-
-export interface MoveVaultNodeInput {
-  nodeId: string;
-  newParentId: string | null;
 }
 
 export async function moveVaultNode(input: MoveVaultNodeInput): Promise<VaultNodeDto> {
@@ -313,19 +265,6 @@ export async function getVaultSourcesForNode(
   return api.get<VaultNodeSourceDto[]>(`/vault/node/${nodeId}/sources`);
 }
 
-export interface AddVaultSourceToNodeInput {
-  type: "external" | "internal";
-  server: string | null;
-  urlOrFileId?: string;
-  file?: File;
-}
-
-export interface UpdateVaultSourceInput {
-  type?: "external" | "internal";
-  server?: string | null;
-  urlOrFileId?: string;
-}
-
 export async function addVaultSourceToNode(
   nodeId: string,
   input: AddVaultSourceToNodeInput,
@@ -364,15 +303,6 @@ export async function updateVaultSource(
 
 export async function deleteVaultSource(sourceId: string): Promise<void> {
   await api.delete<undefined>(`/vault/sources/${sourceId}`);
-}
-
-export interface UploadMediaResult {
-  readonly id: string;
-  readonly name: string;
-  readonly contentType: string;
-  readonly size: number;
-  readonly url: string;
-  readonly isPrivate: boolean;
 }
 
 export async function uploadMediaFile(file: File): Promise<UploadMediaResult> {
@@ -444,39 +374,6 @@ export async function updateWeeklyScheduleFile(
 
 // Anime
 
-export type AnimeLastAction = "created" | "updated" | "deleted" | "restore";
-
-export type AnimeStatus = "watching" | "completed" | "upcoming";
-
-export interface AnimeDto {
-  readonly id: string;
-  readonly title: string;
-  readonly description?: string;
-  readonly coverImageURL?: string;
-  readonly genre: string;
-  readonly status: AnimeStatus;
-  readonly active: boolean;
-  readonly lastAction: AnimeLastAction;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
-export interface CreateAnimeInput {
-  title: string;
-  description?: string;
-  coverImageURL?: string;
-  genre: string;
-  status: AnimeStatus;
-}
-
-export interface UpdateAnimeInput {
-  title?: string;
-  description?: string;
-  coverImageURL?: string;
-  genre?: string;
-  status?: AnimeStatus;
-}
-
 export async function listAnimes(includeInactive = false): Promise<AnimeDto[]> {
   const params = new URLSearchParams();
   if (!includeInactive) params.set("activeOnly", "true");
@@ -506,31 +403,6 @@ export async function restoreAnime(id: string): Promise<AnimeDto> {
 
 // Chapter
 
-export interface ChapterDto {
-  readonly id: string;
-  readonly animeId: string;
-  readonly number: number;
-  readonly title?: string;
-  readonly videoURL?: string;
-  readonly coverImageURL?: string;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
-export interface CreateChapterInput {
-  number: number;
-  title?: string;
-  videoURL?: string;
-  coverImageURL?: string;
-}
-
-export interface UpdateChapterInput {
-  number?: number;
-  title?: string;
-  videoURL?: string;
-  coverImageURL?: string;
-}
-
 export async function listChaptersByAnime(animeId: string): Promise<ChapterDto[]> {
   return api.get<ChapterDto[]>(`/anime/${animeId}/chapters`);
 }
@@ -548,31 +420,6 @@ export async function deleteChapter(id: string): Promise<void> {
 }
 
 // Nav Items
-
-export type NavItemsLastAction = "created" | "updated" | "deleted" | "restore";
-
-export interface NavItemsDto {
-  readonly id: string;
-  readonly title: string;
-  readonly path: string;
-  readonly position: number;
-  readonly active: boolean;
-  readonly lastAction: NavItemsLastAction;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
-export interface CreateNavItemsInput {
-  title: string;
-  path: string;
-  position: number;
-}
-
-export interface UpdateNavItemsInput {
-  title: string;
-  path: string;
-  position: number;
-}
 
 export async function listNavItems(includeInactive = false): Promise<NavItemsDto[]> {
   const params = new URLSearchParams();

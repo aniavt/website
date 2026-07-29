@@ -9,14 +9,10 @@ import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import { FAQPermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
-import type { FaqItemPublicDto } from "../dto";
+import type { FaqItemPublicDto, CreateFaqItemInput } from "../dto";
 import { toFaqItemPublicDto } from "../dto";
 
-
-export interface CreateFaqItemInput {
-    query: string;
-    answer: string;
-}
+export type { CreateFaqItemInput };
 
 export class CreateFaqItemUseCase {
     constructor(

@@ -8,17 +8,10 @@ import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHisto
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
-import type { WeeklyScheduleDto } from "../dto";
+import type { WeeklyScheduleDto, UpdateWeeklyScheduleInput as UpdateWeeklyScheduleBody } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
 
-
-export interface UpdateWeeklyScheduleInput {
-    id: string;
-    fileId?: string;
-    title?: string;
-    description?: string;
-    tags?: readonly { label: string; bgColor: string; txColor: string }[];
-}
+export type UpdateWeeklyScheduleInput = UpdateWeeklyScheduleBody & { id: string };
 
 export class UpdateWeeklyScheduleUseCase {
     constructor(

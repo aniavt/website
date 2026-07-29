@@ -4,12 +4,9 @@ import { VaultPermission } from "@domain/value-object/Permissions";
 import { err, type Result } from "@lib/result";
 import type { VaultError } from "../errors";
 import type { VaultNodeEntity } from "@domain/entities/Vault";
+import type { CreateVaultFolderInput } from "../dto";
 
-export interface CreateFolderInput {
-    parentId: string | null;
-    name: string;
-    isPublic?: boolean;
-}
+export type CreateFolderInput = CreateVaultFolderInput;
 
 export class CreateFolderUseCase {
     constructor(

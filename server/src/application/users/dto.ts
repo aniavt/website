@@ -1,29 +1,14 @@
 import type { UserEntity } from "@domain/entities/User";
+import type { UserDto } from "@ania/api-contract/user";
 
-export interface UserDto {
-    readonly id: string;
-    readonly username: string;
-    readonly createdAt: Date;
-    readonly updatedAt: Date;
-    readonly isActive: boolean;
-    readonly sessionVersion: number;
-    readonly permissions: {
-        readonly meta: string[];
-        readonly user: string[];
-        readonly faq: string[];
-        readonly weekly_schedule: string[];
-        readonly vault: string[];
-        readonly anime: string[];
-        readonly navItems: string[];
-    };
-}
+export type { UserDto, UserPermissions, PermissionNamespace, LoginRequest, CreateUserInput } from "@ania/api-contract/user";
 
 export function toUserDto(user: UserEntity): UserDto {
     return {
         id: user.id,
         username: user.username,
-        createdAt: user.createdAt,
-        updatedAt: user.updatedAt,
+        createdAt: user.createdAt.toISOString(),
+        updatedAt: user.updatedAt.toISOString(),
         isActive: user.isActive,
         sessionVersion: user.sessionVersion,
         permissions: {
@@ -33,7 +18,7 @@ export function toUserDto(user: UserEntity): UserDto {
             weekly_schedule: user.permissions.weekly_schedule.getSlugs("weekly_schedule"),
             vault: user.permissions.vault.getSlugs("vault"),
             anime: user.permissions.anime.getSlugs("anime"),
-            navItems: user.permissions. navItems.getSlugs("navItems"),
+            navItems: user.permissions.navItems.getSlugs("navItems"),
         },
     };
 }

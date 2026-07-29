@@ -1,28 +1,9 @@
 import { signal, computed } from "@preact/signals";
-import { api } from "@utils";
+import { api } from "@utils/api";
 import { route } from "preact-router";
+import type { UserDto, PermissionNamespace } from "@ania/api-contract/user";
 
-export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule" | "vault" | "anime" | "navItems";
-
-export interface UserPermissions {
-  readonly meta: string[];
-  readonly user: string[];
-  readonly faq: string[];
-  readonly weekly_schedule: string[];
-  readonly vault: string[];
-  readonly anime: string[];
-  readonly navItems : string[];
-}
-
-export interface User {
-  id: string;
-  username: string;
-  createdAt: string;
-  updatedAt: string;
-  isActive: boolean;
-  sessionVersion: number;
-  permissions: UserPermissions;
-}
+export type User = UserDto;
 
 export const user = signal<User | null>(null);
 export const authLoading = signal(true);

@@ -5,9 +5,8 @@ import Table, { type Column } from "@components/Table";
 import Modal from "@components/Modal";
 import { addToast } from "@store/toast";
 import { canReadVault, canManageVaultNodes } from "@store/auth";
+import type { VaultNodeDto, VaultTagDto } from "@ania/api-contract/vault";
 import {
-  type VaultNodeDto,
-  type VaultTagDto,
   listVaultChildren,
   listVaultTags,
   createVaultFolder,
@@ -19,8 +18,8 @@ import {
   renameVaultTag,
   deleteVaultTag,
   ApiError,
-  t,
-} from "@utils";
+} from "@utils/api";
+import { t } from "@utils/i18n";
 import VaultTree from "@components/VaultTree";
 import VaultNodeDetails from "@components/VaultNodeDetails";
 

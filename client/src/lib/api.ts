@@ -1,28 +1,5 @@
-export interface WeeklyScheduleTagDto {
-  readonly label: string;
-  readonly bgColor: string;
-  readonly txColor: string;
-}
-
-export interface WeeklyScheduleDto {
-  readonly id: string;
-  readonly week: number;
-  readonly year: number;
-  readonly fileId: string;
-  readonly isDeleted: boolean;
-  readonly title: string;
-  readonly description: string;
-  readonly tags: readonly WeeklyScheduleTagDto[];
-  readonly fileContentType?: string | null;
-}
-
-export interface FaqItemPublicDto {
-  readonly id: string;
-  readonly query: string;
-  readonly answer: string;
-  readonly isActive: boolean;
-  readonly lastAction: string;
-}
+import type { WeeklyScheduleDto } from "@ania/api-contract/weekly-schedule";
+import type { FaqItemPublicDto } from "@ania/api-contract/faq";
 
 export async function getCurrentWeeklySchedule(): Promise<WeeklyScheduleDto | null> {
   let url: string;
@@ -72,4 +49,3 @@ export async function getFaqs(): Promise<FaqItemPublicDto[]> {
   const data = await res.json();
   return data as FaqItemPublicDto[];
 }
-

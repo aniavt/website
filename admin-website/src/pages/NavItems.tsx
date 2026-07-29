@@ -12,17 +12,19 @@ import {
    canDeleteNavItems,
    canRestoreNavItems,
 } from "@store/auth";
+import type {
+   NavItemsDto,
+   CreateNavItemsInput,
+   UpdateNavItemsInput,
+} from "@ania/api-contract/nav-items";
 import {
-   type NavItemsDto,
-   type CreateNavItemsInput,
-   type UpdateNavItemsInput,
    listNavItems,
    createNavItems,
    updateNavItems,
    deleteNavItems,
    restoreNavItems,
    ApiError,
-} from "@utils";
+} from "@utils/api";
 
 const LIMIT = 15;
 

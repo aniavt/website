@@ -12,13 +12,9 @@ import {
    canDeleteAnime,
    canRestoreAnime,
 } from "@store/auth";
+import type { AnimeDto, CreateAnimeInput, UpdateAnimeInput } from "@ania/api-contract/anime";
+import type { ChapterDto, CreateChapterInput, UpdateChapterInput } from "@ania/api-contract/chapter";
 import {
-   type AnimeDto,
-   type ChapterDto,
-   type CreateAnimeInput,
-   type UpdateAnimeInput,
-   type CreateChapterInput,
-   type UpdateChapterInput,
    listAnimes,
    createAnime,
    updateAnime,
@@ -30,7 +26,7 @@ import {
    deleteChapter,
    uploadMediaFile,
    ApiError,
-} from "@utils";
+} from "@utils/api";
 
 const LIMIT = 15;
 

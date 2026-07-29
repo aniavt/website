@@ -9,15 +9,10 @@ import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import { FAQPermission } from "@domain/value-object/Permissions";
 import { err, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
-import type { FaqItemPublicDto } from "../dto";
+import type { FaqItemPublicDto, UpdateFaqItemInput as UpdateFaqItemBody } from "../dto";
 import { resolveItemToPublicDto } from "../resolveFaqItem";
 
-
-export interface UpdateFaqItemInput {
-    id: string;
-    query?: string;
-    answer?: string;
-}
+export type UpdateFaqItemInput = UpdateFaqItemBody & { id: string };
 
 export class UpdateFaqItemUseCase {
     constructor(

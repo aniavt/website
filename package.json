@@ -1,0 +1,5 @@
+{
+  "name": "ania",
+  "private": true,
+  "workspaces": ["server", "admin-website", "client", "packages/*"]
+}

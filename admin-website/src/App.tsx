@@ -1,12 +1,12 @@
 import "./App.css";
 import { Router, Route } from "preact-router";
 import { useEffect } from "preact/hooks";
+import type { PermissionNamespace } from "@ania/api-contract/user";
 import {
   checkAuth,
   authLoading,
   isAuthenticated,
   hasPermission,
-  type PermissionNamespace,
 } from "@store/auth";
 import Login from "@pages/Login";
 import Faq from "@pages/Faq";

@@ -6,6 +6,11 @@ import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { MediaError } from "@application/media/errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 import type { VaultError } from "@application/vault/errors";
+import {
+    toVaultNodeDto,
+    toVaultNodeSourceDto,
+    toVaultTagDto,
+} from "@application/vault/dto";
 
 export interface VaultRoutesDependencies {
     userUseCases: IUserUseCases;
@@ -170,7 +175,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
         const body = request.body as { name: string };
         const result = await vaultUseCases.createTag.execute(request.user!.id, body.name);
         if (result.isError()) return sendVaultError(reply, result.error);
-        return reply.status(201).send(result.data);
+        return reply.status(201).send(toVaultTagDto(result.data));
     });
 
     app.patch<{ Params: { id: string } }>(
@@ -180,7 +185,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
             const body = request.body as { name: string };
             const result = await vaultUseCases.renameTag.execute(request.user!.id, request.params.id, body.name);
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(toVaultTagDto(result.data));
         },
     );
 
@@ -197,7 +202,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
     app.get(prefixUrl("/vault/tags"), async (_request, reply) => {
         const result = await vaultUseCases.listTags.execute();
         if (result.isError()) return sendVaultError(reply, result.error);
-        return reply.send(result.data);
+        return reply.send(result.data.map(toVaultTagDto));
     });
 
     app.get<{ Querystring: { parentId?: string } }>(
@@ -209,7 +214,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
 
             const result = await vaultUseCases.getChildren.execute(requesterId, parentId);
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(result.data.map(toVaultNodeDto));
         },
     );
 
@@ -235,7 +240,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 return sendVaultError(reply, result.error as VaultError);
             }
 
-            return reply.send(result.data);
+            return reply.send(result.data ? toVaultNodeDto(result.data) : null);
         },
     );
 
@@ -255,7 +260,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 : await vaultUseCases.findNodesByTagName.execute(requesterId, tagName!);
 
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(result.data.map(toVaultNodeDto));
         },
     );
 
@@ -270,7 +275,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 isPublic: body.isPublic,
             });
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.status(201).send(result.data);
+            return reply.status(201).send(toVaultNodeDto(result.data));
         },
     );
 
@@ -375,7 +380,10 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 isPublic,
             });
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.status(201).send(result.data);
+            return reply.status(201).send({
+                node: toVaultNodeDto(result.data.node),
+                source: toVaultNodeSourceDto(result.data.source),
+            });
         },
     );
 
@@ -390,7 +398,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 body.isPublic,
             );
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(toVaultNodeDto(result.data));
         },
     );
 
@@ -405,7 +413,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 body.thumbnailFileId ?? null,
             );
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(toVaultNodeDto(result.data));
         },
     );
 
@@ -450,7 +458,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 body.newName,
             );
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(toVaultNodeDto(result.data));
         },
     );
 
@@ -471,7 +479,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
             const requesterId = request.user?.id ?? null;
             const result = await vaultUseCases.getTagsForNode.execute(requesterId, request.params.id);
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(result.data.map(toVaultTagDto));
         },
     );
 
@@ -482,7 +490,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
             const requesterId = request.user?.id ?? null;
             const result = await vaultUseCases.getSourcesForNode.execute(requesterId, request.params.id);
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(result.data.map(toVaultNodeSourceDto));
         },
     );
 
@@ -566,7 +574,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 urlOrFileId: urlOrFileId!,
             });
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.status(201).send(result.data);
+            return reply.status(201).send(toVaultNodeSourceDto(result.data));
         },
     );
 
@@ -586,7 +594,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 urlOrFileId: body.urlOrFileId,
             });
             if (result.isError()) return sendVaultError(reply, result.error);
-            return reply.send(result.data);
+            return reply.send(toVaultNodeSourceDto(result.data));
         },
     );
 

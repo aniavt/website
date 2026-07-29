@@ -12,9 +12,11 @@ import {
   canDeleteWeeklySchedule,
   canViewWeeklyScheduleHistory,
 } from "@store/auth";
+import type {
+  WeeklyScheduleDto,
+  WeeklyScheduleHistoryEntryDto,
+} from "@ania/api-contract/weekly-schedule";
 import {
-  type WeeklyScheduleDto,
-  type WeeklyScheduleHistoryEntryDto,
   deleteWeeklySchedule,
   getWeeklyScheduleHistory,
   listWeeklySchedules,
@@ -23,8 +25,8 @@ import {
   updateWeeklyScheduleFile,
   updateWeeklySchedule,
   ApiError,
-  t,
-} from "@utils";
+} from "@utils/api";
+import { t } from "@utils/i18n";
 
 type ScheduleTag = { label: string; bgColor: string; txColor: string };
 

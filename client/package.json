@@ -10,6 +10,7 @@
     "astro": "astro"
   },
   "dependencies": {
+    "@ania/api-contract": "workspace:*",
     "@astrojs/node": "^9",
     "astro": "^5.17.1"
   }

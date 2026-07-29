@@ -4,15 +4,9 @@ import { VaultPermission } from "@domain/value-object/Permissions";
 import { err, type Result } from "@lib/result";
 import type { VaultError } from "../errors";
 import type { VaultNodeEntity, VaultNodeSourceEntity } from "@domain/entities/Vault";
+import type { CreateVaultFileNodeInput } from "../dto";
 
-export interface CreateFileNodeInput {
-    parentId: string | null;
-    name: string;
-    sourceType: "external" | "internal";
-    server: string | null;
-    urlOrFileId: string;
-    isPublic?: boolean;
-}
+export type CreateFileNodeInput = CreateVaultFileNodeInput;
 
 export class CreateFileNodeUseCase {
     constructor(
@@ -31,7 +25,12 @@ export class CreateFileNodeUseCase {
             return err("vault_not_authorized");
         }
 
-        return await this.vaultService.createFileNode(input);
+        if (!input.urlOrFileId) return err("vault_invalid_input");
+
+        return await this.vaultService.createFileNode({
+            ...input,
+            urlOrFileId: input.urlOrFileId,
+        });
     }
 }
 

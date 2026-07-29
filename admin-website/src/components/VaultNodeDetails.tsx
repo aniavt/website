@@ -6,10 +6,12 @@ import { addToast } from "@store/toast";
 import {
   canManageVaultNodes,
 } from "@store/auth";
+import type {
+  VaultNodeDto,
+  VaultTagDto,
+  VaultNodeSourceDto,
+} from "@ania/api-contract/vault";
 import {
-  type VaultNodeDto,
-  type VaultTagDto,
-  type VaultNodeSourceDto,
   listVaultTags,
   getVaultTagsForNode,
   getVaultSourcesForNode,
@@ -23,8 +25,8 @@ import {
   deleteVaultNode,
   uploadMediaFile,
   ApiError,
-  t,
-} from "@utils";
+} from "@utils/api";
+import { t } from "@utils/i18n";
 
 interface VaultNodeDetailsProps {
   node: VaultNodeDto | null;
@@ -286,7 +288,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
             </div>
             <div class="flex justify-between gap-2">
               <dt class="font-medium">Creado</dt>
-              <dd>{new Date(node.createdAt).toLocaleString()}</dd>
+              <dd>{node.createdAt ? new Date(node.createdAt).toLocaleString() : "—"}</dd>
             </div>
             <div class="flex justify-between gap-2">
               <dt class="font-medium">Thumbnail</dt>

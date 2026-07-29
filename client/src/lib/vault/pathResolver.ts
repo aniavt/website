@@ -1,7 +1,7 @@
 // TypeScript - client/src/lib/vault/pathResolver.ts
 // Helper para resolver una ruta lógica de la bóveda a partir de segmentos.
 
-import type { VaultNodeDto } from "./types";
+import type { VaultNodeDto } from "@ania/api-contract/vault";
 import { fetchVaultNodeByParentAndName } from "./api";
 
 export interface ResolvedVaultPath {

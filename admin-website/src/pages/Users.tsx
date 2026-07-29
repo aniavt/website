@@ -1,6 +1,8 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
-import { api, ApiError, t } from "@utils";
+import { api, ApiError } from "@utils/api";
+import { t } from "@utils/i18n";
 import { addToast } from "@store/toast";
+import type { UserPermissions } from "@ania/api-contract/user";
 import {
   user as currentUser,
   canActivateUsers,
@@ -11,7 +13,7 @@ import {
   canManageWeeklySchedulePermissions,
   canManageVaultNodes,
   userHasPermission,
-  type UserPermissions,
+  type User,
 } from "@store/auth";
 import Layout from "@components/Layout";
 import Table, { type Column } from "@components/Table";
@@ -19,8 +21,6 @@ import Button from "@components/Button";
 import Badge from "@components/Badge";
 import Pagination from "@components/Pagination";
 import Modal from "@components/Modal";
-
-import type { User } from "@store/auth";
 
 const LIMIT = 15;
 

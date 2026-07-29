@@ -1,7 +1,11 @@
 // TypeScript - client/src/lib/vault/api.ts
 // Funciones de solo lectura para consumir el Vault desde el cliente (hemeroteca).
 
-import type { VaultNodeDto, VaultTagDto, VaultNodeSourceDto } from "./types";
+import type {
+  VaultNodeDto,
+  VaultTagDto,
+  VaultNodeSourceDto,
+} from "@ania/api-contract/vault";
 
 function buildApiUrl(path: string): string {
   if (typeof window === "undefined") {

@@ -2,16 +2,11 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import { NavItemsPermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { NavItemsError } from "../errors";
-import type { NavItemsDto } from "../dto";
+import type { NavItemsDto, UpdateNavItemsInput as UpdateNavItemsBody } from "../dto";
 import { toNavItemsDto } from "../dto";
 import type { NavItemsRepository } from "@domain/repositories/NavItemsRepository";
 
-export interface UpdateNavItemsInput {
-   id: string;
-   title?: string;
-   path?: string;
-   position: number
-}
+export type UpdateNavItemsInput = UpdateNavItemsBody & { id: string };
 
 export class UpdateNavItemsUseCase {
    constructor(

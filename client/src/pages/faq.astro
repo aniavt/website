@@ -1,7 +1,8 @@
 ---
 // src/pages/faq.astro
 import BaseLayout from '../layouts/BaseLayout.astro';
-import { getFaqs, type FaqItemPublicDto } from '../lib/api';
+import type { FaqItemPublicDto } from '@ania/api-contract/faq';
+import { getFaqs } from '../lib/api';
 
 const faqs: FaqItemPublicDto[] = await getFaqs();
 ---

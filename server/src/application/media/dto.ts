@@ -1,13 +1,7 @@
 import type { FileEntity } from "@domain/entities/File";
+import type { FileDto } from "@ania/api-contract/media";
 
-export interface FileDto {
-    readonly id: string;
-    readonly name: string;
-    readonly contentType: string;
-    readonly size: number;
-    readonly url: string;
-    readonly isPrivate: boolean;
-}
+export type { FileDto, UploadMediaResult } from "@ania/api-contract/media";
 
 export function toFileDto(file: FileEntity): FileDto {
     return {
@@ -19,4 +13,3 @@ export function toFileDto(file: FileEntity): FileDto {
         isPrivate: file.isPrivate,
     };
 }
-

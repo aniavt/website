@@ -1,27 +1,5 @@
-export type AnimeStatus = "watching" | "completed" | "upcoming";
-
-export interface AnimeDto {
-  readonly id: string;
-  readonly title: string;
-  readonly description?: string | null;
-  readonly coverImageURL?: string | null;
-  readonly genre: string;
-  readonly status: AnimeStatus;
-  readonly active: boolean;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
-
-export interface ChapterDto {
-  readonly id: string;
-  readonly animeId: string;
-  readonly number: number;
-  readonly title?: string | null;
-  readonly videoURL?: string | null;
-  readonly coverImageURL?: string | null;
-  readonly createdAt: string;
-  readonly updatedAt: string;
-}
+import type { AnimeDto } from "@ania/api-contract/anime";
+import type { ChapterDto } from "@ania/api-contract/chapter";
 
 export function slugify(title: string): string {
   return title

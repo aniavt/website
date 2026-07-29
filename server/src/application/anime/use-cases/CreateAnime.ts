@@ -5,16 +5,10 @@ import { Anime } from "@domain/entities/Anime";
 import { AnimePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { AnimeError } from "../errors";
-import type { AnimeDto } from "../dto";
+import type { AnimeDto, CreateAnimeInput } from "../dto";
 import { toAnimeDto } from "../dto";
 
-export interface CreateAnimeInput {
-  title: string;
-  description?: string;
-  coverImageURL?: string;
-  genre: string;
-  status: "watching" | "completed" | "upcoming";
-}
+export type { CreateAnimeInput };
 
 export class CreateAnimeUseCase {
   constructor(

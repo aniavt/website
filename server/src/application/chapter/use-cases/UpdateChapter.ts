@@ -3,16 +3,10 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import { AnimePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { ChapterError } from "../errors";
-import type { ChapterDto } from "../dto";
+import type { ChapterDto, UpdateChapterInput as UpdateChapterBody } from "../dto";
 import { toChapterDto } from "../dto";
 
-export interface UpdateChapterInput {
-   id: string;
-   number?: number;
-   title?: string;
-   videoURL?: string;
-   coverImageURL?: string;
-}
+export type UpdateChapterInput = UpdateChapterBody & { id: string };
 
 export class UpdateChapterUseCase {
    constructor(

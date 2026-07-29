@@ -1,5 +1,13 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
-import { api, ApiError, t } from "@utils";
+import type {
+  FaqItemPublicDto,
+  FaqHistoryEntryDto,
+  FaqHistoryAction,
+  CreateFaqItemInput,
+  UpdateFaqItemInput,
+} from "@ania/api-contract/faq";
+import { api, ApiError } from "@utils/api";
+import { t } from "@utils/i18n";
 import { addToast } from "@store/toast";
 import {
   canManageFaqRead,
@@ -15,42 +23,26 @@ import Badge from "@components/Badge";
 import Modal from "@components/Modal";
 import Input from "@components/Input";
 
-interface FaqItem {
-  id: string;
-  query: string;
-  answer: string;
-  isActive: boolean;
-  lastAction: string;
-}
-
-interface HistoryEntry {
-  id: string;
-  action: string;
-  by: string;
-  byUsername: string;
-  timestamp: string;
-}
-
 export default function Faq() {
-  const [items, setItems] = useState<FaqItem[]>([]);
+  const [items, setItems] = useState<FaqItemPublicDto[]>([]);
   const [loading, setLoading] = useState(true);
   const [showAll, setShowAll] = useState(true);
   const [expanded, setExpanded] = useState<Record<string, boolean>>({});
 
   const [formOpen, setFormOpen] = useState(false);
-  const [editing, setEditing] = useState<FaqItem | null>(null);
+  const [editing, setEditing] = useState<FaqItemPublicDto | null>(null);
   const [query, setQuery] = useState("");
   const [answer, setAnswer] = useState("");
   const [saving, setSaving] = useState(false);
 
   const [historyOpen, setHistoryOpen] = useState(false);
-  const [history, setHistory] = useState<HistoryEntry[]>([]);
+  const [history, setHistory] = useState<FaqHistoryEntryDto[]>([]);
   const [historyLoading, setHistoryLoading] = useState(false);
 
   const fetchItems = useCallback(async () => {
     setLoading(true);
     try {
-      const data = await api.get<FaqItem[]>(`/faq${showAll ? "" : "?activeOnly=true"}`);
+      const data = await api.get<FaqItemPublicDto[]>(`/faq${showAll ? "" : "?activeOnly=true"}`);
       setItems(data);
     } catch {
       addToast("Error al cargar FAQ", "error");
@@ -68,7 +60,7 @@ export default function Faq() {
     setFormOpen(true);
   }
 
-  function openEdit(item: FaqItem) {
+  function openEdit(item: FaqItemPublicDto) {
     setEditing(item);
     setQuery(item.query);
     setAnswer(item.answer);
@@ -80,10 +72,12 @@ export default function Faq() {
     setSaving(true);
     try {
       if (editing) {
-        await api.patch(`/faq/${editing.id}`, { query, answer });
+        const body: UpdateFaqItemInput = { query, answer };
+        await api.patch(`/faq/${editing.id}`, body);
         addToast("FAQ actualizado", "success");
       } else {
-        await api.post("/faq", { query, answer });
+        const body: CreateFaqItemInput = { query, answer };
+        await api.post("/faq", body);
         addToast("FAQ creado", "success");
       }
       setFormOpen(false);
@@ -95,7 +89,7 @@ export default function Faq() {
     }
   }
 
-  async function handleToggleActive(item: FaqItem) {
+  async function handleToggleActive(item: FaqItemPublicDto) {
     try {
       if (item.isActive) {
         await api.delete(`/faq/${item.id}`);
@@ -110,11 +104,11 @@ export default function Faq() {
     }
   }
 
-  async function openHistory(item: FaqItem) {
+  async function openHistory(item: FaqItemPublicDto) {
     setHistoryOpen(true);
     setHistoryLoading(true);
     try {
-      setHistory(await api.get<HistoryEntry[]>(`/faq/${item.id}/history`));
+      setHistory(await api.get<FaqHistoryEntryDto[]>(`/faq/${item.id}/history`));
     } catch {
       addToast("Error al cargar historial", "error");
       setHistoryOpen(false);
@@ -123,14 +117,14 @@ export default function Faq() {
     }
   }
 
-  const actionLabels: Record<string, string> = {
+  const actionLabels: Record<FaqHistoryAction, string> = {
     created: "Creado",
     updated: "Actualizado",
     deleted: "Eliminado",
     restore: "Restaurado",
   };
 
-  const columns: Column<FaqItem>[] = [
+  const columns: Column<FaqItemPublicDto>[] = [
     {
       key: "query",
       header: "Pregunta",
@@ -265,7 +259,7 @@ export default function Faq() {
               <div key={entry.id} class="flex items-center justify-between rounded-lg bg-[var(--bg-tertiary)] px-4 py-3 border border-[var(--border-subtle)]">
                 <div>
                   <span class="text-sm font-medium text-[var(--text-primary)]">
-                    {actionLabels[entry.action] ?? entry.action}
+                    {actionLabels[entry.action]}
                   </span>
                   <span class="text-xs text-[var(--text-muted)] ml-2">por {entry.byUsername}</span>
                 </div>

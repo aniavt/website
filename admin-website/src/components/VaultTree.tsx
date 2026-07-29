@@ -1,6 +1,6 @@
 import type { ComponentChildren } from "preact";
 import Button from "@components/Button";
-import type { VaultNodeDto } from "@utils";
+import type { VaultNodeDto } from "@ania/api-contract/vault";
 
 interface VaultTreeProps {
   nodes: VaultNodeDto[];

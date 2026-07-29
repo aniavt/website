@@ -6,16 +6,10 @@ import { Chapter } from "@domain/entities/Chapter";
 import { AnimePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { ChapterError } from "../errors";
-import type { ChapterDto } from "../dto";
+import type { ChapterDto, CreateChapterInput as CreateChapterBody } from "../dto";
 import { toChapterDto } from "../dto";
 
-export interface CreateChapterInput {
-   animeId: string;
-   number: number;
-   title?: string;
-   videoURL?: string;
-   coverImageURL?: string;
-}
+export type CreateChapterInput = CreateChapterBody & { animeId: string };
 
 export class CreateChapterUseCase {
    constructor(
