@@ -6,20 +6,7 @@ import type {
   VaultTagDto,
   VaultNodeSourceDto,
 } from "@ania/api-contract/vault";
-
-function buildApiUrl(path: string): string {
-  if (typeof window === "undefined") {
-    const g =
-      typeof globalThis !== "undefined"
-        ? (globalThis as { process?: { env?: Record<string, string> } })
-        : null;
-    const envUrl = g?.process?.env?.PUBLIC_SERVER_URL;
-    const base = envUrl || import.meta.env.PUBLIC_SERVER_URL || "";
-    return `${base.replace(/\/+$/, "")}${g === null ? "/api" : ""}${path}`;
-  }
-
-  return `/api${path}`;
-}
+import { buildApiUrl } from "../buildApiUrl";
 
 async function getJson<T>(path: string): Promise<T> {
   const url = buildApiUrl(path);
