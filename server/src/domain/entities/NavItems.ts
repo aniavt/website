@@ -1,4 +1,9 @@
-export type NavItemsLastAction = "created" | "updated" | "deleted" | "restore";
+import {
+  canTransitionLastAction,
+  type SoftDeleteLastAction,
+} from "@domain/shared/canTransitionLastAction";
+
+export type NavItemsLastAction = SoftDeleteLastAction;
 
 export interface NavItemsProps {
   readonly id: string;
@@ -37,15 +42,6 @@ export class NavItems {
   }
 
   canTransitionTo(action: NavItemsLastAction): boolean {
-    switch (this.lastAction) {
-      case "created":
-      case "updated":
-      case "restore":
-        return action === "updated" || action === "deleted";
-      case "deleted":
-        return action === "restore";
-      default:
-        return false;
-    }
+    return canTransitionLastAction(this.lastAction, action);
   }
 }

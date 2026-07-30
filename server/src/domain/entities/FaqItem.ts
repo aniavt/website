@@ -1,4 +1,9 @@
-export type FaqItemLastAction = "created" | "updated" | "deleted" | "restore";
+import {
+    canTransitionLastAction,
+    type SoftDeleteLastAction,
+} from "@domain/shared/canTransitionLastAction";
+
+export type FaqItemLastAction = SoftDeleteLastAction;
 
 export interface FaqItemProps {
     readonly id: string;
@@ -28,15 +33,6 @@ export class FaqItem {
     }
 
     canTransitionTo(action: FaqItemLastAction): boolean {
-        switch (this.lastAction) {
-            case "created":
-            case "updated":
-            case "restore":
-                return action === "updated" || action === "deleted";
-            case "deleted":
-                return action === "restore";
-            default:
-                return false;
-        }
+        return canTransitionLastAction(this.lastAction, action);
     }
 }

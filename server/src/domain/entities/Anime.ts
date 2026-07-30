@@ -1,4 +1,9 @@
-export type AnimeLastAction = "created" | "updated" | "deleted" | "restore";
+import {
+  canTransitionLastAction,
+  type SoftDeleteLastAction,
+} from "@domain/shared/canTransitionLastAction";
+
+export type AnimeLastAction = SoftDeleteLastAction;
 
 export type AnimeStatus = "watching" | "completed" | "upcoming";
 
@@ -45,15 +50,6 @@ export class Anime {
   }
 
   canTransitionTo(action: AnimeLastAction): boolean {
-    switch (this.lastAction) {
-      case "created":
-      case "updated":
-      case "restore":
-        return action === "updated" || action === "deleted";
-      case "deleted":
-        return action === "restore";
-      default:
-        return false;
-    }
+    return canTransitionLastAction(this.lastAction, action);
   }
 }
