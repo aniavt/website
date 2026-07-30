@@ -1,14 +1,6 @@
 import type { AnimeDto } from "@ania/api-contract/anime";
 import type { ChapterDto } from "@ania/api-contract/chapter";
-
-export function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { slugify } from "./slugify";
 
 function buildUrl(path: string): string {
   if (typeof window === "undefined") {

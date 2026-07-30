@@ -1,13 +1,5 @@
 import type { NavItemsDto } from "@ania/api-contract/nav-items";
-
-export function slugify(title: string): string {
-  return title
-    .toLowerCase()
-    .normalize("NFD")
-    .replace(/[\u0300-\u036f]/g, "")
-    .replace(/[^a-z0-9]+/g, "-")
-    .replace(/^-+|-+$/g, "");
-}
+import { slugify } from "./slugify";
 
 export function buildUrl(path: string) {
   const PUBLIC_API = import.meta.env.PUBLIC_SERVER_URL || '/api';
