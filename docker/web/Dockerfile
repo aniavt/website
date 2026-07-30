@@ -5,6 +5,7 @@ WORKDIR /app
 COPY package.json bun.lock ./
 COPY packages/api-contract/package.json ./packages/api-contract/
 COPY packages/date/package.json ./packages/date/
+COPY packages/domain-shared/package.json ./packages/domain-shared/
 COPY server/package.json ./server/
 COPY admin-website/package.json ./admin-website/
 COPY client/package.json ./client/
@@ -12,6 +13,7 @@ COPY client/package.json ./client/
 RUN bun install --frozen-lockfile --filter ./client
 
 COPY packages/api-contract ./packages/api-contract
+COPY packages/domain-shared ./packages/domain-shared
 COPY client ./client
 
 WORKDIR /app/client
