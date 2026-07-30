@@ -1,5 +1,6 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import {
+    AnimePermission,
     FAQPermission,
     isPermissionNamespace,
     ManagePermission,
@@ -50,6 +51,7 @@ export class ManagePermissionUseCase {
                 case "weekly_schedule": return WeeklySchedulePermission;
                 case "navItems": return NavItemsPermission;
                 case "vault": return VaultPermission;
+                case "anime": return AnimePermission;
             }
             return "permission_invalid_namespace";
         })();
@@ -87,10 +89,13 @@ export class ManagePermissionUseCase {
                 if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_VAULT }))
                     return err("permission_not_authorized");
                 break;
-
+            case "anime":
+                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_ANIME }))
+                    return err("permission_not_authorized");
+                break;
             case "navItems":
                 if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_NAVITEMS }))
-                        return err("permission_not_authorized");
+                    return err("permission_not_authorized");
                 break;
         }
 

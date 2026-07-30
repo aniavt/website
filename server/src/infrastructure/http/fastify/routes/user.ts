@@ -258,7 +258,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
                 return sendErrorResponse(reply, result.error);
             }
 
-            const slugs = result.data.permissions[namespace];
+            const slugs = result.data.permissions[namespace] as readonly string[];
             const hasPermission = slugs.includes(`${namespace}.${permission}`);
 
             return reply.send({ hasPermission });

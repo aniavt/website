@@ -16,7 +16,7 @@ export function userHasPermission(
 ): boolean {
   if (!target) return false;
   const full = `${namespace}.${permission}`;
-  return target.permissions[namespace]?.includes(full) ?? false;
+  return (target.permissions[namespace] as readonly string[] | undefined)?.includes(full) ?? false;
 }
 
 export function hasPermission(namespace: PermissionNamespace, permission: string): boolean {
@@ -69,6 +69,9 @@ export const canManageFaqPermissions = computed(() => hasPermission("meta", "man
 export const canManageWeeklySchedulePermissions = computed(() =>
   hasPermission("meta", "manage_weekly_schedule"),
 );
+export const canManageVaultPermissions = computed(() => hasPermission("meta", "manage_vault"));
+export const canManageAnimePermissions = computed(() => hasPermission("meta", "manage_anime"));
+export const canManageNavItemsPermissions = computed(() => hasPermission("meta", "manage_navItems"));
 
 export const canReadVault = computed(() =>
   hasPermission("vault", "create_node") ||
