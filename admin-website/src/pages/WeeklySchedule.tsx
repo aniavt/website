@@ -5,7 +5,7 @@ import Button from "@components/Button";
 import ColorPicker from "@components/ColorPicker";
 import Modal from "@components/Modal";
 import Pagination from "@components/Pagination";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import {
   canReadWeeklySchedule,
   canCreateWeeklySchedule,
@@ -24,7 +24,6 @@ import {
   restoreWeeklySchedule,
   updateWeeklyScheduleFile,
   updateWeeklySchedule,
-  ApiError,
 } from "@utils/api";
 import { t } from "@utils/i18n";
 import { formatDate, lastActionLabel } from "@utils/labels";
@@ -106,10 +105,7 @@ export default function WeeklySchedule() {
       setItems(data.slice(start, end));
       setTotal(data.length);
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_load_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_load_failed");
     } finally {
       setLoading(false);
     }
@@ -195,10 +191,7 @@ export default function WeeklySchedule() {
       setOffset(0);
       fetchItems();
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_upload_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_upload_failed");
     } finally {
       setUploadLoading(false);
     }
@@ -214,10 +207,7 @@ export default function WeeklySchedule() {
       setHistoryItems(data);
     } catch (err) {
       setHistoryOpen(false);
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_history_load_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_history_load_failed");
     } finally {
       setHistoryLoading(false);
     }
@@ -240,10 +230,7 @@ export default function WeeklySchedule() {
       setOffset(0);
       fetchItems();
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_delete_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_delete_failed");
     } finally {
       setConfirmLoading(false);
     }
@@ -257,10 +244,7 @@ export default function WeeklySchedule() {
       setOffset(0);
       fetchItems();
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_restore_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_restore_failed");
     } finally {
       setRestoreLoadingId(null);
     }

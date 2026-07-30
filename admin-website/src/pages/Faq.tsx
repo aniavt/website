@@ -5,10 +5,9 @@ import type {
   CreateFaqItemInput,
   UpdateFaqItemInput,
 } from "@ania/api-contract/faq";
-import { api, ApiError } from "@utils/api";
-import { t } from "@utils/i18n";
+import { api } from "@utils/api";
 import { formatDate, lastActionLabel } from "@utils/labels";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import {
   canManageFaqRead,
   canManageFaqCreate,
@@ -83,7 +82,7 @@ export default function Faq() {
       setFormOpen(false);
       fetchItems();
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setSaving(false);
     }
@@ -100,7 +99,7 @@ export default function Faq() {
       }
       fetchItems();
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     }
   }
 

@@ -1,8 +1,8 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
-import { api, ApiError } from "@utils/api";
+import { api } from "@utils/api";
 import { t } from "@utils/i18n";
 import { formatDate } from "@utils/labels";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import type { UserPermissions } from "@ania/api-contract/user";
 import {
   user as currentUser,
@@ -79,7 +79,7 @@ export default function Users() {
       await confirmAction.fn();
       fetchUsers();
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setConfirmOpen(false);
       setConfirmAction(null);
@@ -103,7 +103,7 @@ export default function Users() {
       setPermissions(res.permissions);
     } catch (err) {
       setPermissionsOpen(false);
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setPermissionsLoading(false);
     }
@@ -131,7 +131,7 @@ export default function Users() {
       });
       addToast(t(enabled ? "permission_granted" : "permission_revoked"), "success");
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     }
   }
 

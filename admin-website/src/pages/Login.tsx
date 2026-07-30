@@ -1,11 +1,9 @@
 import { useState, useEffect } from "preact/hooks";
 import { login, isAuthenticated, user } from "@store/auth";
-import { ApiError } from "@utils/api";
-import { t } from "@utils/i18n";
 import Button from "@components/Button";
 import Input from "@components/Input";
 import ToastContainer from "@components/Toast";
-import { addToast } from "@store/toast";
+import { addToast, apiErrorMessage } from "@store/toast";
 import { route } from "preact-router";
 
 const REDIRECT_SECONDS = 3;
@@ -37,8 +35,7 @@ export default function Login() {
       await login(username, password);
       addToast("Sesión iniciada", "success");
     } catch (err) {
-      const msg = err instanceof ApiError ? t(err.code) : t("unknown_error");
-      setError(msg);
+      setError(apiErrorMessage(err));
     } finally {
       setLoading(false);
     }

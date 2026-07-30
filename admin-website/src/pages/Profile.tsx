@@ -16,10 +16,10 @@ import {
   canManageUserPermissions,
   canManageFaqPermissions,
 } from "@store/auth";
-import { api, ApiError } from "@utils/api";
+import { api } from "@utils/api";
 import { t } from "@utils/i18n";
 import { formatDate } from "@utils/labels";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import Layout from "@components/Layout";
 import Button from "@components/Button";
 import Input from "@components/Input";
@@ -72,7 +72,7 @@ export default function Profile() {
       setPassword("");
       setConfirm("");
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setSaving(false);
     }
@@ -85,7 +85,7 @@ export default function Profile() {
       addToast(t(res.message), "info");
       await logout();
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setDeactivating(false);
       setDeactivateOpen(false);

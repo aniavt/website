@@ -3,7 +3,7 @@ import Layout from "@components/Layout";
 import Button from "@components/Button";
 import Table, { type Column } from "@components/Table";
 import Modal from "@components/Modal";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import { canReadVault, canManageVaultNodes } from "@store/auth";
 import type { VaultNodeDto, VaultTagDto } from "@ania/api-contract/vault";
 import {
@@ -17,9 +17,7 @@ import {
   createVaultTag,
   renameVaultTag,
   deleteVaultTag,
-  ApiError,
 } from "@utils/api";
-import { t } from "@utils/i18n";
 import VaultTree from "@components/VaultTree";
 import VaultNodeDetails from "@components/VaultNodeDetails";
 
@@ -77,10 +75,7 @@ export default function Vault() {
       setNodes(rootChildren);
       setTags(allTags);
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setLoading(false);
     }
@@ -153,10 +148,7 @@ export default function Vault() {
       }
       setCreateModalOpen(false);
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setCreateLoading(false);
     }
@@ -184,10 +176,7 @@ export default function Vault() {
       addToast("Nodo movido", "success");
       setMoveModalOpen(false);
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setMoveLoading(false);
     }
@@ -216,10 +205,7 @@ export default function Vault() {
       addToast("Nodo renombrado", "success");
       setRenameModalOpen(false);
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setRenameLoading(false);
     }
@@ -237,10 +223,7 @@ export default function Vault() {
       setNodes(result);
       setSelectedNode(null);
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setTagFilterLoading(false);
     }
@@ -261,10 +244,7 @@ export default function Vault() {
       setNewTagName("");
       addToast("Etiqueta creada", "success");
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setTagSaving(false);
     }
@@ -299,10 +279,7 @@ export default function Vault() {
       setEditingTagName("");
       addToast("Etiqueta renombrada", "success");
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setTagSaving(false);
     }
@@ -320,10 +297,7 @@ export default function Vault() {
       }
       addToast("Etiqueta eliminada", "success");
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setDeletingTagId(null);
     }
@@ -600,10 +574,7 @@ export default function Vault() {
                       return merged;
                     });
                   } catch (err) {
-                    addToast(
-                      err instanceof ApiError ? t(err.code) : t("unknown_error"),
-                      "error",
-                    );
+                    toastApiError(err);
                   }
                 }
               }}

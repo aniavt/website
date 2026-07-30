@@ -2,7 +2,7 @@ import Button from "@components/Button";
 import Badge from "@components/Badge";
 import Modal from "@components/Modal";
 import { useState, useEffect } from "preact/hooks";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import {
   canManageVaultNodes,
 } from "@store/auth";
@@ -24,9 +24,7 @@ import {
   setVaultThumbnail,
   deleteVaultNode,
   uploadMediaFile,
-  ApiError,
 } from "@utils/api";
-import { t } from "@utils/i18n";
 import { formatDate } from "@utils/labels";
 
 interface VaultNodeDetailsProps {
@@ -82,10 +80,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
         }
       } catch (err) {
         if (cancelled) return;
-        addToast(
-          err instanceof ApiError ? t(err.code) : t("unknown_error"),
-          "error",
-        );
+        toastApiError(err);
       } finally {
         if (!cancelled) setLoading(false);
       }
@@ -131,10 +126,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
         "success",
       );
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setPublicLoading(false);
     }
@@ -164,10 +156,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
       onRenamed(updated);
       addToast("Thumbnail actualizado", "success");
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setThumbnailLoading(false);
     }
@@ -181,10 +170,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
       onRenamed(updated);
       addToast("Thumbnail eliminado", "success");
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     } finally {
       setThumbnailLoading(false);
     }
@@ -199,10 +185,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
       setNodeTags(updated);
       addToast("Etiqueta añadida", "success");
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     }
   }
 
@@ -215,10 +198,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
       setNodeTags(updated);
       addToast("Etiqueta quitada", "success");
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     }
   }
 
@@ -231,10 +211,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
       setConfirmDeleteOpen(false);
       onDeleted();
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("unknown_error"),
-        "error",
-      );
+      toastApiError(err);
     }
   }
 
@@ -464,10 +441,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
                           setSources(updatedSources);
                           addToast("Fuente eliminada", "success");
                         } catch (err) {
-                          addToast(
-                            err instanceof ApiError ? t(err.code) : t("unknown_error"),
-                            "error",
-                          );
+                          toastApiError(err);
                         }
                       }}
                     >
@@ -662,10 +636,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
               );
               setSourcesModalOpen(false);
             } catch (err) {
-              addToast(
-                err instanceof ApiError ? t(err.code) : t("unknown_error"),
-                "error",
-              );
+              toastApiError(err);
             } finally {
               setSourcesSaving(false);
             }

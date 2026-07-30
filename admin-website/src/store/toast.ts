@@ -1,4 +1,6 @@
 import { signal } from "@preact/signals";
+import { ApiError } from "@utils/api";
+import { t } from "@utils/i18n";
 
 interface Toast {
   id: number;
@@ -18,4 +20,12 @@ export function addToast(message: string, type: Toast["type"] = "info") {
 
 export function removeToast(id: number) {
   toasts.value = toasts.value.filter((t) => t.id !== id);
+}
+
+export function apiErrorMessage(err: unknown, fallbackKey = "unknown_error"): string {
+  return err instanceof ApiError ? t(err.code) : t(fallbackKey);
+}
+
+export function toastApiError(err: unknown, fallbackKey = "unknown_error") {
+  addToast(apiErrorMessage(err, fallbackKey), "error");
 }
