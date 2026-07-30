@@ -4,11 +4,15 @@ WORKDIR /app
 
 COPY package.json bun.lock ./
 COPY packages/api-contract/package.json ./packages/api-contract/
+COPY packages/date/package.json ./packages/date/
+COPY server/package.json ./server/
 COPY admin-website/package.json ./admin-website/
+COPY client/package.json ./client/
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --filter admin-website
 
 COPY packages/api-contract ./packages/api-contract
+COPY packages/date ./packages/date
 COPY admin-website ./admin-website
 
 WORKDIR /app/admin-website

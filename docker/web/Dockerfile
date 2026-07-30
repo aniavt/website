@@ -1,13 +1,15 @@
-
 #--- Producción Builder + Runner ----
 FROM oven/bun:1.3-alpine AS builder
 WORKDIR /app
 
 COPY package.json bun.lock ./
 COPY packages/api-contract/package.json ./packages/api-contract/
+COPY packages/date/package.json ./packages/date/
+COPY server/package.json ./server/
+COPY admin-website/package.json ./admin-website/
 COPY client/package.json ./client/
 
-RUN bun install --frozen-lockfile
+RUN bun install --frozen-lockfile --filter ./client
 
 COPY packages/api-contract ./packages/api-contract
 COPY client ./client
@@ -32,4 +34,3 @@ WORKDIR /workspace
 ENV PORT=80
 EXPOSE 80
 CMD ["sh", "-lc", "bun install && cd client && bunx --bun astro dev --host 0.0.0.0 --port 80"]
-
