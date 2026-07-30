@@ -1,3 +1,5 @@
+import type { WeeklyScheduleHistoryAction } from "@ania/domain-shared/weekly-schedule";
+
 export interface WeeklyScheduleTagDto {
   readonly label: string;
   readonly bgColor: string;
@@ -22,7 +24,7 @@ export interface WeeklyScheduleHistoryEntryDto {
   readonly week: number;
   readonly year: number;
   readonly fileId: string;
-  readonly action: string;
+  readonly action: WeeklyScheduleHistoryAction;
   readonly by: string;
   readonly byUsername: string;
   readonly timestamp: string;

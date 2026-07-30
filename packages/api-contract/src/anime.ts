@@ -1,8 +1,5 @@
-import type { SoftDeleteLastAction } from "./soft-delete";
-
-export type AnimeLastAction = SoftDeleteLastAction;
-
-export type AnimeStatus = "watching" | "completed" | "upcoming";
+import type { SoftDeleteLastAction } from "@ania/domain-shared/soft-delete";
+import type { AnimeStatus } from "@ania/domain-shared/anime";
 
 export interface AnimeDto {
   readonly id: string;
@@ -12,7 +9,7 @@ export interface AnimeDto {
   readonly genre: string;
   readonly status: AnimeStatus;
   readonly active: boolean;
-  readonly lastAction: AnimeLastAction;
+  readonly lastAction: SoftDeleteLastAction;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

@@ -13,8 +13,6 @@ export type {
     VaultNodeDto,
     VaultNodeSourceDto,
     VaultTagDto,
-    VaultNodeType,
-    VaultSourceType,
     CreateVaultFolderInput,
     CreateVaultFileNodeInput,
     MoveVaultNodeInput,

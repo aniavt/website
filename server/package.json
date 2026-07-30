@@ -13,6 +13,7 @@
   "dependencies": {
     "@ania/api-contract": "workspace:*",
     "@ania/date": "workspace:*",
+    "@ania/domain-shared": "workspace:*",
     "@aws-sdk/client-s3": "3.992.0",
     "@aws-sdk/s3-request-presigner": "^3.1008.0",
     "@fastify/cookie": "^11.0.2",

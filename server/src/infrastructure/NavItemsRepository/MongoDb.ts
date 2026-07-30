@@ -1,7 +1,7 @@
 import { NavItems, type NavItemsLastAction } from "@domain/entities/NavItems";
 import type { NavItemsRepository, NavItemsFindAllOptions } from "@domain/repositories/NavItemsRepository";
 import { upsertById } from "@infrastructure/shared/upsertById";
-import { SOFT_DELETE_LAST_ACTIONS } from "@ania/api-contract/soft-delete";
+import { SOFT_DELETE_LAST_ACTIONS } from "@ania/domain-shared/soft-delete";
 import mongoose from "mongoose";
 
 const navItemsSchema = new mongoose.Schema({

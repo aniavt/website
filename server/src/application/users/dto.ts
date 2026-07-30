@@ -1,7 +1,7 @@
 import type { UserEntity } from "@domain/entities/User";
 import type { UserDto } from "@ania/api-contract/user";
 
-export type { UserDto, UserPermissions, PermissionNamespace, LoginRequest, CreateUserInput } from "@ania/api-contract/user";
+export type { UserDto, LoginRequest, CreateUserInput } from "@ania/api-contract/user";
 
 export function toUserDto(user: UserEntity): UserDto {
     return {

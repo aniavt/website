@@ -1,4 +1,4 @@
-import type { SoftDeleteLastAction } from "@ania/api-contract/soft-delete";
+import type { SoftDeleteLastAction } from "@ania/domain-shared/soft-delete";
 
 export type { SoftDeleteLastAction };
 

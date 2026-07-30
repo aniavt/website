@@ -11,6 +11,7 @@ import type {
   VaultTagDto,
   VaultNodeSourceDto,
 } from "@ania/api-contract/vault";
+import type { VaultSourceType } from "@ania/domain-shared/vault";
 import {
   listVaultTags,
   getVaultTagsForNode,
@@ -45,7 +46,7 @@ export default function VaultNodeDetails({ node, onRenamed, onDeleted }: VaultNo
   const [thumbnailPreviewOpen, setThumbnailPreviewOpen] = useState(false);
   const [sourcesModalOpen, setSourcesModalOpen] = useState(false);
   const [editingSource, setEditingSource] = useState<VaultNodeSourceDto | null>(null);
-  const [sourceType, setSourceType] = useState<"external" | "internal">("external");
+  const [sourceType, setSourceType] = useState<VaultSourceType>("external");
   const [sourceServer, setSourceServer] = useState<string>("");
   const [sourceUrlOrFileId, setSourceUrlOrFileId] = useState<string>("");
   const [sourceFile, setSourceFile] = useState<File | null>(null);

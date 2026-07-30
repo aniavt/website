@@ -10,6 +10,7 @@ import {
     toVaultNodeSourceDto,
     toVaultTagDto,
 } from "@application/vault/dto";
+import { VAULT_SOURCE_TYPES, type VaultSourceType } from "@ania/domain-shared/vault";
 import { sendMediaError, sendVaultError } from "../errors";
 
 export interface VaultRoutesDependencies {
@@ -49,7 +50,7 @@ const createFileNodeSchema: FastifySchema = {
         properties: {
             parentId: { type: "string", nullable: true },
             name: { type: "string" },
-            sourceType: { type: "string", enum: ["external", "internal"] },
+            sourceType: { type: "string", enum: [...VAULT_SOURCE_TYPES] },
             server: { type: "string", nullable: true },
             urlOrFileId: { type: "string" },
             isPublic: { type: "boolean" },
@@ -63,7 +64,7 @@ const addSourceToNodeSchema: FastifySchema = {
         type: "object",
         required: ["type"],
         properties: {
-            type: { type: "string", enum: ["external", "internal"] },
+            type: { type: "string", enum: [...VAULT_SOURCE_TYPES] },
             server: { type: "string", nullable: true },
             urlOrFileId: { type: "string" },
         },
@@ -75,7 +76,7 @@ const updateSourceSchema: FastifySchema = {
     body: {
         type: "object",
         properties: {
-            type: { type: "string", enum: ["external", "internal"] },
+            type: { type: "string", enum: [...VAULT_SOURCE_TYPES] },
             server: { type: "string", nullable: true },
             urlOrFileId: { type: "string" },
         },
@@ -255,7 +256,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
 
             let parentId: string | null = null;
             let name: string;
-            let sourceType: "external" | "internal";
+            let sourceType: VaultSourceType;
             let server: string | null = null;
             let urlOrFileId: string | null = null;
             let isPublic: boolean | undefined;
@@ -269,10 +270,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 const fields = (file.fields ?? {}) as Record<string, { value: string }>;
                 const nameField = fields.name?.value as string | undefined;
                 const parentField = fields.parentId?.value as string | undefined;
-                const sourceTypeField = fields.sourceType?.value as
-                    | "external"
-                    | "internal"
-                    | undefined;
+                const sourceTypeField = fields.sourceType?.value as VaultSourceType | undefined;
                 const serverField = fields.server?.value as string | undefined;
                 const isPublicField = fields.isPublic?.value as string | undefined;
 
@@ -314,7 +312,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 const body = request.body as {
                     parentId?: string | null;
                     name: string;
-                    sourceType: "external" | "internal";
+                    sourceType: VaultSourceType;
                     server?: string | null;
                     urlOrFileId?: string;
                     isPublic?: boolean;
@@ -468,7 +466,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
             // - multipart/form-data con un archivo para fuentes internas
             const isMultipart = (request as any).isMultipart?.() === true;
 
-            let type: "external" | "internal";
+            let type: VaultSourceType;
             let server: string | null = null;
             let urlOrFileId: string | null = null;
 
@@ -479,7 +477,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 }
 
                 const fields = (file.fields ?? {}) as Record<string, { value: string }>;
-                const typeField = fields.type?.value as "external" | "internal" | undefined;
+                const typeField = fields.type?.value as VaultSourceType | undefined;
                 const serverField = fields.server?.value as string | undefined;
 
                 if (!typeField) {
@@ -514,7 +512,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
                 }
             } else {
                 const body = request.body as {
-                    type: "external" | "internal";
+                    type: VaultSourceType;
                     server?: string | null;
                     urlOrFileId?: string;
                 };
@@ -548,7 +546,7 @@ export const registerVaultRoutes: RegisterRouteFn<VaultRoutesDependencies> = (
         { preHandler: authenticate(userUseCases), schema: updateSourceSchema },
         async (request, reply) => {
             const body = request.body as {
-                type?: "external" | "internal";
+                type?: VaultSourceType;
                 server?: string | null;
                 urlOrFileId?: string;
             };

@@ -1,6 +1,4 @@
-import type { SoftDeleteLastAction } from "./soft-delete";
-
-export type NavItemsLastAction = SoftDeleteLastAction;
+import type { SoftDeleteLastAction } from "@ania/domain-shared/soft-delete";
 
 export interface NavItemsDto {
   readonly id: string;
@@ -8,7 +6,7 @@ export interface NavItemsDto {
   readonly path: string;
   readonly position: number;
   readonly active: boolean;
-  readonly lastAction: NavItemsLastAction;
+  readonly lastAction: SoftDeleteLastAction;
   readonly createdAt: string;
   readonly updatedAt: string;
 }

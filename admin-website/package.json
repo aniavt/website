@@ -11,6 +11,7 @@
   "dependencies": {
     "@ania/api-contract": "workspace:*",
     "@ania/date": "workspace:*",
+    "@ania/domain-shared": "workspace:*",
     "@preact/signals": "^2.7.0",
     "@tailwindcss/vite": "^4.1.18",
     "preact": "^10.28.3",

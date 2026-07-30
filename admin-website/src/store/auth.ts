@@ -1,7 +1,8 @@
 import { signal, computed } from "@preact/signals";
 import { api } from "@utils/api";
 import { route } from "preact-router";
-import type { UserDto, PermissionNamespace } from "@ania/api-contract/user";
+import type { UserDto } from "@ania/api-contract/user";
+import type { PermissionNamespace } from "@ania/domain-shared/permissions";
 
 export type User = UserDto;
 

@@ -1,7 +1,7 @@
 import type { NavItems } from "@domain/entities/NavItems";
 import type { NavItemsDto } from "@ania/api-contract/nav-items";
 
-export type { NavItemsDto, NavItemsLastAction, CreateNavItemsInput, UpdateNavItemsInput } from "@ania/api-contract/nav-items";
+export type { NavItemsDto, CreateNavItemsInput, UpdateNavItemsInput } from "@ania/api-contract/nav-items";
 
 export function toNavItemsDto(entity: NavItems): NavItemsDto {
    return {

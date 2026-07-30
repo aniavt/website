@@ -7,7 +7,7 @@ import {
   PERMISSION_SLUGS,
   type PermissionNamespace,
   type UserPermissions,
-} from "@ania/api-contract/user";
+} from "@ania/domain-shared/permissions";
 import {
   user as currentUser,
   canActivateUsers,

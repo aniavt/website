@@ -12,6 +12,7 @@ import type {
 } from "@domain/repositories/VaultRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { FileRepository } from "@domain/repositories/FileRepository";
+import type { VaultSourceType } from "@ania/domain-shared/vault";
 import { err, ok, type Result } from "@lib/result";
 
 export type VaultDomainError =
@@ -79,7 +80,7 @@ export class VaultService {
     async createFileNode(params: {
         parentId: string | null;
         name: string;
-        sourceType: "external" | "internal";
+        sourceType: VaultSourceType;
         server: string | null;
         urlOrFileId: string;
         isPublic?: boolean;
@@ -465,7 +466,7 @@ export class VaultService {
 
     async addSourceToNode(params: {
         nodeId: string;
-        type: "external" | "internal";
+        type: VaultSourceType;
         server: string | null;
         urlOrFileId: string;
     }): Promise<Result<VaultNodeSourceEntity, VaultDomainError>> {
@@ -509,7 +510,7 @@ export class VaultService {
 
     async updateSource(params: {
         sourceId: string;
-        type?: "external" | "internal";
+        type?: VaultSourceType;
         server?: string | null;
         urlOrFileId?: string;
     }): Promise<Result<VaultNodeSourceEntity, VaultDomainError>> {

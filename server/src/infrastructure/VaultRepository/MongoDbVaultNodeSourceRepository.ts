@@ -1,11 +1,12 @@
 import { VaultNodeSourceEntity } from "@domain/entities/Vault";
 import type { VaultNodeSourceRepository } from "@domain/repositories/VaultRepository";
+import { VAULT_SOURCE_TYPES, type VaultSourceType } from "@ania/domain-shared/vault";
 import mongoose from "mongoose";
 
 const vaultNodeSourceSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     nodeId: { type: String, required: true, index: true },
-    type: { type: String, required: true, enum: ["external", "internal"] },
+    type: { type: String, required: true, enum: [...VAULT_SOURCE_TYPES] },
     server: { type: String, required: false },
     url: { type: String, required: true },
     createdAt: { type: Date, required: true },
@@ -14,7 +15,7 @@ const vaultNodeSourceSchema = new mongoose.Schema({
 interface VaultNodeSourceDocument {
     id: string;
     nodeId: string;
-    type: "external" | "internal";
+    type: VaultSourceType;
     server: string | null;
     url: string;
     createdAt: Date;

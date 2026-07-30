@@ -6,6 +6,7 @@ import Modal from "@components/Modal";
 import { addToast, toastApiError } from "@store/toast";
 import { canReadVault, canManageVaultNodes } from "@store/auth";
 import type { VaultNodeDto, VaultTagDto } from "@ania/api-contract/vault";
+import type { VaultNodeType, VaultSourceType } from "@ania/domain-shared/vault";
 import {
   listVaultChildren,
   listVaultTags,
@@ -32,8 +33,8 @@ export default function Vault() {
   const [creatingParentId, setCreatingParentId] = useState<string | null>(null);
   const [createModalOpen, setCreateModalOpen] = useState(false);
   const [createName, setCreateName] = useState("");
-  const [createType, setCreateType] = useState<"folder" | "file">("folder");
-  const [createSourceType, setCreateSourceType] = useState<"external" | "internal">("external");
+  const [createType, setCreateType] = useState<VaultNodeType>("folder");
+  const [createSourceType, setCreateSourceType] = useState<VaultSourceType>("external");
   const [createServer, setCreateServer] = useState("");
   const [createUrl, setCreateUrl] = useState("");
   const [createFile, setCreateFile] = useState<File | null>(null);
@@ -85,7 +86,7 @@ export default function Vault() {
     fetchAll();
   }, [fetchAll]);
 
-  function openCreate(parentId: string | null, type: "folder" | "file") {
+  function openCreate(parentId: string | null, type: VaultNodeType) {
     if (!canEdit) return;
     setCreatingParentId(parentId);
     setCreateType(type);
@@ -669,7 +670,7 @@ export default function Vault() {
                   value={createSourceType}
                   onChange={(e) =>
                     setCreateSourceType(
-                      (e.target as HTMLSelectElement).value as "external" | "internal",
+                      (e.target as HTMLSelectElement).value as VaultSourceType,
                     )
                   }
                 >

@@ -1,8 +1,4 @@
-import type { SoftDeleteLastAction } from "./soft-delete";
-
-export type FaqItemLastAction = SoftDeleteLastAction;
-
-export type FaqHistoryAction = FaqItemLastAction;
+import type { SoftDeleteLastAction } from "@ania/domain-shared/soft-delete";
 
 export interface FaqTextDto {
   readonly id: string;
@@ -15,7 +11,7 @@ export interface FaqItemDto {
   readonly queryId: string;
   readonly answerId: string;
   readonly isActive: boolean;
-  readonly lastAction: FaqItemLastAction;
+  readonly lastAction: SoftDeleteLastAction;
 }
 
 /** Public response: query and answer as text. */
@@ -24,7 +20,7 @@ export interface FaqItemPublicDto {
   readonly query: string;
   readonly answer: string;
   readonly isActive: boolean;
-  readonly lastAction: FaqItemLastAction;
+  readonly lastAction: SoftDeleteLastAction;
 }
 
 export interface FaqHistoryEntryDto {
@@ -32,7 +28,7 @@ export interface FaqHistoryEntryDto {
   readonly faqId: string;
   readonly queryId: string;
   readonly answerId: string;
-  readonly action: FaqHistoryAction;
+  readonly action: SoftDeleteLastAction;
   readonly by: string;
   readonly byUsername: string;
   readonly timestamp: string;

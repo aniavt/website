@@ -1,5 +1,9 @@
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import type { FaqHistoryRepository } from "@domain/repositories/FaqHistoryRepository";
+import {
+    SOFT_DELETE_LAST_ACTIONS,
+    type SoftDeleteLastAction,
+} from "@ania/domain-shared/soft-delete";
 import mongoose from "mongoose";
 
 const faqHistorySchema = new mongoose.Schema({
@@ -7,7 +11,7 @@ const faqHistorySchema = new mongoose.Schema({
     faqId: { type: String, required: true },
     queryId: { type: String, required: true },
     answerId: { type: String, required: true },
-    action: { type: String, required: true, enum: ["created", "updated", "deleted", "restore"] },
+    action: { type: String, required: true, enum: [...SOFT_DELETE_LAST_ACTIONS] },
     by: { type: String, required: true },
     timestamp: { type: Date, required: true },
 });
@@ -17,7 +21,7 @@ interface FaqHistoryDocument {
     faqId: string;
     queryId: string;
     answerId: string;
-    action: "created" | "updated" | "deleted" | "restore";
+    action: SoftDeleteLastAction;
     by: string;
     timestamp: Date;
 }

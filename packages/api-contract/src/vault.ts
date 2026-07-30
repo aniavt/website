@@ -1,6 +1,4 @@
-export type VaultNodeType = "file" | "folder";
-
-export type VaultSourceType = "external" | "internal";
+import type { VaultNodeType, VaultSourceType } from "@ania/domain-shared/vault";
 
 export interface VaultNodeDto {
   readonly id: string;

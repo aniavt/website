@@ -4,7 +4,7 @@ import {
     PERMISSION_SLUGS,
     type NamespacedPermissionSlug,
     type PermissionNamespace,
-} from "@ania/api-contract/user";
+} from "@ania/domain-shared/permissions";
 
 export { PERMISSION_NAMESPACES as namespaces, type PermissionNamespace };
 

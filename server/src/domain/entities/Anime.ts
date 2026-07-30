@@ -2,10 +2,9 @@ import {
   canTransitionLastAction,
   type SoftDeleteLastAction,
 } from "@domain/shared/canTransitionLastAction";
+import type { AnimeStatus } from "@ania/domain-shared/anime";
 
 export type AnimeLastAction = SoftDeleteLastAction;
-
-export type AnimeStatus = "watching" | "completed" | "upcoming";
 
 export interface AnimeProps {
   readonly id: string;

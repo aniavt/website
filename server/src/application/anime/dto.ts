@@ -1,7 +1,7 @@
 import type { Anime } from "@domain/entities/Anime";
 import type { AnimeDto } from "@ania/api-contract/anime";
 
-export type { AnimeDto, AnimeStatus, AnimeLastAction, CreateAnimeInput, UpdateAnimeInput } from "@ania/api-contract/anime";
+export type { AnimeDto, CreateAnimeInput, UpdateAnimeInput } from "@ania/api-contract/anime";
 
 export function toAnimeDto(entity: Anime): AnimeDto {
    return {

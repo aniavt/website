@@ -3,6 +3,7 @@ import type {
     VaultNodeSourceEntity,
     VaultNodeTagInfoEntity,
 } from "@domain/entities/Vault";
+import type { VaultSourceType } from "@ania/domain-shared/vault";
 import type { Result } from "@lib/result";
 import type { VaultError } from "./errors";
 
@@ -38,7 +39,7 @@ export interface IVaultUseCases {
         execute(requesterId: string, input: {
             parentId: string | null;
             name: string;
-            sourceType: "external" | "internal";
+            sourceType: VaultSourceType;
             server: string | null;
             urlOrFileId: string;
             isPublic?: boolean;
@@ -87,7 +88,7 @@ export interface IVaultUseCases {
             requesterId: string,
             input: {
                 nodeId: string;
-                type: "external" | "internal";
+                type: VaultSourceType;
                 server: string | null;
                 urlOrFileId: string;
             },
@@ -98,7 +99,7 @@ export interface IVaultUseCases {
             requesterId: string,
             input: {
                 sourceId: string;
-                type?: "external" | "internal";
+                type?: VaultSourceType;
                 server?: string | null;
                 urlOrFileId?: string;
             },

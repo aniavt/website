@@ -1,12 +1,13 @@
 import { VaultNodeEntity } from "@domain/entities/Vault";
 import type { VaultNodeRepository } from "@domain/repositories/VaultRepository";
+import { VAULT_NODE_TYPES, type VaultNodeType } from "@ania/domain-shared/vault";
 import mongoose from "mongoose";
 
 const vaultNodeSchema = new mongoose.Schema({
     id: { type: String, required: true, unique: true },
     parentId: { type: String, required: false },
     name: { type: String, required: true },
-    type: { type: String, required: true, enum: ["folder", "file"] },
+    type: { type: String, required: true, enum: [...VAULT_NODE_TYPES] },
     createdAt: { type: Date, required: false },
     thumbnailId: { type: String, required: false },
     isPublic: { type: Boolean, required: true, default: false },
@@ -16,7 +17,7 @@ interface VaultNodeDocument {
     id: string;
     parentId: string | null;
     name: string;
-    type: "folder" | "file";
+    type: VaultNodeType;
     createdAt: Date | null;
     thumbnailId: string | null;
     isPublic: boolean;

@@ -1,6 +1,6 @@
 import { FaqItem, type FaqItemLastAction } from "@domain/entities/FaqItem";
 import type { FaqItemRepository, FaqItemFindAllOptions } from "@domain/repositories/FaqItemRepository";
-import { SOFT_DELETE_LAST_ACTIONS } from "@ania/api-contract/soft-delete";
+import { SOFT_DELETE_LAST_ACTIONS } from "@ania/domain-shared/soft-delete";
 import mongoose from "mongoose";
 
 const faqItemSchema = new mongoose.Schema({

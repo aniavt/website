@@ -1,7 +1,8 @@
-import { Anime, type AnimeLastAction, type AnimeStatus } from "@domain/entities/Anime";
+import { Anime, type AnimeLastAction } from "@domain/entities/Anime";
+import { ANIME_STATUSES, type AnimeStatus } from "@ania/domain-shared/anime";
 import type { AnimeRepository, AnimeFindAllOptions } from "@domain/repositories/AnimeRepository";
 import { upsertById } from "@infrastructure/shared/upsertById";
-import { SOFT_DELETE_LAST_ACTIONS } from "@ania/api-contract/soft-delete";
+import { SOFT_DELETE_LAST_ACTIONS } from "@ania/domain-shared/soft-delete";
 import mongoose from "mongoose";
 
 const animeSchema = new mongoose.Schema({
@@ -10,7 +11,7 @@ const animeSchema = new mongoose.Schema({
    description: { type: String },
    coverImageURL: { type: String },
    genre: { type: String, required: true },
-   status: { type: String, required: true, enum: ["watching", "completed", "upcoming"] },
+   status: { type: String, required: true, enum: [...ANIME_STATUSES] },
    active: { type: Boolean, required: true },
    lastAction: {
       type: String,

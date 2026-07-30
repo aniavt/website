@@ -1,8 +1,10 @@
+import type { VaultNodeType, VaultSourceType } from "@ania/domain-shared/vault";
+
 export interface VaultNodeProps {
     readonly id: string;
     readonly parentId: string | null;
     readonly name: string;
-    readonly type: "folder" | "file";
+    readonly type: VaultNodeType;
     readonly createdAt: Date | null;
     readonly thumbnailId: string | null; // File id
     readonly isPublic: boolean;
@@ -11,7 +13,7 @@ export interface VaultNodeProps {
 export interface VaultNodeSourceProps {
     readonly id: string;
     readonly nodeId: string;
-    readonly type: "external" | "internal"; // external: from external server, internal: from internal server
+    readonly type: VaultSourceType; // external: from external server, internal: from internal server
     readonly server: string | null;
     readonly url: string; // internal == file id, external == url
     readonly createdAt: Date;
@@ -32,7 +34,7 @@ export class VaultNodeEntity {
     readonly id: string;
     readonly parentId: string | null;
     readonly name: string;
-    readonly type: "folder" | "file";
+    readonly type: VaultNodeType;
     readonly createdAt: Date | null;
     readonly thumbnailId: string | null;
      readonly isPublic: boolean;
@@ -56,7 +58,7 @@ export class VaultNodeEntity {
 export class VaultNodeSourceEntity {
     readonly id: string;
     readonly nodeId: string;
-    readonly type: "external" | "internal";
+    readonly type: VaultSourceType;
     readonly server: string | null;
     readonly url: string;
     readonly createdAt: Date;

@@ -1,6 +1,8 @@
 import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
+import type { CreateAnimeInput, UpdateAnimeInput } from "@ania/api-contract/anime";
+import { ANIME_STATUSES } from "@ania/domain-shared/anime";
 import type { RegisterRouteFn } from "../types";
 import { sendAnimeError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
@@ -19,7 +21,7 @@ const createAnimeSchema: FastifySchema = {
          description: { type: "string" },
          coverImageURL: { type: "string" },
          genre: { type: "string" },
-         status: { type: "string", enum: ["watching", "completed", "upcoming"] },
+         status: { type: "string", enum: [...ANIME_STATUSES] },
       },
       additionalProperties: false,
    },
@@ -33,7 +35,7 @@ const updateAnimeSchema: FastifySchema = {
          description: { type: "string" },
          coverImageURL: { type: "string" },
          genre: { type: "string" },
-         status: { type: "string", enum: ["watching", "completed", "upcoming"] },
+         status: { type: "string", enum: [...ANIME_STATUSES] },
       },
       additionalProperties: false,
    },
@@ -48,7 +50,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
       prefixUrl("/anime"),
       { preHandler: authenticate(userUseCases), schema: createAnimeSchema },
       async (request, reply) => {
-         const body = request.body as { title: string; description?: string; coverImageURL?: string; genre: string; status: "watching" | "completed" | "upcoming" };
+         const body = request.body as CreateAnimeInput;
          const result = await animeUseCases.createAnime.execute(request.user!.id, body);
          if (result.isError()) return sendAnimeError(reply, result.error);
          return reply.status(201).send(result.data);
@@ -59,7 +61,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
       prefixUrl("/anime/:id"),
       { preHandler: authenticate(userUseCases), schema: updateAnimeSchema },
       async (request, reply) => {
-         const body = request.body as { title?: string; description?: string; coverImageURL?: string; genre?: string; status?: "watching" | "completed" | "upcoming" };
+         const body = request.body as UpdateAnimeInput;
          const result = await animeUseCases.updateAnime.execute(request.user!.id, {
             id: request.params.id,
             ...body,

@@ -14,6 +14,7 @@ import {
 } from "@store/auth";
 import type { AnimeDto, CreateAnimeInput, UpdateAnimeInput } from "@ania/api-contract/anime";
 import type { ChapterDto, CreateChapterInput, UpdateChapterInput } from "@ania/api-contract/chapter";
+import type { AnimeStatus } from "@ania/domain-shared/anime";
 import {
    listAnimes,
    createAnime,
@@ -45,7 +46,7 @@ export default function Anime() {
    const [createCoverFile, setCreateCoverFile] = useState<File | null>(null);
    const [createCoverPreviewUrl, setCreateCoverPreviewUrl] = useState<string | null>(null);
    const [createGenre, setCreateGenre] = useState("");
-   const [createStatus, setCreateStatus] = useState<"watching" | "completed" | "upcoming">("upcoming");
+   const [createStatus, setCreateStatus] = useState<AnimeStatus>("upcoming");
    const [createLoading, setCreateLoading] = useState(false);
 
    // ── Edit anime modal ────────────────────────────────────────────────────────
@@ -56,7 +57,7 @@ export default function Anime() {
    const [editCoverFile, setEditCoverFile] = useState<File | null>(null);
    const [editCoverPreviewUrl, setEditCoverPreviewUrl] = useState<string | null>(null);
    const [editGenre, setEditGenre] = useState("");
-   const [editStatus, setEditStatus] = useState<"watching" | "completed" | "upcoming">("upcoming");
+   const [editStatus, setEditStatus] = useState<AnimeStatus>("upcoming");
    const [editLoading, setEditLoading] = useState(false);
 
    // ── Delete anime confirm modal ──────────────────────────────────────────────
@@ -654,7 +655,7 @@ export default function Anime() {
                   <span>Seguimiento <span class="text-[var(--error)]">*</span></span>
                   <select
                      value={createStatus}
-                     onChange={(e) => setCreateStatus((e.target as HTMLSelectElement).value as "watching" | "completed" | "upcoming")}
+                     onChange={(e) => setCreateStatus((e.target as HTMLSelectElement).value as AnimeStatus)}
                      class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none"
                   >
                      <option value="upcoming">Próximo</option>
@@ -774,7 +775,7 @@ export default function Anime() {
                   <span>Seguimiento</span>
                   <select
                      value={editStatus}
-                     onChange={(e) => setEditStatus((e.target as HTMLSelectElement).value as "watching" | "completed" | "upcoming")}
+                     onChange={(e) => setEditStatus((e.target as HTMLSelectElement).value as AnimeStatus)}
                      class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none"
                   >
                      <option value="upcoming">Próximo</option>
