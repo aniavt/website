@@ -88,7 +88,7 @@ export const canManageVaultNodes = computed(() =>
   hasPermission("vault", "delete_node"),
 );
 
-export const canReadNavItems = computed(() => hasPermission("navItems", "restore_navItems"));
+export const canReadNavItems = computed(() => hasPermission("navItems", "read_navItems"));
 export const canCreateNavItems = computed(() => hasPermission("navItems", "create_navItems"));
 export const canUpdateNavItems = computed(() => hasPermission("navItems", "update_navItems"));
 export const canDeleteNavItems = computed(() => hasPermission("navItems", "delete_navItems"));
