@@ -8,6 +8,7 @@ import { err, ok, type Result } from "@lib/result";
 import type { ChapterError } from "../errors";
 import type { ChapterDto, CreateChapterInput as CreateChapterBody } from "../dto";
 import { toChapterDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
 
 export type CreateChapterInput = CreateChapterBody & { animeId: string };
 
@@ -20,11 +21,13 @@ export class CreateChapterUseCase {
    ) { }
 
    async execute(requesterId: string, input: CreateChapterInput): Promise<Result<ChapterDto, ChapterError>> {
-      const requester = await this.userRepository.findById(requesterId);
-      if (!requester) return err("chapter_not_authorized");
-      if (!requester.hasPermission({ type: "anime", permission: AnimePermission.CREATE_ANIME })) {
-         return err("chapter_not_authorized");
-      }
+      const auth = await assertPermission(
+         this.userRepository,
+         requesterId,
+         { type: "anime", permission: AnimePermission.CREATE_ANIME },
+         "chapter_not_authorized",
+      );
+      if (auth.isError()) return auth;
 
       const anime = await this.animeRepository.findById(input.animeId);
       if (!anime) return err("anime_not_found");

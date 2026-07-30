@@ -3,6 +3,7 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import { AnimePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { ChapterError } from "../errors";
+import { assertPermission } from "@application/shared/auth";
 
 export class DeleteChapterUseCase {
    constructor(
@@ -11,11 +12,13 @@ export class DeleteChapterUseCase {
    ) { }
 
    async execute(requesterId: string, chapterId: string): Promise<Result<void, ChapterError>> {
-      const requester = await this.userRepository.findById(requesterId);
-      if (!requester) return err("chapter_not_authorized");
-      if (!requester.hasPermission({ type: "anime", permission: AnimePermission.DELETE_ANIME })) {
-         return err("chapter_not_authorized");
-      }
+      const auth = await assertPermission(
+         this.userRepository,
+         requesterId,
+         { type: "anime", permission: AnimePermission.DELETE_ANIME },
+         "chapter_not_authorized",
+      );
+      if (auth.isError()) return auth;
 
       const chapter = await this.chapterRepository.findById(chapterId);
       if (!chapter) return err("chapter_not_found");

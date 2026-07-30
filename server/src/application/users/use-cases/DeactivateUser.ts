@@ -2,6 +2,7 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import { ManagePermission, UserPermission } from "@domain/value-object/Permissions";
 import { type Result, err, ok } from "@lib/result";
 import type { UserError } from "../errors";
+import { assertPermission } from "@application/shared/auth";
 
 
 export class DeactivateUserUseCase {
@@ -9,13 +10,20 @@ export class DeactivateUserUseCase {
 
     async execute(id: string, requesterId: string): Promise<Result<void, UserError>> {
         const user = await this.userRepository.findById(id);
-        const requester = await this.userRepository.findById(requesterId);
-        if (!user || !requester) {
+        if (!user) {
             return err("user_not_found");
         }
 
-        if (user.id !== requester.id && !requester.hasPermission({ type: "user", permission: UserPermission.DEACTIVATE_USER })) {
-            return err("user_not_authorized");
+        // Self-deactivate is allowed without DEACTIVATE_USER; others need the permission.
+        // If self, `user` already proves the requester exists (same id).
+        if (user.id !== requesterId) {
+            const auth = await assertPermission(
+                this.userRepository,
+                requesterId,
+                { type: "user", permission: UserPermission.DEACTIVATE_USER },
+                "user_not_authorized",
+            );
+            if (auth.isError()) return auth;
         }
 
         if (user.hasPermission({ type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS })

@@ -5,19 +5,17 @@ import type { PaginationOptions } from "@domain/repositories/UserRepository";
 import { namespaces, type PermissionNamespace } from "@domain/value-object/Permissions";
 
 import type { IUserUseCases } from "@application/users/IUserUseCases";
-import type { UserError, PermissionError } from "@application/users/errors";
 import type { UserDto } from "@application/users/dto";
 
 import type { RegisterRouteFn } from "../types";
 import { environment, jwt } from "../config";
 import { authenticate } from "../middlewares/auth";
+import { sendUserError } from "../errors";
 
 
 export interface UserRoutesDependencies {
     userUseCases: IUserUseCases;
 }
-
-type UserOrPermissionError = UserError | PermissionError;
 
 const loginSchema: FastifySchema = {
     body: {
@@ -29,34 +27,6 @@ const loginSchema: FastifySchema = {
         },
         additionalProperties: false,
     }
-}
-
-function mapErrorToHttpErrorCode(error: UserOrPermissionError): number {
-    switch (error) {
-        case "user_not_found":
-            return 404;
-        case "user_not_authorized":
-        case "password_verify_failed":
-        case "permission_not_authorized":
-            return 401;
-        case "username_already_exists":
-        case "username_too_long":
-        case "password_too_short":
-        case "password_too_long":
-        case "password_week_upper_case_letter":
-        case "password_week_lower_case_letter":
-        case "password_week_number":
-        case "password_week_symbol":
-        case "username_too_short":
-        case "permission_invalid_action":
-        case "permission_invalid_namespace":
-        case "permission_invalid_slug":
-            return 400;
-        case "user_repo_error":
-        case "user_save_failed":
-            return 500;
-    }
-    return 500;
 }
 
 function setAuthCookie(reply: FastifyReply, user: UserDto) {
@@ -85,12 +55,6 @@ function clearAuthCookie(reply: FastifyReply) {
     });
 }
 
-function sendErrorResponse(reply: FastifyReply, error: UserOrPermissionError) {
-    return reply
-        .status(mapErrorToHttpErrorCode(error))
-        .send({ error });
-}
-
 function userToResponse(user: UserDto) {
     return {
         id: user.id,
@@ -108,14 +72,14 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         const result = await userUseCases.getByUsername.execute(username);
 
         if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
+            return sendUserError(reply, result.error);
         }
 
         const user = result.data;
         const verifyPasswordResult = await userUseCases.verifyPassword.execute(user.id, password);
 
         if (verifyPasswordResult.isError()) {
-            return sendErrorResponse(reply, verifyPasswordResult.error);
+            return sendUserError(reply, verifyPasswordResult.error);
         }
 
         setAuthCookie(reply, user);
@@ -127,7 +91,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         const result = await userUseCases.create.execute({ username, password });
 
         if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
+            return sendUserError(reply, result.error);
         }
 
         const user = result.data;
@@ -155,7 +119,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         const { password } = request.body as { password: string };
         const result = await userUseCases.updatePassword.execute(request.user!.id, password);
         if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
+            return sendUserError(reply, result.error);
         }
         return reply.send({ message: "password_updated" });
     });
@@ -193,7 +157,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
             });
 
             if (result.isError()) {
-                return sendErrorResponse(reply, result.error);
+                return sendUserError(reply, result.error);
             }
 
             return reply.send({ message: "permission_granted" });
@@ -216,7 +180,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
             });
 
             if (result.isError()) {
-                return sendErrorResponse(reply, result.error);
+                return sendUserError(reply, result.error);
             }
 
             return reply.send({ message: "permission_revoked" });
@@ -235,7 +199,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
                 requesterId: requester.id,
             });
             if (result.isError()) {
-                return sendErrorResponse(reply, result.error);
+                return sendUserError(reply, result.error);
             }
 
             return reply.send({ permissions: result.data.permissions });
@@ -255,7 +219,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
                 requesterId: requester.id,
             });
             if (result.isError()) {
-                return sendErrorResponse(reply, result.error);
+                return sendUserError(reply, result.error);
             }
 
             const slugs = result.data.permissions[namespace] as readonly string[];
@@ -268,7 +232,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/deactivate/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
         const result = await userUseCases.deactivate.execute(request.params.userId, request.user!.id);
         if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
+            return sendUserError(reply, result.error);
         }
         clearAuthCookie(reply);
         return reply.send({ message: "user_deactivated" });
@@ -277,7 +241,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
     app.post<{ Params: { userId: string } }>(prefixUrl("/user/activate/:userId"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
         const result = await userUseCases.activate.execute(request.params.userId, request.user!.id);
         if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
+            return sendUserError(reply, result.error);
         }
         return reply.send({ message: "user_activated" });
     });
@@ -306,7 +270,7 @@ export const registerUserRoutes: RegisterRouteFn<UserRoutesDependencies> = (app,
         const result = await userUseCases.getAll.execute(request.user!.id, options);
 
         if (result.isError()) {
-            return sendErrorResponse(reply, result.error);
+            return sendUserError(reply, result.error);
         }
         return reply.send(result.data.map(userToResponse));
     });

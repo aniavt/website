@@ -6,10 +6,11 @@ import type { IdGenerator } from "@domain/services/IdGenerator";
 import { FaqItem } from "@domain/entities/FaqItem";
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import { FAQPermission } from "@domain/value-object/Permissions";
-import { err, ok, type Result } from "@lib/result";
+import { err, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
 import type { FaqItemPublicDto } from "../dto";
 import { resolveItemToPublicDto } from "../resolveFaqItem";
+import { assertPermission } from "@application/shared/auth";
 
 export class RestoreFaqItemUseCase {
     constructor(
@@ -21,9 +22,13 @@ export class RestoreFaqItemUseCase {
     ) {}
 
     async execute(requesterId: string, id: string): Promise<Result<FaqItemPublicDto, FaqError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("faq_not_authorized");
-        if (!requester.hasPermission({ type: "faq", permission: FAQPermission.RESTORE_FAQ })) return err("faq_not_authorized");
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "faq", permission: FAQPermission.RESTORE_FAQ },
+            "faq_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
         const item = await this.faqItemRepository.findById(id);
         if (!item) return err("faq_item_not_found");

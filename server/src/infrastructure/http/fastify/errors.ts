@@ -5,6 +5,7 @@ import type { FaqError } from "@application/faq/errors";
 import type { MediaError } from "@application/media/errors";
 import type { NavItemsError } from "@application/navItems/errors";
 import type { WeeklyScheduleError } from "@application/weekly_schedule/errors";
+import type { PermissionError, UserError } from "@application/users/errors";
 
 export function mapErrorToHttpCode<E extends string>(
     error: E,
@@ -93,4 +94,31 @@ const WEEKLY_SCHEDULE_ERROR_STATUS: Partial<Record<WeeklyScheduleError, number>>
 
 export function sendWeeklyScheduleError(reply: FastifyReply, error: WeeklyScheduleError) {
     return sendDomainError(reply, error, WEEKLY_SCHEDULE_ERROR_STATUS);
+}
+
+type UserOrPermissionError = UserError | PermissionError;
+
+const USER_ERROR_STATUS: Partial<Record<UserOrPermissionError, number>> = {
+    user_not_found: 404,
+    user_not_authorized: 401,
+    password_verify_failed: 401,
+    permission_not_authorized: 401,
+    username_already_exists: 400,
+    username_too_long: 400,
+    password_too_short: 400,
+    password_too_long: 400,
+    password_week_upper_case_letter: 400,
+    password_week_lower_case_letter: 400,
+    password_week_number: 400,
+    password_week_symbol: 400,
+    username_too_short: 400,
+    permission_invalid_action: 400,
+    permission_invalid_namespace: 400,
+    permission_invalid_slug: 400,
+    user_repo_error: 500,
+    user_save_failed: 500,
+};
+
+export function sendUserError(reply: FastifyReply, error: UserOrPermissionError) {
+    return sendDomainError(reply, error, USER_ERROR_STATUS);
 }

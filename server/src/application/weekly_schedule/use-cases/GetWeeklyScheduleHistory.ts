@@ -6,6 +6,7 @@ import { err, ok, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleHistoryEntryDto } from "../dto";
 import { toWeeklyScheduleHistoryEntryDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
 
 
 export class GetWeeklyScheduleHistoryUseCase {
@@ -16,11 +17,13 @@ export class GetWeeklyScheduleHistoryUseCase {
     ) {}
 
     async execute(requesterId: string, scheduleId: string): Promise<Result<WeeklyScheduleHistoryEntryDto[], WeeklyScheduleError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("weekly_schedule_not_authorized");
-        if (!requester.hasPermission({ type: "weekly_schedule", permission: WeeklySchedulePermission.READ_WEEKLY_SCHEDULE_HISTORY })) {
-            return err("weekly_schedule_not_authorized");
-        }
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "weekly_schedule", permission: WeeklySchedulePermission.READ_WEEKLY_SCHEDULE_HISTORY },
+            "weekly_schedule_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
         const schedule = await this.weeklyScheduleRepository.findById(scheduleId, { includeDeleted: true });
         if (!schedule) return err("weekly_schedule_not_found");

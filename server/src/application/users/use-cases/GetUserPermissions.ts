@@ -4,6 +4,7 @@ import { err, ok, type Result } from "@lib/result";
 import type { UserError } from "../errors";
 import type { UserDto } from "../dto";
 import { toUserDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
 
 
 export interface GetUserPermissionsInput {
@@ -21,23 +22,23 @@ export class GetUserPermissionsUseCase {
     async execute(input: GetUserPermissionsInput): Promise<Result<GetUserPermissionsOutput, UserError>> {
         const { userId, requesterId } = input;
 
-        const [user, requester] = await Promise.all([
-            this.userRepository.findById(userId),
-            this.userRepository.findById(requesterId),
-        ]);
-
-        if (!user || !requester) {
+        const user = await this.userRepository.findById(userId);
+        if (!user) {
             return err("user_not_found");
         }
 
-        const isSelf = user.id === requester.id;
-        const canManageUser = requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER });
-
-        if (!isSelf && !canManageUser) {
-            return err("user_not_authorized");
+        // Self-read is allowed; others need MANAGE_USER.
+        // If self, `user` already proves the requester exists (same id).
+        if (user.id !== requesterId) {
+            const auth = await assertPermission(
+                this.userRepository,
+                requesterId,
+                { type: "meta", permission: ManagePermission.MANAGE_USER },
+                "user_not_authorized",
+            );
+            if (auth.isError()) return auth;
         }
 
         return ok({ permissions: toUserDto(user).permissions });
     }
 }
-

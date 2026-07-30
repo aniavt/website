@@ -11,6 +11,7 @@ import { err, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
 import type { FaqItemPublicDto, UpdateFaqItemInput as UpdateFaqItemBody } from "../dto";
 import { resolveItemToPublicDto } from "../resolveFaqItem";
+import { assertPermission } from "@application/shared/auth";
 
 export type UpdateFaqItemInput = UpdateFaqItemBody & { id: string };
 
@@ -24,9 +25,13 @@ export class UpdateFaqItemUseCase {
     ) {}
 
     async execute(requesterId: string, input: UpdateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("faq_not_authorized");
-        if (!requester.hasPermission({ type: "faq", permission: FAQPermission.UPDATE_FAQ })) return err("faq_not_authorized");
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "faq", permission: FAQPermission.UPDATE_FAQ },
+            "faq_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
         const item = await this.faqItemRepository.findById(input.id);
         if (!item) return err("faq_item_not_found");

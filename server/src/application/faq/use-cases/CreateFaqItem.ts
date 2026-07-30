@@ -11,6 +11,7 @@ import { err, ok, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
 import type { FaqItemPublicDto, CreateFaqItemInput } from "../dto";
 import { toFaqItemPublicDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
 
 export type { CreateFaqItemInput };
 
@@ -24,9 +25,13 @@ export class CreateFaqItemUseCase {
     ) {}
 
     async execute(requesterId: string, input: CreateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("faq_not_authorized");
-        if (!requester.hasPermission({ type: "faq", permission: FAQPermission.CREATE_FAQ })) return err("faq_not_authorized");
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "faq", permission: FAQPermission.CREATE_FAQ },
+            "faq_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
         const queryText = await this.findOrCreateFaqText(input.query);
         const answerText = await this.findOrCreateFaqText(input.answer);

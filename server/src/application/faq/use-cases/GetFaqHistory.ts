@@ -6,6 +6,7 @@ import { err, ok, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
 import type { FaqHistoryEntryDto } from "../dto";
 import { toFaqHistoryEntryDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
 
 
 export class GetFaqHistoryUseCase {
@@ -16,9 +17,13 @@ export class GetFaqHistoryUseCase {
     ) {}
 
     async execute(requesterId: string, faqId: string): Promise<Result<FaqHistoryEntryDto[], FaqError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("faq_not_authorized");
-        if (!requester.hasPermission({ type: "faq", permission: FAQPermission.READ_FAQ })) return err("faq_not_authorized");
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "faq", permission: FAQPermission.READ_FAQ },
+            "faq_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
         const item = await this.faqItemRepository.findById(faqId);
         if (!item) return err("faq_item_not_found");

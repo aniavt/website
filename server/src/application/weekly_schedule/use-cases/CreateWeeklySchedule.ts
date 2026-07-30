@@ -10,6 +10,7 @@ import { err, ok, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto, CreateWeeklyScheduleInput } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
 
 export type { CreateWeeklyScheduleInput };
 
@@ -23,11 +24,13 @@ export class CreateWeeklyScheduleUseCase {
     ) {}
 
     async execute(requesterId: string, input: CreateWeeklyScheduleInput): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("weekly_schedule_not_authorized");
-        if (!requester.hasPermission({ type: "weekly_schedule", permission: WeeklySchedulePermission.CREATE_WEEKLY_SCHEDULE })) {
-            return err("weekly_schedule_not_authorized");
-        }
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "weekly_schedule", permission: WeeklySchedulePermission.CREATE_WEEKLY_SCHEDULE },
+            "weekly_schedule_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
         const schedule = new WeeklySchedule({
             id: "",
