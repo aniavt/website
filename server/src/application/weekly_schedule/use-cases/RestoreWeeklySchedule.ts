@@ -2,6 +2,7 @@ import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklySchedu
 import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/WeeklyScheduleHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
+import { getISOWeekAndYear } from "@ania/date";
 import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
@@ -30,8 +31,7 @@ export class RestoreWeeklyScheduleUseCase {
         if (!schedule) return err("weekly_schedule_not_found");
 
         const now = new Date();
-        const currentWeek = WeeklySchedule.getWeekNumber(now);
-        const currentYear = now.getFullYear();
+        const { week: currentWeek, year: currentYear } = getISOWeekAndYear(now);
         const isPast =
             schedule.year < currentYear ||
             (schedule.year === currentYear && schedule.week < currentWeek);

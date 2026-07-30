@@ -1,3 +1,4 @@
+import { getISOWeekAndYear } from "@ania/date";
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/WeeklyScheduleHistoryRepository";
 import type { FileRepository } from "@domain/repositories/FileRepository";
@@ -33,8 +34,7 @@ export class UpdateWeeklyScheduleUseCase {
         if (!schedule) return err("weekly_schedule_not_found");
 
         const now = new Date();
-        const currentWeek = WeeklySchedule.getWeekNumber(now);
-        const currentYear = now.getFullYear();
+        const { week: currentWeek, year: currentYear } = getISOWeekAndYear(now);
         const isPast =
             schedule.year < currentYear ||
             (schedule.year === currentYear && schedule.week < currentWeek);

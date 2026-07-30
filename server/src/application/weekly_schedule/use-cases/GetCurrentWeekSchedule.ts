@@ -1,4 +1,4 @@
-import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
+import { getISOWeekAndYear } from "@ania/date";
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { FileRepository } from "@domain/repositories/FileRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
@@ -25,7 +25,7 @@ export class GetCurrentWeekScheduleUseCase {
             }) === true;
 
         const now = new Date();
-        const { week: currentWeek, year: currentYear } = WeeklySchedule.getISOWeekAndYear(now);
+        const { week: currentWeek, year: currentYear } = getISOWeekAndYear(now);
 
         const schedule = await this.weeklyScheduleRepository.findByWeekAndYear(currentWeek, currentYear, {
             includeDeleted: canSeeDeleted,

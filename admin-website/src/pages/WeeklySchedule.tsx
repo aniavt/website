@@ -27,26 +27,14 @@ import {
 } from "@utils/api";
 import { t } from "@utils/i18n";
 import { formatDate, lastActionLabel } from "@utils/labels";
+import { getISOWeekAndYear } from "@ania/date";
 
 type ScheduleTag = { label: string; bgColor: string; txColor: string };
 
 const LIMIT = 15;
 
-function getCurrentWeekYear() {
-  const now = new Date();
-  // Copia para no mutar `now`
-  const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  // Ajustar al jueves de la semana actual (regla ISO-8601)
-  const day = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  const year = date.getUTCFullYear();
-  return { week, year };
-}
-
 export default function WeeklySchedule() {
-  const { week: currentWeek, year: currentYear } = getCurrentWeekYear();
+  const { week: currentWeek, year: currentYear } = getISOWeekAndYear(new Date());
 
   const [items, setItems] = useState<WeeklyScheduleDto[]>([]);
   const [loading, setLoading] = useState(true);
