@@ -2,31 +2,12 @@ import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { RegisterRouteFn } from "../types";
-import type { AnimeError } from "@application/anime/errors";
+import { sendAnimeError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 
 export interface AnimeRoutesDependencies {
    userUseCases: IUserUseCases;
    animeUseCases: IAnimeUseCases;
-}
-
-function mapAnimeErrorToHttpCode(error: AnimeError): number {
-   switch (error) {
-      case "anime_not_found":
-         return 404;
-      case "anime_not_authorized":
-         return 401;
-      case "anime_invalid_transition":
-         return 400;
-      case "anime_save_failed":
-         return 500;
-      default:
-         return 500;
-   }
-}
-
-function sendAnimeError(reply: FastifyReply, error: AnimeError) {
-   return reply.status(mapAnimeErrorToHttpCode(error)).send({ error });
 }
 
 const createAnimeSchema: FastifySchema = {

@@ -1,26 +1,10 @@
 import type { FastifyReply, FastifyRequest } from "fastify";
 import type { RegisterRouteFn } from "../types";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
-import type { MediaError } from "@application/media/errors";
+import { sendMediaError } from "../errors";
 
 export interface MediaRoutesDependencies {
     mediaUseCases: IMediaUseCases;
-}
-
-function mapMediaErrorToHttpCode(error: MediaError): number {
-    switch (error) {
-        case "media_invalid_input":
-            return 400;
-        case "media_upload_failed":
-        case "media_delete_failed":
-            return 500;
-        default:
-            return 500;
-    }
-}
-
-function sendMediaError(reply: FastifyReply, error: MediaError) {
-    return reply.status(mapMediaErrorToHttpCode(error)).send({ error });
 }
 
 export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (

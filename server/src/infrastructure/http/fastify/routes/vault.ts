@@ -3,7 +3,6 @@ import type { RegisterRouteFn } from "../types";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IVaultUseCases } from "@application/vault/IVaultUseCases";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
-import type { MediaError } from "@application/media/errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 import type { VaultError } from "@application/vault/errors";
 import {
@@ -11,46 +10,12 @@ import {
     toVaultNodeSourceDto,
     toVaultTagDto,
 } from "@application/vault/dto";
+import { sendMediaError, sendVaultError } from "../errors";
 
 export interface VaultRoutesDependencies {
     userUseCases: IUserUseCases;
     vaultUseCases: IVaultUseCases;
     mediaUseCases: IMediaUseCases;
-}
-
-function mapMediaErrorToHttpCode(error: MediaError): number {
-    switch (error) {
-        case "media_invalid_input":
-            return 400;
-        case "media_upload_failed":
-        case "media_delete_failed":
-            return 500;
-        default:
-            return 500;
-    }
-}
-
-function sendMediaError(reply: FastifyReply, error: MediaError) {
-    return reply.status(mapMediaErrorToHttpCode(error)).send({ error });
-}
-
-function mapVaultErrorToHttpCode(error: VaultError): number {
-    switch (error) {
-        case "vault_node_not_found":
-        case "vault_tag_not_found":
-            return 404;
-        case "vault_not_authorized":
-            return 401;
-        case "vault_invalid_input":
-        case "vault_duplicate_name":
-            return 400;
-        default:
-            return 500;
-    }
-}
-
-function sendVaultError(reply: FastifyReply, error: VaultError) {
-    return reply.status(mapVaultErrorToHttpCode(error)).send({ error });
 }
 
 const createOrRenameTagSchema: FastifySchema = {

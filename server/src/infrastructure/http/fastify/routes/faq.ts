@@ -2,32 +2,12 @@ import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
 import type { RegisterRouteFn } from "../types";
-import type { FaqError } from "@application/faq/errors";
+import { sendFaqError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 
 export interface FaqRoutesDependencies {
   userUseCases: IUserUseCases;
   faqUseCases: IFaqUseCases;
-}
-
-function mapFaqErrorToHttpCode(error: FaqError): number {
-  switch (error) {
-    case "faq_item_not_found":
-    case "faq_text_not_found":
-      return 404;
-    case "faq_not_authorized":
-      return 401;
-    case "faq_invalid_transition":
-      return 400;
-    case "faq_save_failed":
-      return 500;
-    default:
-      return 500;
-  }
-}
-
-function sendFaqError(reply: FastifyReply, error: FaqError) {
-  return reply.status(mapFaqErrorToHttpCode(error)).send({ error });
 }
 
 const createFaqItemSchema: FastifySchema = {

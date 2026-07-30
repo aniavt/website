@@ -1,34 +1,13 @@
 import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
-import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { RegisterRouteFn } from "../types";
-import type { AnimeError } from "@application/anime/errors";
+import { sendNavItemsError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
-import type { NavItemsError } from "@application/navItems/errors";
 
 export interface NavItemsRoutesDependencies {
    userUseCases: IUserUseCases;
    navItemsUseCases: INavItemsUseCases;
-}
-
-function mapNavItemsErrorToHttpCode(error: NavItemsError): number {
-   switch (error) {
-      case "navItems_not_found":
-         return 404;
-      case "navItems_not_authorized":
-         return 401;
-      case "navItems_invalid_transition":
-         return 400;
-      case "navItems_save_failed":
-         return 500;
-      default:
-         return 500;
-   }
-}
-
-function sendNavItemsError(reply: FastifyReply, error: NavItemsError) {
-   return reply.status(mapNavItemsErrorToHttpCode(error)).send({ error });
 }
 
 const createNavItemsSchema: FastifySchema = {

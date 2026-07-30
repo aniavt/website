@@ -3,52 +3,13 @@ import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { RegisterRouteFn } from "../types";
-import type { WeeklyScheduleError } from "@application/weekly_schedule/errors";
-import type { MediaError } from "@application/media/errors";
+import { sendMediaError, sendWeeklyScheduleError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 
 export interface WeeklyScheduleRoutesDependencies {
     userUseCases: IUserUseCases;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
     mediaUseCases: IMediaUseCases;
-}
-
-function mapWeeklyScheduleErrorToHttpCode(error: WeeklyScheduleError): number {
-    switch (error) {
-        case "weekly_schedule_not_found":
-            return 404;
-        case "weekly_schedule_not_authorized":
-            return 401;
-        case "weekly_schedule_invalid_week":
-        case "weekly_schedule_duplicate_week_year":
-        case "weekly_schedule_file_not_found":
-        case "weekly_schedule_cannot_modify_past":
-            return 400;
-        case "weekly_schedule_save_failed":
-            return 500;
-        default:
-            return 500;
-    }
-}
-
-function sendWeeklyScheduleError(reply: FastifyReply, error: WeeklyScheduleError) {
-    return reply.status(mapWeeklyScheduleErrorToHttpCode(error)).send({ error });
-}
-
-function mapMediaErrorToHttpCode(error: MediaError): number {
-    switch (error) {
-        case "media_invalid_input":
-            return 400;
-        case "media_upload_failed":
-        case "media_delete_failed":
-            return 500;
-        default:
-            return 500;
-    }
-}
-
-function sendMediaError(reply: FastifyReply, error: MediaError) {
-    return reply.status(mapMediaErrorToHttpCode(error)).send({ error });
 }
 
 const weeklyScheduleTagSchema = {

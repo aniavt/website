@@ -2,31 +2,12 @@ import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
 import type { RegisterRouteFn } from "../types";
-import type { ChapterError } from "@application/chapter/errors";
+import { sendChapterError } from "../errors";
 import { authenticate } from "../middlewares/auth";
 
 export interface ChapterRoutesDependencies {
    userUseCases: IUserUseCases;
    chapterUseCases: IChapterUseCases;
-}
-
-function mapChapterErrorToHttpCode(error: ChapterError): number {
-   switch (error) {
-      case "chapter_not_found":
-      case "anime_not_found":
-         return 404;
-      case "chapter_not_authorized":
-         return 401;
-      case "chapter_save_failed":
-      case "chapter_delete_failed":
-         return 500;
-      default:
-         return 500;
-   }
-}
-
-function sendChapterError(reply: FastifyReply, error: ChapterError) {
-   return reply.status(mapChapterErrorToHttpCode(error)).send({ error });
 }
 
 const createChapterSchema: FastifySchema = {
