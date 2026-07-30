@@ -18,6 +18,7 @@ const userSchema = new mongoose.Schema({
         weekly_schedule: { type: Number, required: true, default: 0 },
         vault: { type: Number, required: true, default: 0 },
         anime: { type: Number, required: true, default: 0 },
+        navItems: { type: Number, required: true, default: 0 },
     },
 });
 
@@ -36,6 +37,7 @@ interface UserDocument {
         weekly_schedule: number;
         vault: number;
         anime: number;
+        navItems: number;
     }
 }
 
@@ -66,6 +68,7 @@ function userToDocument(user: UserEntity): UserDocument {
             weekly_schedule: user.permissions.weekly_schedule.valueOf(),
             vault: user.permissions.vault.valueOf(),
             anime: user.permissions.anime.valueOf(),
+            navItems: user.permissions.navItems.valueOf(),
         },
     };
 }
