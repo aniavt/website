@@ -1,5 +1,6 @@
-import { FaqItem } from "@domain/entities/FaqItem";
+import { FaqItem, type FaqItemLastAction } from "@domain/entities/FaqItem";
 import type { FaqItemRepository, FaqItemFindAllOptions } from "@domain/repositories/FaqItemRepository";
+import { SOFT_DELETE_LAST_ACTIONS } from "@ania/api-contract/soft-delete";
 import mongoose from "mongoose";
 
 const faqItemSchema = new mongoose.Schema({
@@ -7,7 +8,7 @@ const faqItemSchema = new mongoose.Schema({
     queryId: { type: String, required: true },
     answerId: { type: String, required: true },
     isActive: { type: Boolean, required: true },
-    lastAction: { type: String, required: true, enum: ["created", "updated", "deleted", "restore"] },
+    lastAction: { type: String, required: true, enum: [...SOFT_DELETE_LAST_ACTIONS] },
 });
 
 interface FaqItemDocument {
@@ -15,7 +16,7 @@ interface FaqItemDocument {
     queryId: string;
     answerId: string;
     isActive: boolean;
-    lastAction: "created" | "updated" | "deleted" | "restore";
+    lastAction: FaqItemLastAction;
 }
 
 faqItemSchema.index({ isActive: 1 });

@@ -1,4 +1,6 @@
-export type NavItemsLastAction = "created" | "updated" | "deleted" | "restore";
+import type { SoftDeleteLastAction } from "./soft-delete";
+
+export type NavItemsLastAction = SoftDeleteLastAction;
 
 export interface NavItemsDto {
   readonly id: string;

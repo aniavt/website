@@ -1,4 +1,6 @@
-export type FaqItemLastAction = "created" | "updated" | "deleted" | "restore";
+import type { SoftDeleteLastAction } from "./soft-delete";
+
+export type FaqItemLastAction = SoftDeleteLastAction;
 
 export type FaqHistoryAction = FaqItemLastAction;
 

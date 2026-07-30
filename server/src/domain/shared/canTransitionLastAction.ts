@@ -1,4 +1,6 @@
-export type SoftDeleteLastAction = "created" | "updated" | "deleted" | "restore";
+import type { SoftDeleteLastAction } from "@ania/api-contract/soft-delete";
+
+export type { SoftDeleteLastAction };
 
 export function canTransitionLastAction(
   from: SoftDeleteLastAction,

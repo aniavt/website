@@ -9,6 +9,7 @@
     "./faq": "./src/faq.ts",
     "./media": "./src/media.ts",
     "./nav-items": "./src/nav-items.ts",
+    "./soft-delete": "./src/soft-delete.ts",
     "./user": "./src/user.ts",
     "./vault": "./src/vault.ts",
     "./weekly-schedule": "./src/weekly-schedule.ts",

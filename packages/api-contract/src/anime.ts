@@ -1,4 +1,6 @@
-export type AnimeLastAction = "created" | "updated" | "deleted" | "restore";
+import type { SoftDeleteLastAction } from "./soft-delete";
+
+export type AnimeLastAction = SoftDeleteLastAction;
 
 export type AnimeStatus = "watching" | "completed" | "upcoming";
 
