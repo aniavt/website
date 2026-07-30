@@ -1,5 +1,6 @@
 import type { WeeklyScheduleDto } from "@ania/api-contract/weekly-schedule";
 import type { FaqItemPublicDto } from "@ania/api-contract/faq";
+import { throwApiError } from "@ania/api-contract/error";
 import { buildApiUrl } from "./buildApiUrl";
 
 export async function getCurrentWeeklySchedule(): Promise<WeeklyScheduleDto | null> {
@@ -9,9 +10,7 @@ export async function getCurrentWeeklySchedule(): Promise<WeeklyScheduleDto | nu
     return null;
   }
 
-  if (!res.ok) {
-    throw new Error("weekly_schedule_load_failed");
-  }
+  if (!res.ok) await throwApiError(res);
 
   const data = await res.json();
   return data;
@@ -20,9 +19,7 @@ export async function getCurrentWeeklySchedule(): Promise<WeeklyScheduleDto | nu
 export async function getFaqs(): Promise<FaqItemPublicDto[]> {
   const res = await fetch(buildApiUrl("/faq?activeOnly=true"));
 
-  if (!res.ok) {
-    throw new Error("faq_load_failed");
-  }
+  if (!res.ok) await throwApiError(res);
 
   const data = await res.json();
   return data as FaqItemPublicDto[];

@@ -6,6 +6,7 @@ import type {
   VaultTagDto,
   VaultNodeSourceDto,
 } from "@ania/api-contract/vault";
+import { throwApiError } from "@ania/api-contract/error";
 import { buildApiUrl } from "../buildApiUrl";
 
 async function getJson<T>(path: string): Promise<T> {
@@ -14,13 +15,7 @@ async function getJson<T>(path: string): Promise<T> {
     credentials: "include",
   });
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({ error: "unknown_error" }));
-    const err = new Error(data.error ?? "unknown_error");
-    // @ts-expect-error attach status for callers if needed
-    err.status = res.status;
-    throw err;
-  }
+  if (!res.ok) await throwApiError(res);
 
   return res.json() as Promise<T>;
 }
@@ -79,4 +74,3 @@ export async function fetchVaultNodesByTagName(
   const path = `/vault/nodes?${params.toString()}`;
   return getJson<VaultNodeDto[]>(path);
 }
-

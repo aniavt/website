@@ -1,5 +1,5 @@
 import { signal } from "@preact/signals";
-import { ApiError } from "@utils/api";
+import { ApiError } from "@ania/api-contract/error";
 import { t } from "@utils/i18n";
 
 interface Toast {

@@ -1,4 +1,5 @@
 import { apiUrl } from "@config";
+import { throwApiError } from "@ania/api-contract/error";
 import type {
   WeeklyScheduleDto,
   WeeklyScheduleHistoryEntryDto,
@@ -35,16 +36,6 @@ import type {
 export type CreateVaultFileNodeInput = CreateVaultFileNodeBody & { file?: File; urlOrFileId?: string };
 export type AddVaultSourceToNodeInput = AddVaultSourceToNodeBody & { file?: File; urlOrFileId?: string };
 
-class ApiError extends Error {
-  status: number;
-  code: string;
-  constructor(status: number, code: string) {
-    super(code);
-    this.status = status;
-    this.code = code;
-  }
-}
-
 async function request<T>(method: string, path: string, body?: unknown): Promise<T> {
   const opts: RequestInit = {
     method,
@@ -55,10 +46,7 @@ async function request<T>(method: string, path: string, body?: unknown): Promise
 
   const res = await fetch(`${apiUrl}${path}`, opts);
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({ error: "unknown_error" }));
-    throw new ApiError(res.status, data.error ?? "unknown_error");
-  }
+  if (!res.ok) await throwApiError(res);
 
   if (res.status === 204) return undefined as T;
   return res.json();
@@ -70,8 +58,6 @@ export const api = {
   patch: <T>(path: string, body?: unknown) => request<T>("PATCH", path, body),
   delete: <T>(path: string) => request<T>("DELETE", path),
 };
-
-export { ApiError };
 
 export async function listWeeklySchedules(
   year?: number,
@@ -161,10 +147,7 @@ export async function createVaultFileNode(
       body: formData,
     });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({ error: "unknown_error" }));
-      throw new ApiError(res.status, data.error ?? "unknown_error");
-    }
+    if (!res.ok) await throwApiError(res);
 
     return res.json() as Promise<{ node: VaultNodeDto; source: VaultNodeSourceDto }>;
   }
@@ -283,10 +266,7 @@ export async function addVaultSourceToNode(
       body: formData,
     });
 
-    if (!res.ok) {
-      const data = await res.json().catch(() => ({ error: "unknown_error" }));
-      throw new ApiError(res.status, data.error ?? "unknown_error");
-    }
+    if (!res.ok) await throwApiError(res);
 
     return res.json() as Promise<VaultNodeSourceDto>;
   }
@@ -315,10 +295,7 @@ export async function uploadMediaFile(file: File): Promise<UploadMediaResult> {
     body: formData,
   });
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({ error: "unknown_error" }));
-    throw new ApiError(res.status, data.error ?? "unknown_error");
-  }
+  if (!res.ok) await throwApiError(res);
 
   return res.json() as Promise<UploadMediaResult>;
 }
@@ -343,10 +320,7 @@ export async function uploadWeeklyScheduleFile(
     body: formData,
   });
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({ error: "unknown_error" }));
-    throw new ApiError(res.status, data.error ?? "unknown_error");
-  }
+  if (!res.ok) await throwApiError(res);
 
   return res.json();
 }
@@ -364,10 +338,7 @@ export async function updateWeeklyScheduleFile(
     body: formData,
   });
 
-  if (!res.ok) {
-    const data = await res.json().catch(() => ({ error: "unknown_error" }));
-    throw new ApiError(res.status, data.error ?? "unknown_error");
-  }
+  if (!res.ok) await throwApiError(res);
 
   return res.json();
 }

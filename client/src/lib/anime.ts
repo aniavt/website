@@ -1,11 +1,12 @@
 import type { AnimeDto } from "@ania/api-contract/anime";
 import type { ChapterDto } from "@ania/api-contract/chapter";
+import { throwApiError } from "@ania/api-contract/error";
 import { buildApiUrl } from "./buildApiUrl";
 import { slugify } from "./slugify";
 
 export async function listAnimes(): Promise<AnimeDto[]> {
   const res = await fetch(buildApiUrl("/anime?activeOnly=true"));
-  if (!res.ok) throw new Error("anime_list_failed");
+  if (!res.ok) await throwApiError(res);
   return res.json();
 }
 
@@ -17,7 +18,7 @@ export async function getAnimeBySlug(slug: string): Promise<AnimeDto | null> {
 export async function getAnime(id: string): Promise<AnimeDto | null> {
   const res = await fetch(buildApiUrl(`/anime/${id}`));
   if (res.status === 404) return null;
-  if (!res.ok) throw new Error("anime_get_failed");
+  if (!res.ok) await throwApiError(res);
   return res.json();
 }
 
@@ -25,6 +26,6 @@ export async function listChaptersByAnime(
   animeId: string,
 ): Promise<ChapterDto[]> {
   const res = await fetch(buildApiUrl(`/anime/${animeId}/chapters`));
-  if (!res.ok) throw new Error("chapters_list_failed");
+  if (!res.ok) await throwApiError(res);
   return res.json();
 }

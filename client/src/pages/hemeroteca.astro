@@ -317,6 +317,11 @@ const initialNodes: VaultNodeDto[] = await fetchVaultChildren(initialParentId);
 </style>
 
 <script>
+  import {
+    fetchVaultChildren,
+    fetchVaultSourcesForNode,
+  } from "../lib/vault/api";
+
   const grid = document.getElementById('hemeGrid');
   const modal = document.getElementById('hemeModal');
   const sourcesList = document.getElementById('hemeSourcesList');
@@ -391,11 +396,7 @@ const initialNodes: VaultNodeDto[] = await fetchVaultChildren(initialParentId);
     document.body.style.overflow = 'hidden';
 
     try {
-      const res = await fetch(`/api/vault/node/${nodeId}/sources`, { credentials: 'include' });
-      if (!res.ok) {
-        throw new Error('sources_load_failed');
-      }
-      const data = await res.json();
+      const data = await fetchVaultSourcesForNode(nodeId);
       const sources = Array.isArray(data) ? data : [];
 
       if (sources.length === 0) {
@@ -515,19 +516,10 @@ const initialNodes: VaultNodeDto[] = await fetchVaultChildren(initialParentId);
   async function loadChildren(parentId: string | null) {
     if (!grid) return;
 
-    const params = new URLSearchParams();
-    if (parentId !== null) params.set('parentId', parentId);
-
     grid.innerHTML = '<p style="color:var(--text-dim);font-size:.9rem">Cargando contenido...</p>';
 
     try {
-      const res = await fetch(`/api/vault/children${params.toString() ? `?${params}` : ''}`, {
-        credentials: 'include',
-      });
-      if (!res.ok) {
-        throw new Error('children_load_failed');
-      }
-      const nodes = await res.json();
+      const nodes = await fetchVaultChildren(parentId);
 
       if (!Array.isArray(nodes) || nodes.length === 0) {
         grid.innerHTML = '<p style="color:var(--text-dim);font-size:.9rem">Esta carpeta está vacía.</p>';
