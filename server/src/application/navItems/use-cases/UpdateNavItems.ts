@@ -5,6 +5,8 @@ import type { NavItemsError } from "../errors";
 import type { NavItemsDto, UpdateNavItemsInput as UpdateNavItemsBody } from "../dto";
 import { toNavItemsDto } from "../dto";
 import type { NavItemsRepository } from "@domain/repositories/NavItemsRepository";
+import { assertPermission } from "@application/shared/auth";
+import { saveOrErr } from "@application/shared/saveOrErr";
 
 export type UpdateNavItemsInput = UpdateNavItemsBody & { id: string };
 
@@ -15,11 +17,13 @@ export class UpdateNavItemsUseCase {
    ) { }
 
    async execute(requesterId: string, input: UpdateNavItemsInput): Promise<Result<NavItemsDto, NavItemsError>> {
-      const requester = await this.userRepository.findById(requesterId);
-      if (!requester) return err("navItems_not_authorized");
-      if (!requester.hasPermission({ type: "navItems", permission: NavItemsPermission.UPDATE_NAVITEMS })) {
-         return err("navItems_not_authorized");
-      }
+      const auth = await assertPermission(
+         this.userRepository,
+         requesterId,
+         { type: "navItems", permission: NavItemsPermission.UPDATE_NAVITEMS },
+         "navItems_not_authorized",
+      );
+      if (auth.isError()) return auth;
 
       const navItem = await this.navItemsRepository.findById(input.id);
       if (!navItem) return err("navItems_not_found");
@@ -32,11 +36,8 @@ export class UpdateNavItemsUseCase {
       navItem.lastAction = "updated";
       navItem.updatedAt = new Date();
 
-      try {
-         await this.navItemsRepository.save(navItem);
-      } catch {
-         return err("navItems_save_failed");
-      }
+      const saved = await saveOrErr(this.navItemsRepository.save(navItem), "navItems_save_failed");
+      if (saved.isError()) return saved;
 
       return ok(toNavItemsDto(navItem));
    }

@@ -3,6 +3,8 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import { AnimePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { AnimeError } from "../errors";
+import { assertPermission } from "@application/shared/auth";
+import { saveOrErr } from "@application/shared/saveOrErr";
 
 export class RestoreAnimeUseCase {
    constructor(
@@ -11,11 +13,13 @@ export class RestoreAnimeUseCase {
    ) { }
 
    async execute(requesterId: string, id: string): Promise<Result<void, AnimeError>> {
-      const requester = await this.userRepository.findById(requesterId);
-      if (!requester) return err("anime_not_authorized");
-      if (!requester.hasPermission({ type: "anime", permission: AnimePermission.RESTORE_ANIME })) {
-         return err("anime_not_authorized");
-      }
+      const auth = await assertPermission(
+         this.userRepository,
+         requesterId,
+         { type: "anime", permission: AnimePermission.RESTORE_ANIME },
+         "anime_not_authorized",
+      );
+      if (auth.isError()) return auth;
 
       const anime = await this.animeRepository.findById(id);
       if (!anime) return err("anime_not_found");
@@ -26,11 +30,8 @@ export class RestoreAnimeUseCase {
       anime.lastAction = "restore";
       anime.updatedAt = new Date();
 
-      try {
-         await this.animeRepository.save(anime);
-      } catch {
-         return err("anime_save_failed");
-      }
+      const saved = await saveOrErr(this.animeRepository.save(anime), "anime_save_failed");
+      if (saved.isError()) return saved;
 
       return ok(undefined);
    }

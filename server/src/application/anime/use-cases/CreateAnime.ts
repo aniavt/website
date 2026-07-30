@@ -3,10 +3,12 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import { Anime } from "@domain/entities/Anime";
 import { AnimePermission } from "@domain/value-object/Permissions";
-import { err, ok, type Result } from "@lib/result";
+import { ok, type Result } from "@lib/result";
 import type { AnimeError } from "../errors";
 import type { AnimeDto, CreateAnimeInput } from "../dto";
 import { toAnimeDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
+import { saveOrErr } from "@application/shared/saveOrErr";
 
 export type { CreateAnimeInput };
 
@@ -18,11 +20,13 @@ export class CreateAnimeUseCase {
   ) { }
 
   async execute(requesterId: string, input: CreateAnimeInput): Promise<Result<AnimeDto, AnimeError>> {
-    const requester = await this.userRepository.findById(requesterId);
-    if (!requester) return err("anime_not_authorized");
-    if (!requester.hasPermission({ type: "anime", permission: AnimePermission.CREATE_ANIME })) {
-      return err("anime_not_authorized");
-    }
+    const auth = await assertPermission(
+      this.userRepository,
+      requesterId,
+      { type: "anime", permission: AnimePermission.CREATE_ANIME },
+      "anime_not_authorized",
+    );
+    if (auth.isError()) return auth;
 
     const now = new Date();
     const anime = new Anime({
@@ -38,11 +42,8 @@ export class CreateAnimeUseCase {
       updatedAt: now,
     });
 
-    try {
-      await this.animeRepository.save(anime);
-    } catch {
-      return err("anime_save_failed");
-    }
+    const saved = await saveOrErr(this.animeRepository.save(anime), "anime_save_failed");
+    if (saved.isError()) return saved;
 
     return ok(toAnimeDto(anime));
   }

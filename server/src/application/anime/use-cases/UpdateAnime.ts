@@ -5,6 +5,8 @@ import { err, ok, type Result } from "@lib/result";
 import type { AnimeError } from "../errors";
 import type { AnimeDto, UpdateAnimeInput as UpdateAnimeBody } from "../dto";
 import { toAnimeDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
+import { saveOrErr } from "@application/shared/saveOrErr";
 
 export type UpdateAnimeInput = UpdateAnimeBody & { id: string };
 
@@ -15,11 +17,13 @@ export class UpdateAnimeUseCase {
    ) { }
 
    async execute(requesterId: string, input: UpdateAnimeInput): Promise<Result<AnimeDto, AnimeError>> {
-      const requester = await this.userRepository.findById(requesterId);
-      if (!requester) return err("anime_not_authorized");
-      if (!requester.hasPermission({ type: "anime", permission: AnimePermission.UPDATE_ANIME })) {
-         return err("anime_not_authorized");
-      }
+      const auth = await assertPermission(
+         this.userRepository,
+         requesterId,
+         { type: "anime", permission: AnimePermission.UPDATE_ANIME },
+         "anime_not_authorized",
+      );
+      if (auth.isError()) return auth;
 
       const anime = await this.animeRepository.findById(input.id);
       if (!anime) return err("anime_not_found");
@@ -34,11 +38,8 @@ export class UpdateAnimeUseCase {
       anime.lastAction = "updated";
       anime.updatedAt = new Date();
 
-      try {
-         await this.animeRepository.save(anime);
-      } catch {
-         return err("anime_save_failed");
-      }
+      const saved = await saveOrErr(this.animeRepository.save(anime), "anime_save_failed");
+      if (saved.isError()) return saved;
 
       return ok(toAnimeDto(anime));
    }
