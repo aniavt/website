@@ -4,7 +4,6 @@ import {
   canReadUsers,
   canManageFaqRead,
   canReadWeeklySchedule,
-  canReadVault,
   canReadAnime,
   canReadNavItems,
 } from "@store/auth";
@@ -23,7 +22,6 @@ export default function Sidebar() {
       href: "/admin/weekly-schedule",
       visible: canReadWeeklySchedule.value,
     },
-    { label: "Bodega", href: "/admin/vault", visible: canReadVault.value },
     { label: "Anime", href: "/admin/anime", visible: canReadAnime.value },
     { label: "Usuarios", href: "/admin/users", visible: canReadUsers.value },
     { label: "Perfil", href: "/admin/profile", visible: true },

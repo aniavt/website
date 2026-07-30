@@ -4,7 +4,6 @@ import type { ChapterError } from "@application/chapter/errors";
 import type { FaqError } from "@application/faq/errors";
 import type { MediaError } from "@application/media/errors";
 import type { NavItemsError } from "@application/navItems/errors";
-import type { VaultError } from "@application/vault/errors";
 import type { WeeklyScheduleError } from "@application/weekly_schedule/errors";
 
 export function mapErrorToHttpCode<E extends string>(
@@ -80,18 +79,6 @@ const NAV_ITEMS_ERROR_STATUS: Partial<Record<NavItemsError, number>> = {
 
 export function sendNavItemsError(reply: FastifyReply, error: NavItemsError) {
     return sendDomainError(reply, error, NAV_ITEMS_ERROR_STATUS);
-}
-
-const VAULT_ERROR_STATUS: Partial<Record<VaultError, number>> = {
-    vault_node_not_found: 404,
-    vault_tag_not_found: 404,
-    vault_not_authorized: 401,
-    vault_invalid_input: 400,
-    vault_duplicate_name: 400,
-};
-
-export function sendVaultError(reply: FastifyReply, error: VaultError) {
-    return sendDomainError(reply, error, VAULT_ERROR_STATUS);
 }
 
 const WEEKLY_SCHEDULE_ERROR_STATUS: Partial<Record<WeeklyScheduleError, number>> = {

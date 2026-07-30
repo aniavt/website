@@ -93,7 +93,7 @@ export class ManagePermission extends Permission {
     static readonly MANAGE_USER = new this(mask(this.getLastBitSlugMap() + 2));
     static readonly MANAGE_FAQ = new this(mask(this.getLastBitSlugMap() + 3));
     static readonly MANAGE_WEEKLY_SCHEDULE = new this(mask(this.getLastBitSlugMap() + 4));
-    static readonly MANAGE_VAULT = new this(mask(this.getLastBitSlugMap() + 5));
+    // bit +5 reserved (was manage_vault) — keep anime/navItems at +6/+7 for persisted masks
     static readonly MANAGE_ANIME = new this(mask(this.getLastBitSlugMap() + 6));
     static readonly MANAGE_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 7));
 
@@ -102,9 +102,9 @@ export class ManagePermission extends Permission {
         [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.meta[1]],
         [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.meta[2]],
         [this.getLastBitSlugMap() + 4, PERMISSION_SLUGS.meta[3]],
-        [this.getLastBitSlugMap() + 5, PERMISSION_SLUGS.meta[4]],
-        [this.getLastBitSlugMap() + 6, PERMISSION_SLUGS.meta[5]],
-        [this.getLastBitSlugMap() + 7, PERMISSION_SLUGS.meta[6]],
+        // bit +5 reserved (was manage_vault)
+        [this.getLastBitSlugMap() + 6, PERMISSION_SLUGS.meta[4]],
+        [this.getLastBitSlugMap() + 7, PERMISSION_SLUGS.meta[5]],
     ]);
 }
 
@@ -168,24 +168,6 @@ export class WeeklySchedulePermission extends Permission {
         [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.weekly_schedule[1]],
         [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.weekly_schedule[2]],
         [this.getLastBitSlugMap() + 4, PERMISSION_SLUGS.weekly_schedule[3]],
-    ]);
-}
-
-export class VaultPermission extends Permission {
-    static readonly CREATE_NODE = new this(mask(this.getLastBitSlugMap() + 1));
-    static readonly UPDATE_NODE = new this(mask(this.getLastBitSlugMap() + 2));
-    static readonly DELETE_NODE = new this(mask(this.getLastBitSlugMap() + 3));
-
-    static readonly MANAGE_VAULT = new this().add(
-        this.CREATE_NODE,
-        this.UPDATE_NODE,
-        this.DELETE_NODE,
-    );
-
-    protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, PERMISSION_SLUGS.vault[0]],
-        [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.vault[1]],
-        [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.vault[2]],
     ]);
 }
 

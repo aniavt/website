@@ -2,7 +2,6 @@ import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
-import type { IVaultUseCases } from "@application/vault/IVaultUseCases";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
 import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
@@ -15,7 +14,6 @@ import { registerUserRoutes } from "./routes/user";
 import { registerFaqRoutes } from "./routes/faq";
 import { registerWeeklyScheduleRoutes } from "./routes/weekly_schedule";
 import { registerMediaRoutes } from "./routes/media";
-import { registerVaultRoutes } from "./routes/vault";
 import { registerAnimeRoutes } from "./routes/anime";
 import { registerChapterRoutes } from "./routes/chapter";
 import { registerNavItemsRoutes } from "./routes/navItems";
@@ -26,7 +24,6 @@ export interface FastifyServerDependencies {
     faqUseCases: IFaqUseCases;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
     mediaUseCases: IMediaUseCases;
-    vaultUseCases: IVaultUseCases;
     animeUseCases: IAnimeUseCases;
     chapterUseCases: IChapterUseCases;
     navItemsUseCases: INavItemsUseCases;
@@ -37,7 +34,7 @@ export async function createFastifyServer(
     listenHostname: string,
     deps: FastifyServerDependencies
 ): Promise<void> {
-    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases, animeUseCases, chapterUseCases, navItemsUseCases } = deps;
+    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, animeUseCases, chapterUseCases, navItemsUseCases } = deps;
     const app = Fastify({ bodyLimit: 2 * 1024 * 1024 * 1024 }); // 2 GB
     const prefixUrl = (path: string) => path === "/" ? "" : path;
 
@@ -65,7 +62,6 @@ export async function createFastifyServer(
     registerFaqRoutes(app, prefixUrl, { userUseCases, faqUseCases });
     registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, weeklyScheduleUseCases, mediaUseCases });
     registerMediaRoutes(app, prefixUrl, { mediaUseCases });
-    registerVaultRoutes(app, prefixUrl, { userUseCases, vaultUseCases, mediaUseCases });
     registerAnimeRoutes(app, prefixUrl, { userUseCases, animeUseCases });
     registerChapterRoutes(app, prefixUrl, { userUseCases, chapterUseCases });
     registerNavItemsRoutes(app, prefixUrl, { userUseCases, navItemsUseCases });

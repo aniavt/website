@@ -13,7 +13,6 @@ import Faq from "@pages/Faq";
 import Users from "@pages/Users";
 import Profile from "@pages/Profile";
 import WeeklySchedule from "@pages/WeeklySchedule";
-import Vault from "@pages/Vault";
 import Anime from "@pages/Anime";
 import NavItems from "@pages/NavItems";
 
@@ -102,15 +101,6 @@ export default function App() {
                 permission: "read_weekly_schedule_history",
               },
             ]}
-          />
-        )}
-      />
-      <Route
-        path={basePath("/vault")}
-        component={() => (
-          <PermissionGuard
-            component={Vault}
-            required={[{ namespace: "vault", permission: "create_node" }]}
           />
         )}
       />

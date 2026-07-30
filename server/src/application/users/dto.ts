@@ -16,7 +16,6 @@ export function toUserDto(user: UserEntity): UserDto {
             user: user.permissions.user.getSlugs("user"),
             faq: user.permissions.faq.getSlugs("faq"),
             weekly_schedule: user.permissions.weekly_schedule.getSlugs("weekly_schedule"),
-            vault: user.permissions.vault.getSlugs("vault"),
             anime: user.permissions.anime.getSlugs("anime"),
             navItems: user.permissions.navItems.getSlugs("navItems"),
         },

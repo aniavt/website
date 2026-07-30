@@ -27,7 +27,6 @@ export function hasPermission(namespace: PermissionNamespace, permission: string
     case "user": return userHasPermission(user.value, "meta", "manage_user");
     case "faq": return userHasPermission(user.value, "meta", "manage_faq");
     case "weekly_schedule": return userHasPermission(user.value, "meta", "manage_weekly_schedule");
-    case "vault": return userHasPermission(user.value, "meta", "manage_vault");
     case "anime": return userHasPermission(user.value, "meta", "manage_anime");
     case "navItems" : return userHasPermission(user.value, "meta", "manage_navItems");
   }
@@ -70,27 +69,14 @@ export const canManageFaqPermissions = computed(() => hasPermission("meta", "man
 export const canManageWeeklySchedulePermissions = computed(() =>
   hasPermission("meta", "manage_weekly_schedule"),
 );
-export const canManageVaultPermissions = computed(() => hasPermission("meta", "manage_vault"));
 export const canManageAnimePermissions = computed(() => hasPermission("meta", "manage_anime"));
 export const canManageNavItemsPermissions = computed(() => hasPermission("meta", "manage_navItems"));
-
-export const canReadVault = computed(() =>
-  hasPermission("vault", "create_node") ||
-  hasPermission("vault", "update_node") ||
-  hasPermission("vault", "delete_node"),
-);
 
 export const canReadAnime = computed(() => hasPermission("anime", "read_anime"));
 export const canCreateAnime = computed(() => hasPermission("anime", "create_anime"));
 export const canUpdateAnime = computed(() => hasPermission("anime", "update_anime"));
 export const canDeleteAnime = computed(() => hasPermission("anime", "delete_anime"));
 export const canRestoreAnime = computed(() => hasPermission("anime", "restore_anime"));
-
-export const canManageVaultNodes = computed(() =>
-  hasPermission("vault", "create_node") ||
-  hasPermission("vault", "update_node") ||
-  hasPermission("vault", "delete_node"),
-);
 
 export const canReadNavItems = computed(() => hasPermission("navItems", "read_navItems"));
 export const canCreateNavItems = computed(() => hasPermission("navItems", "create_navItems"));

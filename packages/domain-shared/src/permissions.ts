@@ -3,7 +3,6 @@ export const PERMISSION_NAMESPACES = [
   "user",
   "faq",
   "weekly_schedule",
-  "vault",
   "anime",
   "navItems",
 ] as const;
@@ -16,7 +15,6 @@ export const PERMISSION_SLUGS = {
     "manage_user",
     "manage_faq",
     "manage_weekly_schedule",
-    "manage_vault",
     "manage_anime",
     "manage_navItems",
   ],
@@ -28,7 +26,6 @@ export const PERMISSION_SLUGS = {
     "update_weekly_schedule",
     "read_weekly_schedule_history",
   ],
-  vault: ["create_node", "update_node", "delete_node"],
   anime: ["read_anime", "create_anime", "delete_anime", "update_anime", "restore_anime"],
   navItems: [
     "read_navItems",
@@ -51,7 +48,6 @@ export interface UserPermissions {
   readonly user: readonly NamespacedPermissionSlug<"user">[];
   readonly faq: readonly NamespacedPermissionSlug<"faq">[];
   readonly weekly_schedule: readonly NamespacedPermissionSlug<"weekly_schedule">[];
-  readonly vault: readonly NamespacedPermissionSlug<"vault">[];
   readonly anime: readonly NamespacedPermissionSlug<"anime">[];
   readonly navItems: readonly NamespacedPermissionSlug<"navItems">[];
 }

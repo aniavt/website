@@ -16,7 +16,6 @@ import {
   canManageUserPermissions,
   canManageFaqPermissions,
   canManageWeeklySchedulePermissions,
-  canManageVaultPermissions,
   canManageAnimePermissions,
   canManageNavItemsPermissions,
   userHasPermission,
@@ -97,7 +96,6 @@ export default function Users() {
     canManageUserPermissions.value ||
     canManageFaqPermissions.value ||
     canManageWeeklySchedulePermissions.value ||
-    canManageVaultPermissions.value ||
     canManageAnimePermissions.value ||
     canManageNavItemsPermissions.value;
 
@@ -148,7 +146,6 @@ export default function Users() {
     manage_user: "Gestionar permisos de usuarios",
     manage_faq: "Gestionar permisos de FAQ",
     manage_weekly_schedule: "Gestionar permisos de horario semanal",
-    manage_vault: "Gestionar permisos de bodega",
     manage_anime: "Gestionar permisos de anime",
     manage_navItems: "Gestionar permisos de navegacion",
     read_user: "Ver usuarios",
@@ -168,9 +165,6 @@ export default function Users() {
     delete_navItems: "Eliminar Navegacion",
     update_navItems: "Actualizar Navegacion",
     restore_navItems: "Restaurar Navegacion",
-    create_node: "Crear nodos",
-    update_node: "Actualizar nodos",
-    delete_node: "Eliminar nodos",
     read_anime: "Ver anime",
     create_anime: "Crear anime",
     delete_anime: "Eliminar anime",
@@ -190,7 +184,6 @@ export default function Users() {
   const faqPermissionsConfig = permissionConfig(PERMISSION_SLUGS.faq);
   const weeklySchedulePermissionsConfig = permissionConfig(PERMISSION_SLUGS.weekly_schedule);
   const navItemsPermissionsConfig = permissionConfig(PERMISSION_SLUGS.navItems);
-  const vaultPermissionsConfig = permissionConfig(PERMISSION_SLUGS.vault);
   const animePermissionsConfig = permissionConfig(PERMISSION_SLUGS.anime);
 
   function hasNamespacedSlug(
@@ -285,14 +278,9 @@ export default function Users() {
           userHasPermission(u, "meta", "meta_manage_permissions") ||
           userHasPermission(u, "meta", "manage_user") ||
           userHasPermission(u, "meta", "manage_faq") ||
-          userHasPermission(u, "meta", "manage_weekly_schedule") ||
-          userHasPermission(u, "meta", "manage_vault");
-        const managesVault =
-          userHasPermission(u, "vault", "create_node") ||
-          userHasPermission(u, "vault", "update_node") ||
-          userHasPermission(u, "vault", "delete_node");
+          userHasPermission(u, "meta", "manage_weekly_schedule");
 
-        if (!managesUsers && !managesFaq && !managesPermissions && !managesVault) {
+        if (!managesUsers && !managesFaq && !managesPermissions) {
           return <span class="text-xs text-[var(--text-muted)]">—</span>;
         }
 
@@ -301,7 +289,6 @@ export default function Users() {
             {managesUsers && <Badge variant="admin">Usuarios</Badge>}
             {managesFaq && <Badge variant="admin">FAQ</Badge>}
             {managesPermissions && <Badge variant="root">Permisos</Badge>}
-            {managesVault && <Badge variant="admin">Vault</Badge>}
           </div>
         );
       },
@@ -513,36 +500,6 @@ export default function Users() {
                         onChange={(e) =>
                           togglePermission(
                             "navItems",
-                            p.slug,
-                            (e.target as HTMLInputElement).checked,
-                          )
-                        }
-                      />
-                      <span>{p.label}</span>
-                    </label>
-                  );
-                })}
-              </div>
-            </div>
-
-            <div>
-              <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Bodega</h3>
-              <div class="flex flex-col gap-1">
-                {vaultPermissionsConfig.map((p) => {
-                  const checked = hasNamespacedSlug(permissions.vault, "vault", p.slug);
-                  const canEdit = canManageVaultPermissions.value;
-                  return (
-                    <label
-                      key={p.slug}
-                      class="flex items-center gap-2 text-sm text-[var(--text-secondary)]"
-                    >
-                      <input
-                        type="checkbox"
-                        checked={checked}
-                        disabled={!canEdit}
-                        onChange={(e) =>
-                          togglePermission(
-                            "vault",
                             p.slug,
                             (e.target as HTMLInputElement).checked,
                           )

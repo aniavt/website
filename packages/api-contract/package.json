@@ -10,7 +10,6 @@
     "./media": "./src/media.ts",
     "./nav-items": "./src/nav-items.ts",
     "./user": "./src/user.ts",
-    "./vault": "./src/vault.ts",
     "./weekly-schedule": "./src/weekly-schedule.ts",
     "./error": "./src/error.ts"
   },

@@ -7,7 +7,6 @@
     "./soft-delete": "./src/soft-delete.ts",
     "./permissions": "./src/permissions.ts",
     "./anime": "./src/anime.ts",
-    "./vault": "./src/vault.ts",
     "./weekly-schedule": "./src/weekly-schedule.ts"
   },
   "scripts": {
