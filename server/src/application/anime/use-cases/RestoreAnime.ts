@@ -24,11 +24,7 @@ export class RestoreAnimeUseCase {
       const anime = await this.animeRepository.findById(id);
       if (!anime) return err("anime_not_found");
 
-      if (!anime.canTransitionTo("restore")) return err("anime_invalid_transition");
-
-      anime.active = true;
-      anime.lastAction = "restore";
-      anime.updatedAt = new Date();
+      if (!anime.restore()) return err("anime_invalid_transition");
 
       const saved = await saveOrErr(this.animeRepository.save(anime), "anime_save_failed");
       if (saved.isError()) return saved;

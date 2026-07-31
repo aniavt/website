@@ -33,4 +33,17 @@ export class Chapter {
    static fromPersistence(props: ChapterProps): Chapter {
       return new Chapter(props);
    }
+
+   applyUpdate(patch: {
+      number?: number;
+      title?: string;
+      videoURL?: string;
+      coverImageURL?: string;
+   }): void {
+      if (patch.number !== undefined) this.number = patch.number;
+      if (patch.title !== undefined) this.title = patch.title;
+      if (patch.videoURL !== undefined) this.videoURL = patch.videoURL;
+      if (patch.coverImageURL !== undefined) this.coverImageURL = patch.coverImageURL;
+      this.updatedAt = new Date();
+   }
 }

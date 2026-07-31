@@ -24,11 +24,7 @@ export class RestoreNavItemsUseCase {
       const navItem = await this.navItemsRepository.findById(id);
       if (!navItem) return err("navItems_not_found");
 
-      if (!navItem.canTransitionTo("restore")) return err("navItems_invalid_transition");
-
-      navItem.active = true;
-      navItem.lastAction = "restore";
-      navItem.updatedAt = new Date();
+      if (!navItem.restore()) return err("navItems_invalid_transition");
 
       const saved = await saveOrErr(this.navItemsRepository.save(navItem), "navItems_save_failed");
       if (saved.isError()) return saved;

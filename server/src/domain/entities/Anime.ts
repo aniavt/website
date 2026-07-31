@@ -51,4 +51,38 @@ export class Anime {
   canTransitionTo(action: AnimeLastAction): boolean {
     return canTransitionLastAction(this.lastAction, action);
   }
+
+  applyUpdate(patch: {
+    title?: string;
+    description?: string;
+    coverImageURL?: string;
+    genre?: string;
+    status?: AnimeStatus;
+  }): boolean {
+    if (!this.canTransitionTo("updated")) return false;
+    if (patch.title !== undefined) this.title = patch.title;
+    if (patch.description !== undefined) this.description = patch.description;
+    if (patch.coverImageURL !== undefined) this.coverImageURL = patch.coverImageURL;
+    if (patch.genre !== undefined) this.genre = patch.genre;
+    if (patch.status !== undefined) this.status = patch.status;
+    this.lastAction = "updated";
+    this.updatedAt = new Date();
+    return true;
+  }
+
+  markDeleted(): boolean {
+    if (!this.canTransitionTo("deleted")) return false;
+    this.active = false;
+    this.lastAction = "deleted";
+    this.updatedAt = new Date();
+    return true;
+  }
+
+  restore(): boolean {
+    if (!this.canTransitionTo("restore")) return false;
+    this.active = true;
+    this.lastAction = "restore";
+    this.updatedAt = new Date();
+    return true;
+  }
 }

@@ -28,15 +28,15 @@ export class UpdateAnimeUseCase {
       const anime = await this.animeRepository.findById(input.id);
       if (!anime) return err("anime_not_found");
 
-      if (!anime.canTransitionTo("updated")) return err("anime_invalid_transition");
-
-      if (input.title !== undefined) anime.title = input.title;
-      if (input.description !== undefined) anime.description = input.description;
-      if (input.coverImageURL !== undefined) anime.coverImageURL = input.coverImageURL;
-      if (input.genre !== undefined) anime.genre = input.genre;
-      if (input.status !== undefined) anime.status = input.status;
-      anime.lastAction = "updated";
-      anime.updatedAt = new Date();
+      if (!anime.applyUpdate({
+         title: input.title,
+         description: input.description,
+         coverImageURL: input.coverImageURL,
+         genre: input.genre,
+         status: input.status,
+      })) {
+         return err("anime_invalid_transition");
+      }
 
       const saved = await saveOrErr(this.animeRepository.save(anime), "anime_save_failed");
       if (saved.isError()) return saved;

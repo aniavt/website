@@ -5,7 +5,6 @@ import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
 import { getISOWeekAndYear } from "@ania/date";
-import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
@@ -13,7 +12,6 @@ import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
-
 
 export class RestoreWeeklyScheduleUseCase {
     constructor(
@@ -49,27 +47,18 @@ export class RestoreWeeklyScheduleUseCase {
             return ok(toWeeklyScheduleDto(schedule));
         }
 
-        const restored = new WeeklySchedule({
-            id: schedule.id,
-            week: schedule.week,
-            year: schedule.year,
-            fileId: schedule.fileId,
-            isDeleted: false,
-            title: schedule.title,
-            description: schedule.description,
-            tags: schedule.tags,
-        });
+        schedule.restore();
 
         try {
             await this.transactionManager.runInTransaction(async () => {
-                await this.weeklyScheduleRepository.save(restored);
+                await this.weeklyScheduleRepository.save(schedule);
                 await this.weeklyScheduleHistoryRepository.append(
                     new WeeklyScheduleHistoryEntry({
                         id: this.idGenerator.generateUUID(),
-                        scheduleId: restored.id,
-                        week: restored.week,
-                        year: restored.year,
-                        fileId: restored.fileId,
+                        scheduleId: schedule.id,
+                        week: schedule.week,
+                        year: schedule.year,
+                        fileId: schedule.fileId,
                         action: "restored",
                         by: auth.data.id,
                         timestamp: new Date(),
@@ -81,7 +70,6 @@ export class RestoreWeeklyScheduleUseCase {
             return err("weekly_schedule_save_failed");
         }
 
-        return ok(toWeeklyScheduleDto(restored));
+        return ok(toWeeklyScheduleDto(schedule));
     }
 }
-

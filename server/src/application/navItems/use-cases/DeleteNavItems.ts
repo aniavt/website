@@ -24,11 +24,7 @@ export class DeleteNavItemsUseCase {
       const navItem = await this.navItemsRepository.findById(id);
       if (!navItem) return err("navItems_not_found");
 
-      if (!navItem.canTransitionTo("deleted")) return err("navItems_invalid_transition");
-
-      navItem.active = false;
-      navItem.lastAction = "deleted";
-      navItem.updatedAt = new Date();
+      if (!navItem.markDeleted()) return err("navItems_invalid_transition");
 
       const saved = await saveOrErr(this.navItemsRepository.save(navItem), "navItems_save_failed");
       if (saved.isError()) return saved;

@@ -6,6 +6,7 @@ import type { ChapterError } from "../errors";
 import type { ChapterDto, UpdateChapterInput as UpdateChapterBody } from "../dto";
 import { toChapterDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
+import { saveOrErr } from "@application/shared/saveOrErr";
 
 export type UpdateChapterInput = UpdateChapterBody & { id: string };
 
@@ -27,18 +28,15 @@ export class UpdateChapterUseCase {
       const chapter = await this.chapterRepository.findById(input.id);
       if (!chapter) return err("chapter_not_found");
 
-      if (input.number !== undefined) chapter.number = input.number;
-      if (input.title !== undefined) chapter.title = input.title;
-      if (input.videoURL !== undefined) chapter.videoURL = input.videoURL;
-      if (input.coverImageURL !== undefined) chapter.coverImageURL = input.coverImageURL;
-      chapter.updatedAt = new Date();
+      chapter.applyUpdate({
+         number: input.number,
+         title: input.title,
+         videoURL: input.videoURL,
+         coverImageURL: input.coverImageURL,
+      });
 
-      try {
-         await this.chapterRepository.save(chapter);
-      } catch (error) {
-         console.error("chapter_save_failed", error);
-         return err("chapter_save_failed");
-      }
+      const saved = await saveOrErr(this.chapterRepository.save(chapter), "chapter_save_failed");
+      if (saved.isError()) return saved;
 
       return ok(toChapterDto(chapter));
    }

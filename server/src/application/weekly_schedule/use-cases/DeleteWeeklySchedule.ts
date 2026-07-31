@@ -5,7 +5,6 @@ import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
 import { getISOWeekAndYear } from "@ania/date";
-import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
@@ -13,7 +12,6 @@ import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
-
 
 export class DeleteWeeklyScheduleUseCase {
     constructor(
@@ -45,27 +43,18 @@ export class DeleteWeeklyScheduleUseCase {
             return err("weekly_schedule_cannot_modify_past");
         }
 
-        const toSave = new WeeklySchedule({
-            id: schedule.id,
-            week: schedule.week,
-            year: schedule.year,
-            fileId: schedule.fileId,
-            isDeleted: true,
-            title: schedule.title,
-            description: schedule.description,
-            tags: schedule.tags,
-        });
+        schedule.markDeleted();
 
         try {
             await this.transactionManager.runInTransaction(async () => {
-                await this.weeklyScheduleRepository.save(toSave);
+                await this.weeklyScheduleRepository.save(schedule);
                 await this.weeklyScheduleHistoryRepository.append(
                     new WeeklyScheduleHistoryEntry({
                         id: this.idGenerator.generateUUID(),
-                        scheduleId: toSave.id,
-                        week: toSave.week,
-                        year: toSave.year,
-                        fileId: toSave.fileId,
+                        scheduleId: schedule.id,
+                        week: schedule.week,
+                        year: schedule.year,
+                        fileId: schedule.fileId,
                         action: "deleted",
                         by: auth.data.id,
                         timestamp: new Date(),

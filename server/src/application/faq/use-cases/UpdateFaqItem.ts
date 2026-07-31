@@ -6,7 +6,6 @@ import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
 import { FaqText } from "@domain/entities/FaqText";
-import { FaqItem } from "@domain/entities/FaqItem";
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import { FAQPermission } from "@domain/value-object/Permissions";
 import { err, type Result } from "@lib/result";
@@ -45,7 +44,7 @@ export class UpdateFaqItemUseCase {
         }
 
         try {
-            const updated = await this.transactionManager.runInTransaction(async () => {
+            await this.transactionManager.runInTransaction(async () => {
                 let queryId = item.queryId;
                 let answerId = item.answerId;
                 if (input.query !== undefined) {
@@ -55,31 +54,23 @@ export class UpdateFaqItemUseCase {
                     answerId = (await this.findOrCreateFaqText(input.answer)).id;
                 }
 
-                const updated = new FaqItem({
-                    id: item.id,
-                    queryId,
-                    answerId,
-                    isActive: item.isActive,
-                    lastAction: "updated",
-                });
+                item.applyUpdate(queryId, answerId);
 
-                await this.faqItemRepository.save(updated);
+                await this.faqItemRepository.save(item);
                 await this.faqHistoryRepository.append(
                     new FaqHistoryEntry({
                         id: this.idGenerator.generateUUID(),
-                        faqId: updated.id,
-                        queryId: updated.queryId,
-                        answerId: updated.answerId,
+                        faqId: item.id,
+                        queryId: item.queryId,
+                        answerId: item.answerId,
                         action: "updated",
                         by: auth.data.id,
                         timestamp: new Date(),
                     }),
                 );
-
-                return updated;
             });
 
-            return resolveItemToPublicDto(this.faqTextRepository, updated);
+            return resolveItemToPublicDto(this.faqTextRepository, item);
         } catch (error) {
             console.error("faq_save_failed", error);
             return err("faq_save_failed");

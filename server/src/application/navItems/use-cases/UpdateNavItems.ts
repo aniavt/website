@@ -28,13 +28,13 @@ export class UpdateNavItemsUseCase {
       const navItem = await this.navItemsRepository.findById(input.id);
       if (!navItem) return err("navItems_not_found");
 
-      if (!navItem.canTransitionTo("updated")) return err("navItems_invalid_transition");
-
-      if (input.title !== undefined) navItem.title = input.title;
-      if (input.path !== undefined) navItem.path = input.path;
-      if (input.position !== undefined) navItem.position = input.position;
-      navItem.lastAction = "updated";
-      navItem.updatedAt = new Date();
+      if (!navItem.applyUpdate({
+         title: input.title,
+         path: input.path,
+         position: input.position,
+      })) {
+         return err("navItems_invalid_transition");
+      }
 
       const saved = await saveOrErr(this.navItemsRepository.save(navItem), "navItems_save_failed");
       if (saved.isError()) return saved;

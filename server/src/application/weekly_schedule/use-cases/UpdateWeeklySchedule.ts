@@ -6,7 +6,6 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
-import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
@@ -56,27 +55,23 @@ export class UpdateWeeklyScheduleUseCase {
             fileId = input.fileId;
         }
 
-        const updated = new WeeklySchedule({
-            id: schedule.id,
-            week: schedule.week,
-            year: schedule.year,
-            fileId,
-            isDeleted: schedule.isDeleted,
-            title: input.title !== undefined ? input.title : schedule.title,
-            description: input.description !== undefined ? input.description : schedule.description,
-            tags: input.tags !== undefined ? input.tags : schedule.tags,
+        schedule.applyUpdate({
+            fileId: input.fileId !== undefined ? fileId : undefined,
+            title: input.title,
+            description: input.description,
+            tags: input.tags,
         });
 
         try {
             await this.transactionManager.runInTransaction(async () => {
-                await this.weeklyScheduleRepository.save(updated);
+                await this.weeklyScheduleRepository.save(schedule);
                 await this.weeklyScheduleHistoryRepository.append(
                     new WeeklyScheduleHistoryEntry({
                         id: this.idGenerator.generateUUID(),
-                        scheduleId: updated.id,
-                        week: updated.week,
-                        year: updated.year,
-                        fileId: updated.fileId,
+                        scheduleId: schedule.id,
+                        week: schedule.week,
+                        year: schedule.year,
+                        fileId: schedule.fileId,
                         action: "updated",
                         by: auth.data.id,
                         timestamp: new Date(),
@@ -88,6 +83,6 @@ export class UpdateWeeklyScheduleUseCase {
             return err("weekly_schedule_save_failed");
         }
 
-        return ok(toWeeklyScheduleDto(updated));
+        return ok(toWeeklyScheduleDto(schedule));
     }
 }

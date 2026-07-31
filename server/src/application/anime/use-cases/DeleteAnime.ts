@@ -24,11 +24,7 @@ export class DeleteAnimeUseCase {
       const anime = await this.animeRepository.findById(id);
       if (!anime) return err("anime_not_found");
 
-      if (!anime.canTransitionTo("deleted")) return err("anime_invalid_transition");
-
-      anime.active = false;
-      anime.lastAction = "deleted";
-      anime.updatedAt = new Date();
+      if (!anime.markDeleted()) return err("anime_invalid_transition");
 
       const saved = await saveOrErr(this.animeRepository.save(anime), "anime_save_failed");
       if (saved.isError()) return saved;

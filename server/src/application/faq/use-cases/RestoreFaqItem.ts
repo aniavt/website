@@ -5,7 +5,6 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
-import { FaqItem } from "@domain/entities/FaqItem";
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import { FAQPermission } from "@domain/value-object/Permissions";
 import { err, type Result } from "@lib/result";
@@ -35,25 +34,17 @@ export class RestoreFaqItemUseCase {
 
         const item = await this.faqItemRepository.findById(id);
         if (!item) return err("faq_item_not_found");
-        if (!item.canTransitionTo("restore")) return err("faq_invalid_transition");
-
-        const updated = new FaqItem({
-            id: item.id,
-            queryId: item.queryId,
-            answerId: item.answerId,
-            isActive: true,
-            lastAction: "restore",
-        });
+        if (!item.restore()) return err("faq_invalid_transition");
 
         try {
             await this.transactionManager.runInTransaction(async () => {
-                await this.faqItemRepository.save(updated);
+                await this.faqItemRepository.save(item);
                 await this.faqHistoryRepository.append(
                     new FaqHistoryEntry({
                         id: this.idGenerator.generateUUID(),
-                        faqId: updated.id,
-                        queryId: updated.queryId,
-                        answerId: updated.answerId,
+                        faqId: item.id,
+                        queryId: item.queryId,
+                        answerId: item.answerId,
                         action: "restore",
                         by: auth.data.id,
                         timestamp: new Date(),
@@ -65,6 +56,6 @@ export class RestoreFaqItemUseCase {
             return err("faq_save_failed");
         }
 
-        return resolveItemToPublicDto(this.faqTextRepository, updated);
+        return resolveItemToPublicDto(this.faqTextRepository, item);
     }
 }
