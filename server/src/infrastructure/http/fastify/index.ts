@@ -1,7 +1,7 @@
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
-import type { IMediaUseCases } from "@application/media/IMediaUseCases";
+import type { MediaService } from "@domain/services/MediaService";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
 import type { INavItemsUseCases } from "@application/nav_items/INavItemsUseCases";
@@ -31,7 +31,7 @@ export interface FastifyServerDependencies {
     userRepository: UserRepository;
     faqUseCases: IFaqUseCases;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
-    mediaUseCases: IMediaUseCases;
+    mediaService: MediaService;
     animeUseCases: IAnimeUseCases;
     chapterUseCases: IChapterUseCases;
     navItemsUseCases: INavItemsUseCases;
@@ -47,7 +47,7 @@ export async function createFastifyServer(
         userRepository,
         faqUseCases,
         weeklyScheduleUseCases,
-        mediaUseCases,
+        mediaService,
         animeUseCases,
         chapterUseCases,
         navItemsUseCases,
@@ -82,7 +82,7 @@ export async function createFastifyServer(
     registerUserRoutes(app, prefixUrl, { userUseCases, userRepository });
     registerFaqRoutes(app, prefixUrl, { userUseCases, userRepository, faqUseCases });
     registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, userRepository, weeklyScheduleUseCases });
-    registerMediaRoutes(app, prefixUrl, { mediaUseCases, userUseCases, userRepository });
+    registerMediaRoutes(app, prefixUrl, { mediaService, userUseCases, userRepository });
     registerAnimeRoutes(app, prefixUrl, { userUseCases, userRepository, animeUseCases });
     registerChapterRoutes(app, prefixUrl, { userUseCases, userRepository, chapterUseCases });
     registerNavItemsRoutes(app, prefixUrl, { userUseCases, userRepository, navItemsUseCases });

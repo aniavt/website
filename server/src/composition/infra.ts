@@ -46,4 +46,4 @@ const s3SigningClient = new S3Client({
     },
 });
 
-export const mediaService = new S3Service(s3Client, s3SigningClient, s3Bucket, idGenerator);
+export const objectStorage = new S3Service(s3Client, s3SigningClient, s3Bucket, idGenerator);

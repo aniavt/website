@@ -1,7 +1,6 @@
 import { describe, expect, test } from "bun:test";
 import { getISOWeekAndYear } from "@ania/date";
-import { UploadFileUseCase } from "@application/media/use-cases/UploadFile";
-import { DeleteFileUseCase } from "@application/media/use-cases/DeleteFile";
+import { StoredMediaService } from "@infrastructure/StoredMediaService";
 import { CreateWeeklyScheduleUseCase } from "@application/weekly_schedule/use-cases/CreateWeeklySchedule";
 import { UploadAndCreateWeeklyScheduleUseCase } from "@application/weekly_schedule/use-cases/UploadAndCreateWeeklySchedule";
 import { InMemoryWeeklyScheduleRepository } from "../../doubles/InMemoryWeeklyScheduleRepository";
@@ -10,7 +9,7 @@ import { InMemoryFileRepository } from "../../doubles/InMemoryFileRepository";
 import { InMemoryUserRepository } from "../../doubles/InMemoryUserRepository";
 import { FakeIdGenerator } from "../../doubles/FakeIdGenerator";
 import { FakeTransactionManager } from "../../doubles/FakeTransactionManager";
-import { FakeMediaService } from "../../doubles/FakeMediaService";
+import { FakeObjectStorage } from "../../doubles/FakeObjectStorage";
 import { WeeklySchedulePermission, createUser, createWeeklySchedule } from "../../helpers/factories";
 import { expectErr, expectOk } from "../../helpers/result";
 
@@ -25,11 +24,10 @@ function buildUploadAndCreate() {
   const history = new InMemoryWeeklyScheduleHistoryRepository();
   const files = new InMemoryFileRepository();
   const users = new InMemoryUserRepository();
-  const media = new FakeMediaService();
+  const storage = new FakeObjectStorage();
+  const mediaService = new StoredMediaService(storage, files);
   const idGen = new FakeIdGenerator("ws");
   const tx = new FakeTransactionManager();
-  const uploadFile = new UploadFileUseCase(media, files);
-  const deleteFile = new DeleteFileUseCase(media, files);
   const createWeeklySchedule = new CreateWeeklyScheduleUseCase(
     schedules,
     history,
@@ -38,8 +36,8 @@ function buildUploadAndCreate() {
     idGen,
     tx,
   );
-  const uc = new UploadAndCreateWeeklyScheduleUseCase(uploadFile, deleteFile, createWeeklySchedule);
-  return { schedules, files, users, media, uc };
+  const uc = new UploadAndCreateWeeklyScheduleUseCase(mediaService, createWeeklySchedule);
+  return { schedules, files, users, storage, uc };
 }
 
 const validFile = {
@@ -67,7 +65,7 @@ describe("UploadAndCreateWeeklyScheduleUseCase", () => {
   });
 
   test("compensates uploaded file on duplicate week/year", async () => {
-    const { schedules, files, users, media, uc } = buildUploadAndCreate();
+    const { schedules, files, users, storage, uc } = buildUploadAndCreate();
     await users.save(
       createUser({
         id: "admin",
@@ -79,7 +77,7 @@ describe("UploadAndCreateWeeklyScheduleUseCase", () => {
     expectErr(await uc.execute("admin", { week, year, file: validFile }), "weekly_schedule_duplicate_week_year");
     const remaining = await files.findById("file-1");
     expect(remaining).toBeNull();
-    expect(media.deletedIds.length).toBeGreaterThan(0);
+    expect(storage.deletedIds.length).toBeGreaterThan(0);
   });
 
   test("rejects invalid upload input", async () => {

@@ -1,9 +1,9 @@
 import type { UserEntity } from "@domain/entities/User";
-import type { UploadFileUseCase, UploadFileInput } from "@application/media/use-cases/UploadFile";
-import type { DeleteFileUseCase } from "@application/media/use-cases/DeleteFile";
-import type { MediaError } from "@application/media/errors";
+import type { MediaService } from "@domain/services/MediaService";
+import type { UploadParams } from "@domain/services/ObjectStorage";
+import { mediaErrorFromUnknown, type MediaError } from "@application/media/errors";
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
-import { type Result } from "@lib/result";
+import { err, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
 import type { UpdateWeeklyScheduleUseCase } from "./UpdateWeeklySchedule";
@@ -12,13 +12,12 @@ export type UploadAndUpdateWeeklyScheduleError = MediaError | WeeklyScheduleErro
 
 export interface UploadAndUpdateWeeklyScheduleInput {
     readonly id: string;
-    readonly file: Omit<UploadFileInput, "isPrivate">;
+    readonly file: Omit<UploadParams, "isPrivate">;
 }
 
 export class UploadAndUpdateWeeklyScheduleUseCase {
     constructor(
-        private readonly uploadFile: UploadFileUseCase,
-        private readonly deleteFile: DeleteFileUseCase,
+        private readonly mediaService: MediaService,
         private readonly updateWeeklySchedule: UpdateWeeklyScheduleUseCase,
         private readonly weeklyScheduleRepository: WeeklyScheduleRepository,
     ) {}
@@ -30,37 +29,41 @@ export class UploadAndUpdateWeeklyScheduleUseCase {
         const existing = await this.weeklyScheduleRepository.findById(input.id);
         const oldFileId = existing?.fileId;
 
-        const uploadResult = await this.uploadFile.execute({
-            ...input.file,
-            isPrivate: false,
-        });
-        if (uploadResult.isError()) {
-            return uploadResult;
+        let fileId: string;
+        try {
+            const file = await this.mediaService.upload({
+                ...input.file,
+                isPrivate: false,
+            });
+            fileId = file.id;
+        } catch (error) {
+            return err(mediaErrorFromUnknown(error, "media_upload_failed"));
         }
 
-        const fileId = uploadResult.data.id;
         const updateResult = await this.updateWeeklySchedule.execute(requester, {
             id: input.id,
             fileId,
         });
 
         if (updateResult.isError()) {
-            const compensate = await this.deleteFile.execute(fileId);
-            if (compensate.isError()) {
+            try {
+                await this.mediaService.delete(fileId);
+            } catch (compensateError) {
                 console.error(
                     `Failed to compensate uploaded file ${fileId} after weekly schedule update failure:`,
-                    compensate.error,
+                    mediaErrorFromUnknown(compensateError, "media_delete_failed"),
                 );
             }
             return updateResult;
         }
 
         if (oldFileId !== undefined && oldFileId !== fileId) {
-            const cleanup = await this.deleteFile.execute(oldFileId);
-            if (cleanup.isError()) {
+            try {
+                await this.mediaService.delete(oldFileId);
+            } catch (cleanupError) {
                 console.error(
                     `Failed to delete previous file ${oldFileId} after weekly schedule update:`,
-                    cleanup.error,
+                    mediaErrorFromUnknown(cleanupError, "media_delete_failed"),
                 );
             }
         }

@@ -15,7 +15,7 @@ import { MongoDbWeeklyScheduleHistoryRepository } from "@infrastructure/WeeklySc
 
 import { mongoClient, idGenerator, transactionManager } from "./infra";
 import { userRepository } from "./users";
-import { fileRepository, mediaUseCases } from "./media";
+import { fileRepository, mediaService } from "./media";
 
 const weeklyScheduleRepository = new MongoDbWeeklyScheduleRepository(mongoClient);
 const weeklyScheduleHistoryRepository = new MongoDbWeeklyScheduleHistoryRepository(mongoClient);
@@ -64,13 +64,11 @@ export const weeklyScheduleUseCases: IWeeklyScheduleUseCases = {
         userRepository,
     ),
     uploadAndCreate: new UploadAndCreateWeeklyScheduleUseCase(
-        mediaUseCases.uploadFile,
-        mediaUseCases.deleteFile,
+        mediaService,
         createWeeklySchedule,
     ),
     uploadAndUpdate: new UploadAndUpdateWeeklyScheduleUseCase(
-        mediaUseCases.uploadFile,
-        mediaUseCases.deleteFile,
+        mediaService,
         updateWeeklySchedule,
         weeklyScheduleRepository,
     ),

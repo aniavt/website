@@ -1,5 +1,7 @@
 import type { RegisterRouteFn } from "../types";
-import type { IMediaUseCases } from "@application/media/IMediaUseCases";
+import type { MediaService } from "@domain/services/MediaService";
+import { toFileDto } from "@application/media/dto";
+import { mediaErrorFromUnknown } from "@application/media/errors";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import { sendMediaError } from "../errors";
@@ -8,7 +10,7 @@ import { parseMultipartFile } from "../multipart";
 import { IdParamsSchema } from "../route-schemas";
 
 export interface MediaRoutesDependencies {
-    mediaUseCases: IMediaUseCases;
+    mediaService: MediaService;
     userUseCases: IUserUseCases;
     userRepository: UserRepository;
 }
@@ -16,13 +18,13 @@ export interface MediaRoutesDependencies {
 export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
     app,
     prefixUrl,
-    { mediaUseCases, userRepository },
+    { mediaService, userRepository },
 ) => {
     app.get(
         prefixUrl("/media/:id"),
         { schema: { params: IdParamsSchema } },
         async (request, reply) => {
-            const url = await mediaUseCases.getFileUrl.execute(request.params.id);
+            const url = await mediaService.getUrl(request.params.id);
             if (!url) {
                 return sendMediaError(reply, "media_not_found");
             }
@@ -40,16 +42,15 @@ export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
                 return sendMediaError(reply, "media_invalid_input");
             }
 
-            const uploadResult = await mediaUseCases.uploadFile.execute({
-                ...parsed.file,
-                isPrivate: false,
-            });
-
-            if (uploadResult.isError()) {
-                return sendMediaError(reply, uploadResult.error);
+            try {
+                const file = await mediaService.upload({
+                    ...parsed.file,
+                    isPrivate: false,
+                });
+                return reply.status(201).send(toFileDto(file));
+            } catch (error) {
+                return sendMediaError(reply, mediaErrorFromUnknown(error, "media_upload_failed"));
             }
-
-            return reply.status(201).send(uploadResult.data);
         },
     );
 };

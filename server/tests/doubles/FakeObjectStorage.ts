@@ -1,7 +1,7 @@
 import { FileEntity } from "@domain/entities/File";
-import type { MediaService, UploadParams } from "@domain/services/MediaService";
+import type { ObjectStorage, UploadParams } from "@domain/services/ObjectStorage";
 
-export class FakeMediaService implements MediaService {
+export class FakeObjectStorage implements ObjectStorage {
   private files = new Map<string, FileEntity>();
   private counter = 0;
   deletedIds: string[] = [];

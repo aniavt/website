@@ -1,5 +1,5 @@
 import { FileEntity } from "@domain/entities/File";
-import type { MediaService, UploadParams } from "@domain/services/MediaService";
+import type { ObjectStorage, UploadParams } from "@domain/services/ObjectStorage";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import {
   DeleteObjectCommand,
@@ -9,7 +9,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export class S3Service implements MediaService {
+export class S3Service implements ObjectStorage {
   constructor(
     private readonly s3Client: S3Client,
     private readonly s3SigningClient: S3Client,

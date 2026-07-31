@@ -2,14 +2,14 @@ import { createFastifyServer } from "@infrastructure/http/fastify";
 import { createCli } from "@infrastructure/cli";
 
 export { userUseCases } from "./users";
-export { mediaUseCases } from "./media";
+export { mediaService } from "./media";
 export { faqUseCases } from "./faq";
 export { weeklyScheduleUseCases } from "./weekly_schedule";
 export { animeUseCases, chapterUseCases } from "./anime";
 export { navItemsUseCases } from "./nav_items";
 
 import { userUseCases, userRepository } from "./users";
-import { mediaUseCases } from "./media";
+import { mediaService } from "./media";
 import { faqUseCases } from "./faq";
 import { weeklyScheduleUseCases } from "./weekly_schedule";
 import { animeUseCases, chapterUseCases } from "./anime";
@@ -25,7 +25,7 @@ export async function startHttpServer(): Promise<void> {
             userRepository,
             faqUseCases,
             weeklyScheduleUseCases,
-            mediaUseCases,
+            mediaService,
             animeUseCases,
             chapterUseCases,
             navItemsUseCases,
