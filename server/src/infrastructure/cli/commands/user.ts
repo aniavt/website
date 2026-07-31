@@ -21,14 +21,14 @@ export function buildUserCommands(userUseCases: IUserUseCases): CliFeature {
     commands: [
       {
         name: "create",
-        description: "user create <username> <password>",
-        async run([username, password]) {
-          if (!username || !password) {
-            console.error("Usage: user create <username> <password>");
+        description: "user create <username> <password> <requester-id>",
+        async run([username, password, requesterId]) {
+          if (!username || !password || !requesterId) {
+            console.error("Usage: user create <username> <password> <requester-id>");
             return;
           }
 
-          const result = await userUseCases.create.execute({ username, password });
+          const result = await userUseCases.create.execute(requesterId, { username, password });
           if (result.isError()) {
             console.error(`Error:`, result.error);
             return;
@@ -255,7 +255,7 @@ export function buildUserCommands(userUseCases: IUserUseCases): CliFeature {
         async run() {
           console.log("Usage: user <command> [args...]");
           console.log("       user help - show this help");
-          console.log("       user create <username> <password> - create a new user");
+          console.log("       user create <username> <password> <requester-id> - create a new user");
           console.log("       user activate <user-id> <requester-id> - activate a user");
           console.log("       user deactivate <user-id> <requester-id> - deactivate a user");
           console.log("       user increment-version <user-id> - increment the session version of a user");

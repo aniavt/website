@@ -61,4 +61,3 @@ export class CreateRootUseCase {
         return ok(toUserDto(user));
     }
 }
-

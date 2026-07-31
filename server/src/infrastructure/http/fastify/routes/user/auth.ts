@@ -37,17 +37,22 @@ export const registerUserAuthRoutes: RegisterRouteFn<{
 
     app.post(
         prefixUrl("/signup"),
-        { schema: { body: CreateUserInputSchema } },
+        {
+            preHandler: authenticate(userRepository),
+            schema: { body: CreateUserInputSchema },
+        },
         async (request, reply) => {
             const { username, password } = request.body;
-            const result = await userUseCases.create.execute({ username, password });
+            const result = await userUseCases.create.execute(request.user!.id, {
+                username,
+                password,
+            });
 
             if (result.isError()) {
                 return sendUserError(reply, result.error);
             }
 
-            setAuthCookie(reply, result.data);
-            return reply.send(userToResponse(result.data));
+            return reply.status(201).send(userToResponse(result.data));
         },
     );
 

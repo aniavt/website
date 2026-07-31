@@ -2,7 +2,9 @@ import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { SecureHasher } from "@domain/services/SecureHasher";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import { UserEntity } from "@domain/entities/User";
+import { ManagePermission } from "@domain/value-object/Permissions";
 import { type Result, err, ok } from "@lib/result";
+import { assertPermission } from "@application/shared/auth";
 import type { UserError } from "../errors";
 import { validatePassword, validateUsername } from "../utils";
 import { type UserDto, toUserDto, type CreateUserInput } from "../dto";
@@ -16,7 +18,20 @@ export class CreateUserUseCase {
         private readonly idGenerator: IdGenerator,
     ) {}
 
-    async execute({ username, password }: CreateUserInput): Promise<Result<UserDto, UserError>> {
+    async execute(
+        requesterId: string,
+        { username, password }: CreateUserInput,
+    ): Promise<Result<UserDto, UserError>> {
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS },
+            "user_not_authorized",
+        );
+        if (auth.isError()) {
+            return auth;
+        }
+
         const usernameResult = validateUsername(username);
 
         if (usernameResult.isError()) {
