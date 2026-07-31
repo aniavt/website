@@ -4,6 +4,7 @@ import {
     SOFT_DELETE_LAST_ACTIONS,
     type SoftDeleteLastAction,
 } from "@ania/domain-shared/soft-delete";
+import { getMongoSession, mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const faqHistorySchema = new mongoose.Schema({
@@ -48,11 +49,20 @@ export class MongoDbFaqHistoryRepository implements FaqHistoryRepository {
     }
 
     async append(entry: FaqHistoryEntry): Promise<void> {
-        await this.model.create(toDocument(entry));
+        const doc = toDocument(entry);
+        const session = getMongoSession();
+        if (session) {
+            await this.model.create([doc], { session });
+        } else {
+            await this.model.create(doc);
+        }
     }
 
     async findByFaqId(faqId: string): Promise<FaqHistoryEntry[]> {
-        const docs = await this.model.find({ faqId }).sort({ timestamp: 1 }).exec();
+        const docs = await this.model
+            .find({ faqId }, null, mongoSessionOption())
+            .sort({ timestamp: 1 })
+            .exec();
         return docs.map((d) => FaqHistoryEntry.fromPersistence(d));
     }
 }

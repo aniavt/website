@@ -4,6 +4,7 @@ import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/Weekl
 import type { FileRepository } from "@domain/repositories/FileRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
+import type { TransactionManager } from "@application/shared/TransactionManager";
 import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
@@ -22,6 +23,7 @@ export class UpdateWeeklyScheduleUseCase {
         private readonly fileRepository: FileRepository,
         private readonly userRepository: UserRepository,
         private readonly idGenerator: IdGenerator,
+        private readonly transactionManager: TransactionManager,
     ) {}
 
     async execute(requesterId: string, input: UpdateWeeklyScheduleInput): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
@@ -65,20 +67,21 @@ export class UpdateWeeklyScheduleUseCase {
         });
 
         try {
-            await this.weeklyScheduleRepository.save(updated);
-            const historyId = this.idGenerator.generateUUID();
-            await this.weeklyScheduleHistoryRepository.append(
-                new WeeklyScheduleHistoryEntry({
-                    id: historyId,
-                    scheduleId: updated.id,
-                    week: updated.week,
-                    year: updated.year,
-                    fileId: updated.fileId,
-                    action: "updated",
-                    by: requesterId,
-                    timestamp: new Date(),
-                }),
-            );
+            await this.transactionManager.runInTransaction(async () => {
+                await this.weeklyScheduleRepository.save(updated);
+                await this.weeklyScheduleHistoryRepository.append(
+                    new WeeklyScheduleHistoryEntry({
+                        id: this.idGenerator.generateUUID(),
+                        scheduleId: updated.id,
+                        week: updated.week,
+                        year: updated.year,
+                        fileId: updated.fileId,
+                        action: "updated",
+                        by: requesterId,
+                        timestamp: new Date(),
+                    }),
+                );
+            });
         } catch {
             return err("weekly_schedule_save_failed");
         }

@@ -1,5 +1,7 @@
 import { FaqText } from "@domain/entities/FaqText";
 import type { FaqTextRepository } from "@domain/repositories/FaqTextRepository";
+import { upsertById } from "@infrastructure/shared/upsertById";
+import { mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const faqTextSchema = new mongoose.Schema({
@@ -26,22 +28,16 @@ export class MongoDbFaqTextRepository implements FaqTextRepository {
     }
 
     async save(entity: FaqText): Promise<void> {
-        const doc = toDocument(entity);
-        const existing = await this.model.findOne({ id: entity.id });
-        if (existing) {
-            await this.model.updateOne({ id: entity.id }, { $set: doc });
-        } else {
-            await this.model.create(doc);
-        }
+        await upsertById(this.model, toDocument(entity));
     }
 
     async findById(id: string): Promise<FaqText | null> {
-        const doc = await this.model.findOne({ id });
+        const doc = await this.model.findOne({ id }, null, mongoSessionOption());
         return doc ? FaqText.fromPersistence(doc) : null;
     }
 
     async findByValue(value: string): Promise<FaqText | null> {
-        const doc = await this.model.findOne({ value });
+        const doc = await this.model.findOne({ value }, null, mongoSessionOption());
         return doc ? FaqText.fromPersistence(doc) : null;
     }
 }

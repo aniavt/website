@@ -29,11 +29,16 @@ services:
   db:
     image: mongo:8.0
     container_name: ania_db_mongo
+    command: ["--replSet", "rs0", "--bind_ip_all"]
     healthcheck:
-      test: ["CMD", "mongosh", "--eval", "db.adminCommand('ping')"]
-      interval: 10s
-      timeout: 5s
-      retries: 5
+      test:
+        [
+          "CMD-SHELL",
+          "mongosh -u \"$$MONGO_INITDB_ROOT_USERNAME\" -p \"$$MONGO_INITDB_ROOT_PASSWORD\" --authenticationDatabase admin --quiet --eval 'try { const s = rs.status(); if (s.ok === 1 && s.members.some(m => m.stateStr === \"PRIMARY\")) quit(0); quit(1); } catch (e) { rs.initiate({ _id: \"rs0\", members: [{ _id: 0, host: \"172.20.0.100:27017\" }] }); quit(1); }'",
+        ]
+      interval: 5s
+      timeout: 10s
+      retries: 12
       start_period: 20s
     env_file:
       - .env
@@ -77,7 +82,7 @@ services:
     environment:
       PORT: 3000
       HOSTNAME: ${SERVER_HOSTNAME}
-      MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@172.20.0.100:27017/${MONGO_INITDB_DATABASE}?authSource=admin"
+      MONGO_URI: "mongodb://${MONGO_INITDB_ROOT_USERNAME}:${MONGO_INITDB_ROOT_PASSWORD}@172.20.0.100:27017/${MONGO_INITDB_DATABASE}?authSource=admin&replicaSet=rs0"
     networks:
       ania_network:
         ipv4_address: 172.20.0.101

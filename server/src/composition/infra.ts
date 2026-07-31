@@ -3,6 +3,7 @@ import { S3Client } from "@aws-sdk/client-s3";
 
 import { ArgonIdSecureHasher } from "@infrastructure/ArgonIdSecureHasher";
 import { CryptoIdGenerator } from "@infrastructure/CryptoIdGenerator";
+import { MongoTransactionManager } from "@infrastructure/MongoTransactionManager";
 import { S3Service } from "@infrastructure/S3Service";
 
 const mongoUri = Bun.env.MONGO_URI;
@@ -11,6 +12,7 @@ if (mongoUri === undefined) {
 }
 
 export const mongoClient = mongoose.createConnection(mongoUri);
+export const transactionManager = new MongoTransactionManager(mongoClient);
 export const passwordHasher = new ArgonIdSecureHasher();
 export const idGenerator = new CryptoIdGenerator();
 

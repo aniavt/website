@@ -4,6 +4,7 @@ import {
     WEEKLY_SCHEDULE_HISTORY_ACTIONS,
     type WeeklyScheduleHistoryAction,
 } from "@ania/domain-shared/weekly-schedule";
+import { getMongoSession, mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const weeklyScheduleHistorySchema = new mongoose.Schema({
@@ -55,16 +56,28 @@ export class MongoDbWeeklyScheduleHistoryRepository implements WeeklyScheduleHis
     }
 
     async append(entry: WeeklyScheduleHistoryEntry): Promise<void> {
-        await this.model.create(toDocument(entry));
+        const doc = toDocument(entry);
+        const session = getMongoSession();
+        if (session) {
+            await this.model.create([doc], { session });
+        } else {
+            await this.model.create(doc);
+        }
     }
 
     async findByScheduleId(scheduleId: string): Promise<WeeklyScheduleHistoryEntry[]> {
-        const docs = await this.model.find({ scheduleId }).sort({ timestamp: 1 }).exec();
+        const docs = await this.model
+            .find({ scheduleId }, null, mongoSessionOption())
+            .sort({ timestamp: 1 })
+            .exec();
         return docs.map((d) => WeeklyScheduleHistoryEntry.fromPersistence(d));
     }
 
     async findByWeekAndYear(week: number, year: number): Promise<WeeklyScheduleHistoryEntry[]> {
-        const docs = await this.model.find({ week, year }).sort({ timestamp: 1 }).exec();
+        const docs = await this.model
+            .find({ week, year }, null, mongoSessionOption())
+            .sort({ timestamp: 1 })
+            .exec();
         return docs.map((d) => WeeklyScheduleHistoryEntry.fromPersistence(d));
     }
 }

@@ -13,7 +13,7 @@ import { UploadAndUpdateWeeklyScheduleUseCase } from "@application/weekly_schedu
 import { MongoDbWeeklyScheduleRepository } from "@infrastructure/WeeklyScheduleRepository/MongoDb";
 import { MongoDbWeeklyScheduleHistoryRepository } from "@infrastructure/WeeklyScheduleHistoryRepository/MongoDb";
 
-import { mongoClient, idGenerator } from "./infra";
+import { mongoClient, idGenerator, transactionManager } from "./infra";
 import { userRepository } from "./users";
 import { fileRepository, mediaUseCases } from "./media";
 
@@ -26,6 +26,7 @@ const createWeeklySchedule = new CreateWeeklyScheduleUseCase(
     fileRepository,
     userRepository,
     idGenerator,
+    transactionManager,
 );
 const updateWeeklySchedule = new UpdateWeeklyScheduleUseCase(
     weeklyScheduleRepository,
@@ -33,6 +34,7 @@ const updateWeeklySchedule = new UpdateWeeklyScheduleUseCase(
     fileRepository,
     userRepository,
     idGenerator,
+    transactionManager,
 );
 
 export const weeklyScheduleUseCases: IWeeklyScheduleUseCases = {
@@ -43,12 +45,14 @@ export const weeklyScheduleUseCases: IWeeklyScheduleUseCases = {
         weeklyScheduleHistoryRepository,
         userRepository,
         idGenerator,
+        transactionManager,
     ),
     restore: new RestoreWeeklyScheduleUseCase(
         weeklyScheduleRepository,
         weeklyScheduleHistoryRepository,
         userRepository,
         idGenerator,
+        transactionManager,
     ),
     getById: new GetWeeklyScheduleByIdUseCase(weeklyScheduleRepository, fileRepository, userRepository),
     getByWeekAndYear: new GetWeeklyScheduleByWeekAndYearUseCase(weeklyScheduleRepository, fileRepository, userRepository),
@@ -68,5 +72,6 @@ export const weeklyScheduleUseCases: IWeeklyScheduleUseCases = {
         mediaUseCases.uploadFile,
         mediaUseCases.deleteFile,
         updateWeeklySchedule,
+        weeklyScheduleRepository,
     ),
 };

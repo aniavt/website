@@ -3,6 +3,7 @@ import type { FaqTextRepository } from "@domain/repositories/FaqTextRepository";
 import type { FaqHistoryRepository } from "@domain/repositories/FaqHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
+import type { TransactionManager } from "@application/shared/TransactionManager";
 import { FaqItem } from "@domain/entities/FaqItem";
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import { FAQPermission } from "@domain/value-object/Permissions";
@@ -19,6 +20,7 @@ export class DeleteFaqItemUseCase {
         private readonly faqHistoryRepository: FaqHistoryRepository,
         private readonly userRepository: UserRepository,
         private readonly idGenerator: IdGenerator,
+        private readonly transactionManager: TransactionManager,
     ) {}
 
     async execute(requesterId: string, id: string): Promise<Result<FaqItemPublicDto, FaqError>> {
@@ -43,19 +45,20 @@ export class DeleteFaqItemUseCase {
         });
 
         try {
-            await this.faqItemRepository.save(updated);
-            const historyId = this.idGenerator.generateUUID();
-            await this.faqHistoryRepository.append(
-                new FaqHistoryEntry({
-                    id: historyId,
-                    faqId: updated.id,
-                    queryId: updated.queryId,
-                    answerId: updated.answerId,
-                    action: "deleted",
-                    by: requesterId,
-                    timestamp: new Date(),
-                }),
-            );
+            await this.transactionManager.runInTransaction(async () => {
+                await this.faqItemRepository.save(updated);
+                await this.faqHistoryRepository.append(
+                    new FaqHistoryEntry({
+                        id: this.idGenerator.generateUUID(),
+                        faqId: updated.id,
+                        queryId: updated.queryId,
+                        answerId: updated.answerId,
+                        action: "deleted",
+                        by: requesterId,
+                        timestamp: new Date(),
+                    }),
+                );
+            });
         } catch {
             return err("faq_save_failed");
         }

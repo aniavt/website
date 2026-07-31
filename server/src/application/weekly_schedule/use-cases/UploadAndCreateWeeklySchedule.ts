@@ -41,10 +41,12 @@ export class UploadAndCreateWeeklyScheduleUseCase {
         });
 
         if (scheduleResult.isError()) {
-            try {
-                await this.deleteFile.execute(fileId);
-            } catch {
-                // ignore rollback errors
+            const compensate = await this.deleteFile.execute(fileId);
+            if (compensate.isError()) {
+                console.error(
+                    `Failed to compensate uploaded file ${fileId} after weekly schedule create failure:`,
+                    compensate.error,
+                );
             }
             return scheduleResult;
         }

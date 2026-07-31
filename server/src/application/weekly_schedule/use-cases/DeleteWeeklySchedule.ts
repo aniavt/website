@@ -2,6 +2,7 @@ import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklySchedu
 import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/WeeklyScheduleHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
+import type { TransactionManager } from "@application/shared/TransactionManager";
 import { getISOWeekAndYear } from "@ania/date";
 import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
 import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
@@ -19,6 +20,7 @@ export class DeleteWeeklyScheduleUseCase {
         private readonly weeklyScheduleHistoryRepository: WeeklyScheduleHistoryRepository,
         private readonly userRepository: UserRepository,
         private readonly idGenerator: IdGenerator,
+        private readonly transactionManager: TransactionManager,
     ) {}
 
     async execute(requesterId: string, id: string): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
@@ -54,20 +56,21 @@ export class DeleteWeeklyScheduleUseCase {
         });
 
         try {
-            await this.weeklyScheduleRepository.save(toSave);
-            const historyId = this.idGenerator.generateUUID();
-            await this.weeklyScheduleHistoryRepository.append(
-                new WeeklyScheduleHistoryEntry({
-                    id: historyId,
-                    scheduleId: toSave.id,
-                    week: toSave.week,
-                    year: toSave.year,
-                    fileId: toSave.fileId,
-                    action: "deleted",
-                    by: requesterId,
-                    timestamp: new Date(),
-                }),
-            );
+            await this.transactionManager.runInTransaction(async () => {
+                await this.weeklyScheduleRepository.save(toSave);
+                await this.weeklyScheduleHistoryRepository.append(
+                    new WeeklyScheduleHistoryEntry({
+                        id: this.idGenerator.generateUUID(),
+                        scheduleId: toSave.id,
+                        week: toSave.week,
+                        year: toSave.year,
+                        fileId: toSave.fileId,
+                        action: "deleted",
+                        by: requesterId,
+                        timestamp: new Date(),
+                    }),
+                );
+            });
         } catch {
             return err("weekly_schedule_save_failed");
         }

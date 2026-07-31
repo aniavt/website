@@ -1,5 +1,7 @@
 import { FileEntity } from "@domain/entities/File";
 import type { FileRepository } from "@domain/repositories/FileRepository";
+import { upsertById } from "@infrastructure/shared/upsertById";
+import { mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const fileSchema = new mongoose.Schema({
@@ -50,21 +52,15 @@ export class MongoDbFileRepository implements FileRepository {
     }
 
     async save(file: FileEntity): Promise<void> {
-        const doc = toDocument(file);
-        const existing = await this.model.findOne({ id: file.id });
-        if (existing) {
-            await this.model.updateOne({ id: file.id }, { $set: doc });
-        } else {
-            await this.model.create(doc);
-        }
+        await upsertById(this.model, toDocument(file));
     }
 
     async findById(id: string): Promise<FileEntity | null> {
-        const doc = await this.model.findOne({ id });
+        const doc = await this.model.findOne({ id }, null, mongoSessionOption());
         return doc ? toEntity(doc) : null;
     }
 
     async delete(id: string): Promise<void> {
-        await this.model.deleteOne({ id });
+        await this.model.deleteOne({ id }, mongoSessionOption());
     }
 }

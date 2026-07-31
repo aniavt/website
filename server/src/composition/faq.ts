@@ -10,7 +10,7 @@ import { MongoDbFaqTextRepository } from "@infrastructure/FaqTextRepository/Mong
 import { MongoDbFaqItemRepository } from "@infrastructure/FaqItemRepository/MongoDb";
 import { MongoDbFaqHistoryRepository } from "@infrastructure/FaqHistoryRepository/MongoDb";
 
-import { mongoClient, idGenerator } from "./infra";
+import { mongoClient, idGenerator, transactionManager } from "./infra";
 import { userRepository } from "./users";
 
 const faqTextRepository = new MongoDbFaqTextRepository(mongoClient);
@@ -24,6 +24,7 @@ export const faqUseCases: IFaqUseCases = {
         faqHistoryRepository,
         userRepository,
         idGenerator,
+        transactionManager,
     ),
     updateFaqItem: new UpdateFaqItemUseCase(
         faqTextRepository,
@@ -31,6 +32,7 @@ export const faqUseCases: IFaqUseCases = {
         faqHistoryRepository,
         userRepository,
         idGenerator,
+        transactionManager,
     ),
     deleteFaqItem: new DeleteFaqItemUseCase(
         faqItemRepository,
@@ -38,6 +40,7 @@ export const faqUseCases: IFaqUseCases = {
         faqHistoryRepository,
         userRepository,
         idGenerator,
+        transactionManager,
     ),
     restoreFaqItem: new RestoreFaqItemUseCase(
         faqItemRepository,
@@ -45,6 +48,7 @@ export const faqUseCases: IFaqUseCases = {
         faqHistoryRepository,
         userRepository,
         idGenerator,
+        transactionManager,
     ),
     listFaqItems: new ListFaqItemsUseCase(
         faqItemRepository,

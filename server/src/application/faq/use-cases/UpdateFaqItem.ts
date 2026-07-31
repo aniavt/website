@@ -3,6 +3,7 @@ import type { FaqItemRepository } from "@domain/repositories/FaqItemRepository";
 import type { FaqHistoryRepository } from "@domain/repositories/FaqHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
+import type { TransactionManager } from "@application/shared/TransactionManager";
 import { FaqText } from "@domain/entities/FaqText";
 import { FaqItem } from "@domain/entities/FaqItem";
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
@@ -22,6 +23,7 @@ export class UpdateFaqItemUseCase {
         private readonly faqHistoryRepository: FaqHistoryRepository,
         private readonly userRepository: UserRepository,
         private readonly idGenerator: IdGenerator,
+        private readonly transactionManager: TransactionManager,
     ) {}
 
     async execute(requesterId: string, input: UpdateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
@@ -41,44 +43,45 @@ export class UpdateFaqItemUseCase {
             return resolveItemToPublicDto(this.faqTextRepository, item);
         }
 
-        let queryId = item.queryId;
-        let answerId = item.answerId;
-        if (input.query !== undefined) {
-            const queryText = await this.findOrCreateFaqText(input.query);
-            queryId = queryText.id;
-        }
-        if (input.answer !== undefined) {
-            const answerText = await this.findOrCreateFaqText(input.answer);
-            answerId = answerText.id;
-        }
-
-        const updated = new FaqItem({
-            id: item.id,
-            queryId,
-            answerId,
-            isActive: item.isActive,
-            lastAction: "updated",
-        });
-
         try {
-            await this.faqItemRepository.save(updated);
-            const historyId = this.idGenerator.generateUUID();
-            await this.faqHistoryRepository.append(
-                new FaqHistoryEntry({
-                    id: historyId,
-                    faqId: updated.id,
-                    queryId: updated.queryId,
-                    answerId: updated.answerId,
-                    action: "updated",
-                    by: requesterId,
-                    timestamp: new Date(),
-                }),
-            );
+            const updated = await this.transactionManager.runInTransaction(async () => {
+                let queryId = item.queryId;
+                let answerId = item.answerId;
+                if (input.query !== undefined) {
+                    queryId = (await this.findOrCreateFaqText(input.query)).id;
+                }
+                if (input.answer !== undefined) {
+                    answerId = (await this.findOrCreateFaqText(input.answer)).id;
+                }
+
+                const updated = new FaqItem({
+                    id: item.id,
+                    queryId,
+                    answerId,
+                    isActive: item.isActive,
+                    lastAction: "updated",
+                });
+
+                await this.faqItemRepository.save(updated);
+                await this.faqHistoryRepository.append(
+                    new FaqHistoryEntry({
+                        id: this.idGenerator.generateUUID(),
+                        faqId: updated.id,
+                        queryId: updated.queryId,
+                        answerId: updated.answerId,
+                        action: "updated",
+                        by: requesterId,
+                        timestamp: new Date(),
+                    }),
+                );
+
+                return updated;
+            });
+
+            return resolveItemToPublicDto(this.faqTextRepository, updated);
         } catch {
             return err("faq_save_failed");
         }
-
-        return resolveItemToPublicDto(this.faqTextRepository, updated);
     }
 
     private async findOrCreateFaqText(value: string): Promise<FaqText> {

@@ -1,6 +1,7 @@
 import type { UploadFileUseCase, UploadFileInput } from "@application/media/use-cases/UploadFile";
 import type { DeleteFileUseCase } from "@application/media/use-cases/DeleteFile";
 import type { MediaError } from "@application/media/errors";
+import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import { type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
@@ -18,12 +19,16 @@ export class UploadAndUpdateWeeklyScheduleUseCase {
         private readonly uploadFile: UploadFileUseCase,
         private readonly deleteFile: DeleteFileUseCase,
         private readonly updateWeeklySchedule: UpdateWeeklyScheduleUseCase,
+        private readonly weeklyScheduleRepository: WeeklyScheduleRepository,
     ) {}
 
     async execute(
         requesterId: string,
         input: UploadAndUpdateWeeklyScheduleInput,
     ): Promise<Result<WeeklyScheduleDto, UploadAndUpdateWeeklyScheduleError>> {
+        const existing = await this.weeklyScheduleRepository.findById(input.id);
+        const oldFileId = existing?.fileId;
+
         const uploadResult = await this.uploadFile.execute({
             ...input.file,
             isPrivate: false,
@@ -39,12 +44,24 @@ export class UploadAndUpdateWeeklyScheduleUseCase {
         });
 
         if (updateResult.isError()) {
-            try {
-                await this.deleteFile.execute(fileId);
-            } catch {
-                // ignore rollback errors
+            const compensate = await this.deleteFile.execute(fileId);
+            if (compensate.isError()) {
+                console.error(
+                    `Failed to compensate uploaded file ${fileId} after weekly schedule update failure:`,
+                    compensate.error,
+                );
             }
             return updateResult;
+        }
+
+        if (oldFileId !== undefined && oldFileId !== fileId) {
+            const cleanup = await this.deleteFile.execute(oldFileId);
+            if (cleanup.isError()) {
+                console.error(
+                    `Failed to delete previous file ${oldFileId} after weekly schedule update:`,
+                    cleanup.error,
+                );
+            }
         }
 
         return updateResult;
