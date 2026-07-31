@@ -1,3 +1,4 @@
+import type { UserEntity } from "@domain/entities/User";
 import type { UploadFileUseCase, UploadFileInput } from "@application/media/use-cases/UploadFile";
 import type { DeleteFileUseCase } from "@application/media/use-cases/DeleteFile";
 import type { MediaError } from "@application/media/errors";
@@ -23,7 +24,7 @@ export class UploadAndUpdateWeeklyScheduleUseCase {
     ) {}
 
     async execute(
-        requesterId: string,
+        requester: UserEntity | string,
         input: UploadAndUpdateWeeklyScheduleInput,
     ): Promise<Result<WeeklyScheduleDto, UploadAndUpdateWeeklyScheduleError>> {
         const existing = await this.weeklyScheduleRepository.findById(input.id);
@@ -38,7 +39,7 @@ export class UploadAndUpdateWeeklyScheduleUseCase {
         }
 
         const fileId = uploadResult.data.id;
-        const updateResult = await this.updateWeeklySchedule.execute(requesterId, {
+        const updateResult = await this.updateWeeklySchedule.execute(requester, {
             id: input.id,
             fileId,
         });

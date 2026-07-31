@@ -1,4 +1,5 @@
 import type { IUserUseCases } from "@application/users/IUserUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import {
     CreateUserInputSchema,
     LoginRequestSchema,
@@ -10,10 +11,13 @@ import { sendUserError } from "../../errors";
 import { clearAuthCookie, setAuthCookie, userToResponse } from "./helpers";
 import { LogoutQuerySchema } from "../../route-schemas";
 
-export const registerUserAuthRoutes: RegisterRouteFn<{ userUseCases: IUserUseCases }> = (
+export const registerUserAuthRoutes: RegisterRouteFn<{
+    userUseCases: IUserUseCases;
+    userRepository: UserRepository;
+}> = (
     app,
     prefixUrl,
-    { userUseCases },
+    { userUseCases, userRepository },
 ) => {
     app.post(
         prefixUrl("/login"),
@@ -47,14 +51,14 @@ export const registerUserAuthRoutes: RegisterRouteFn<{ userUseCases: IUserUseCas
         },
     );
 
-    app.get(prefixUrl("/me"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
+    app.get(prefixUrl("/me"), { preHandler: authenticate(userRepository) }, async (request, reply) => {
         return reply.send(userToResponse(request.user!));
     });
 
     app.post(
         prefixUrl("/logout"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { querystring: LogoutQuerySchema },
         },
         async (request, reply) => {
@@ -69,7 +73,7 @@ export const registerUserAuthRoutes: RegisterRouteFn<{ userUseCases: IUserUseCas
     app.post(
         prefixUrl("/update-password"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { body: UpdatePasswordInputSchema },
         },
         async (request, reply) => {
@@ -84,7 +88,7 @@ export const registerUserAuthRoutes: RegisterRouteFn<{ userUseCases: IUserUseCas
 
     app.post(
         prefixUrl("/refresh-token"),
-        { preHandler: authenticate(userUseCases) },
+        { preHandler: authenticate(userRepository) },
         async (request, reply) => {
             setAuthCookie(reply, request.user!);
             return reply.send(userToResponse(request.user!));

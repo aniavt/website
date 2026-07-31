@@ -1,5 +1,6 @@
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { MediaError } from "@application/media/errors";
 import type { WeeklyScheduleError } from "@application/weekly_schedule/errors";
 import {
@@ -15,6 +16,7 @@ import { IdParamsSchema, WeekYearParamsSchema, WeeklyListQuerySchema } from "../
 
 export interface WeeklyScheduleRoutesDependencies {
     userUseCases: IUserUseCases;
+    userRepository: UserRepository;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
 }
 
@@ -31,17 +33,17 @@ function sendUploadWeeklyScheduleError(
 export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesDependencies> = (
     app,
     prefixUrl,
-    { userUseCases, weeklyScheduleUseCases },
+    { userRepository, weeklyScheduleUseCases },
 ) => {
     app.post(
         prefixUrl("/weekly-schedule"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { body: CreateWeeklyScheduleInputSchema },
         },
         async (request, reply) => {
             const result = await weeklyScheduleUseCases.create.execute(
-                request.user!.id,
+                request.userEntity!,
                 request.body,
             );
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
@@ -52,11 +54,11 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
     app.patch(
         prefixUrl("/weekly-schedule/:id"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: IdParamsSchema, body: UpdateWeeklyScheduleInputSchema },
         },
         async (request, reply) => {
-            const result = await weeklyScheduleUseCases.update.execute(request.user!.id, {
+            const result = await weeklyScheduleUseCases.update.execute(request.userEntity!, {
                 id: request.params.id,
                 ...request.body,
             });
@@ -68,12 +70,12 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
     app.delete(
         prefixUrl("/weekly-schedule/:id"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: IdParamsSchema },
         },
         async (request, reply) => {
             const result = await weeklyScheduleUseCases.delete.execute(
-                request.user!.id,
+                request.userEntity!,
                 request.params.id,
             );
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
@@ -84,12 +86,12 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
     app.post(
         prefixUrl("/weekly-schedule/:id/restore"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: IdParamsSchema },
         },
         async (request, reply) => {
             const result = await weeklyScheduleUseCases.restore.execute(
-                request.user!.id,
+                request.userEntity!,
                 request.params.id,
             );
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
@@ -121,7 +123,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
     app.get(
         prefixUrl("/weekly-schedule"),
         {
-            preHandler: optionalAuthenticate(userUseCases),
+            preHandler: optionalAuthenticate(userRepository),
             schema: { querystring: WeeklyListQuerySchema },
         },
         async (request, reply) => {
@@ -131,9 +133,9 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
                 return reply.status(400).send({ error: "weekly_schedule_invalid_week" });
             }
             const includeDeleted = request.query.includeDeleted === "true";
-            const requesterId = request.user?.id ?? null;
+            const requester = request.userEntity ?? null;
             const result = await weeklyScheduleUseCases.list.execute(
-                requesterId,
+                requester,
                 year !== undefined ? { year: year!, includeDeleted } : { includeDeleted },
             );
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
@@ -154,12 +156,12 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
     app.get(
         prefixUrl("/weekly-schedule/:id/history"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: IdParamsSchema },
         },
         async (request, reply) => {
             const result = await weeklyScheduleUseCases.getHistory.execute(
-                request.user!.id,
+                request.userEntity!,
                 request.params.id,
             );
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
@@ -169,7 +171,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
 
     app.post(
         prefixUrl("/weekly-schedule/upload"),
-        { preHandler: authenticate(userUseCases) },
+        { preHandler: authenticate(userRepository) },
         async (request, reply) => {
             const parsed = await parseMultipartFile(request, {
                 fieldsSchema: UploadWeeklyScheduleFieldsSchema,
@@ -181,7 +183,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
                 return sendMediaError(reply, parsed.error);
             }
 
-            const result = await weeklyScheduleUseCases.uploadAndCreate.execute(request.user!.id, {
+            const result = await weeklyScheduleUseCases.uploadAndCreate.execute(request.userEntity!, {
                 week: parsed.fields.week,
                 year: parsed.fields.year,
                 file: parsed.file,
@@ -194,7 +196,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
     app.post(
         prefixUrl("/weekly-schedule/:id/upload"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: IdParamsSchema },
         },
         async (request, reply) => {
@@ -203,7 +205,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
                 return sendMediaError(reply, "media_invalid_input");
             }
 
-            const result = await weeklyScheduleUseCases.uploadAndUpdate.execute(request.user!.id, {
+            const result = await weeklyScheduleUseCases.uploadAndUpdate.execute(request.userEntity!, {
                 id: request.params.id,
                 file: parsed.file,
             });

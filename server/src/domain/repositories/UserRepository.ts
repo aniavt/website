@@ -16,6 +16,7 @@ export interface PaginationOptions {
 export interface UserRepository {
     save(user: UserEntity): Promise<void>;
     findById(id: string): Promise<UserEntity | null>;
+    findByIds(ids: string[]): Promise<Map<string, UserEntity>>;
     findByUsername(username: string): Promise<UserEntity | null>;
     delete(id: string): Promise<void>;
     

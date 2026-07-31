@@ -1,4 +1,5 @@
 import type { IUserUseCases } from "@application/users/IUserUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { RegisterRouteFn } from "../types";
 import { sendNavItemsError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
@@ -11,18 +12,19 @@ import { ActiveOnlyQuerySchema, IdParamsSchema } from "../route-schemas";
 
 export interface NavItemsRoutesDependencies {
    userUseCases: IUserUseCases;
+   userRepository: UserRepository;
    navItemsUseCases: INavItemsUseCases;
 }
 
 export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies> = (
    app,
    prefixUrl,
-   { userUseCases, navItemsUseCases },
+   { userRepository, navItemsUseCases },
 ) => {
    app.post(
       prefixUrl("/navItems"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { body: CreateNavItemsInputSchema },
       },
       async (request, reply) => {
@@ -38,7 +40,7 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
    app.patch(
       prefixUrl("/navItems/:id"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema, body: UpdateNavItemsInputSchema },
       },
       async (request, reply) => {
@@ -54,7 +56,7 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
    app.delete(
       prefixUrl("/navItems/:id"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema },
       },
       async (request, reply) => {
@@ -70,7 +72,7 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
    app.post(
       prefixUrl("/navItems/:id/restore"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema },
       },
       async (request, reply) => {
@@ -86,7 +88,7 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
    app.get(
       prefixUrl("/navItems"),
       {
-         preHandler: optionalAuthenticate(userUseCases),
+         preHandler: optionalAuthenticate(userRepository),
          schema: { querystring: ActiveOnlyQuerySchema },
       },
       async (request, reply) => {

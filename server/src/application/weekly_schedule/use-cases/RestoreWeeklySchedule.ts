@@ -1,6 +1,7 @@
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/WeeklyScheduleHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
 import { getISOWeekAndYear } from "@ania/date";
@@ -23,10 +24,10 @@ export class RestoreWeeklyScheduleUseCase {
         private readonly transactionManager: TransactionManager,
     ) {}
 
-    async execute(requesterId: string, id: string): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
+    async execute(requester: UserEntity | string, id: string): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
         const auth = await assertPermission(
             this.userRepository,
-            requesterId,
+            requester,
             { type: "weekly_schedule", permission: WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE },
             "weekly_schedule_not_authorized",
         );
@@ -70,7 +71,7 @@ export class RestoreWeeklyScheduleUseCase {
                         year: restored.year,
                         fileId: restored.fileId,
                         action: "restored",
-                        by: requesterId,
+                        by: auth.data.id,
                         timestamp: new Date(),
                     }),
                 );

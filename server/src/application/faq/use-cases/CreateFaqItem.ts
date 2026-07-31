@@ -2,6 +2,7 @@ import type { FaqTextRepository } from "@domain/repositories/FaqTextRepository";
 import type { FaqItemRepository } from "@domain/repositories/FaqItemRepository";
 import type { FaqHistoryRepository } from "@domain/repositories/FaqHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
 import { FaqText } from "@domain/entities/FaqText";
@@ -26,10 +27,10 @@ export class CreateFaqItemUseCase {
         private readonly transactionManager: TransactionManager,
     ) {}
 
-    async execute(requesterId: string, input: CreateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
+    async execute(requester: UserEntity | string, input: CreateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
         const auth = await assertPermission(
             this.userRepository,
-            requesterId,
+            requester,
             { type: "faq", permission: FAQPermission.CREATE_FAQ },
             "faq_not_authorized",
         );
@@ -57,7 +58,7 @@ export class CreateFaqItemUseCase {
                         queryId: item.queryId,
                         answerId: item.answerId,
                         action: "created",
-                        by: requesterId,
+                        by: auth.data.id,
                         timestamp: new Date(),
                     }),
                 );

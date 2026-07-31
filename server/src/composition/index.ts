@@ -8,7 +8,7 @@ export { weeklyScheduleUseCases } from "./weekly_schedule";
 export { animeUseCases, chapterUseCases } from "./anime";
 export { navItemsUseCases } from "./navItems";
 
-import { userUseCases } from "./users";
+import { userUseCases, userRepository } from "./users";
 import { mediaUseCases } from "./media";
 import { faqUseCases } from "./faq";
 import { weeklyScheduleUseCases } from "./weekly_schedule";
@@ -22,6 +22,7 @@ export async function startHttpServer(): Promise<void> {
         hostname,
         {
             userUseCases,
+            userRepository,
             faqUseCases,
             weeklyScheduleUseCases,
             mediaUseCases,

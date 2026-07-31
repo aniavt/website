@@ -60,6 +60,13 @@ export class MongoDbFileRepository implements FileRepository {
         return doc ? toEntity(doc) : null;
     }
 
+    async findByIds(ids: string[]): Promise<Map<string, FileEntity>> {
+        const uniqueIds = [...new Set(ids)];
+        if (uniqueIds.length === 0) return new Map();
+        const docs = await this.model.find({ id: { $in: uniqueIds } }, null, mongoSessionOption());
+        return new Map(docs.map((doc) => [doc.id, toEntity(doc)]));
+    }
+
     async delete(id: string): Promise<void> {
         await this.model.deleteOne({ id }, mongoSessionOption());
     }

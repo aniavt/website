@@ -1,5 +1,6 @@
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import {
    CreateChapterInputSchema,
    UpdateChapterInputSchema,
@@ -11,13 +12,14 @@ import { AnimeIdParamsSchema, IdParamsSchema } from "../route-schemas";
 
 export interface ChapterRoutesDependencies {
    userUseCases: IUserUseCases;
+   userRepository: UserRepository;
    chapterUseCases: IChapterUseCases;
 }
 
 export const registerChapterRoutes: RegisterRouteFn<ChapterRoutesDependencies> = (
    app,
    prefixUrl,
-   { userUseCases, chapterUseCases },
+   { userRepository, chapterUseCases },
 ) => {
    app.get(
       prefixUrl("/anime/:animeId/chapters"),
@@ -32,7 +34,7 @@ export const registerChapterRoutes: RegisterRouteFn<ChapterRoutesDependencies> =
    app.post(
       prefixUrl("/anime/:animeId/chapters"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: AnimeIdParamsSchema, body: CreateChapterInputSchema },
       },
       async (request, reply) => {
@@ -48,7 +50,7 @@ export const registerChapterRoutes: RegisterRouteFn<ChapterRoutesDependencies> =
    app.patch(
       prefixUrl("/chapters/:id"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema, body: UpdateChapterInputSchema },
       },
       async (request, reply) => {
@@ -64,7 +66,7 @@ export const registerChapterRoutes: RegisterRouteFn<ChapterRoutesDependencies> =
    app.delete(
       prefixUrl("/chapters/:id"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema },
       },
       async (request, reply) => {

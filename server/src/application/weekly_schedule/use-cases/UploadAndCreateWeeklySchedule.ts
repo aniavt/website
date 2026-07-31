@@ -1,3 +1,4 @@
+import type { UserEntity } from "@domain/entities/User";
 import type { UploadFileUseCase, UploadFileInput } from "@application/media/use-cases/UploadFile";
 import type { DeleteFileUseCase } from "@application/media/use-cases/DeleteFile";
 import type { MediaError } from "@application/media/errors";
@@ -22,7 +23,7 @@ export class UploadAndCreateWeeklyScheduleUseCase {
     ) {}
 
     async execute(
-        requesterId: string,
+        requester: UserEntity | string,
         input: UploadAndCreateWeeklyScheduleInput,
     ): Promise<Result<WeeklyScheduleDto, UploadAndCreateWeeklyScheduleError>> {
         const uploadResult = await this.uploadFile.execute({
@@ -34,7 +35,7 @@ export class UploadAndCreateWeeklyScheduleUseCase {
         }
 
         const fileId = uploadResult.data.id;
-        const scheduleResult = await this.createWeeklySchedule.execute(requesterId, {
+        const scheduleResult = await this.createWeeklySchedule.execute(requester, {
             week: input.week,
             year: input.year,
             fileId,

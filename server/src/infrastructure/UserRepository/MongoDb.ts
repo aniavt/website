@@ -92,6 +92,13 @@ export class MongoDbUserRepository implements UserRepository {
         return user ? UserEntity.fromPersistence(user) : null;
     }
 
+    async findByIds(ids: string[]): Promise<Map<string, UserEntity>> {
+        const uniqueIds = [...new Set(ids)];
+        if (uniqueIds.length === 0) return new Map();
+        const users = await this.userModel.find({ id: { $in: uniqueIds } });
+        return new Map(users.map((user) => [user.id, UserEntity.fromPersistence(user)]));
+    }
+
     async findByUsername(username: string): Promise<UserEntity | null> {
         const user = await this.userModel.findOne({ username });
         return user ? UserEntity.fromPersistence(user) : null;

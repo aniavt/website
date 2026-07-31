@@ -1,6 +1,7 @@
 import type { RegisterRouteFn } from "../types";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import { sendMediaError } from "../errors";
 import { authenticate } from "../middlewares/auth";
 import { parseMultipartFile } from "../multipart";
@@ -9,12 +10,13 @@ import { IdParamsSchema } from "../route-schemas";
 export interface MediaRoutesDependencies {
     mediaUseCases: IMediaUseCases;
     userUseCases: IUserUseCases;
+    userRepository: UserRepository;
 }
 
 export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
     app,
     prefixUrl,
-    { mediaUseCases, userUseCases },
+    { mediaUseCases, userRepository },
 ) => {
     app.get(
         prefixUrl("/media/:id"),
@@ -31,7 +33,7 @@ export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
 
     app.post(
         prefixUrl("/media/upload"),
-        { preHandler: authenticate(userUseCases) },
+        { preHandler: authenticate(userRepository) },
         async (request, reply) => {
             const parsed = await parseMultipartFile(request);
             if (!parsed.ok) {

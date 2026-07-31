@@ -2,6 +2,7 @@ import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklySchedu
 import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/WeeklyScheduleHistoryRepository";
 import type { FileRepository } from "@domain/repositories/FileRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import type { TransactionManager } from "@application/shared/TransactionManager";
 import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
@@ -25,10 +26,10 @@ export class CreateWeeklyScheduleUseCase {
         private readonly transactionManager: TransactionManager,
     ) {}
 
-    async execute(requesterId: string, input: CreateWeeklyScheduleInput): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
+    async execute(requester: UserEntity | string, input: CreateWeeklyScheduleInput): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
         const auth = await assertPermission(
             this.userRepository,
-            requesterId,
+            requester,
             { type: "weekly_schedule", permission: WeeklySchedulePermission.CREATE_WEEKLY_SCHEDULE },
             "weekly_schedule_not_authorized",
         );
@@ -76,7 +77,7 @@ export class CreateWeeklyScheduleUseCase {
                         year: toSave.year,
                         fileId: toSave.fileId,
                         action: "created",
-                        by: requesterId,
+                        by: auth.data.id,
                         timestamp: new Date(),
                     }),
                 );

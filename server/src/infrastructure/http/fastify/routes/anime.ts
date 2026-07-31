@@ -1,5 +1,6 @@
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import {
    CreateAnimeInputSchema,
    UpdateAnimeInputSchema,
@@ -11,18 +12,19 @@ import { ActiveOnlyQuerySchema, IdParamsSchema } from "../route-schemas";
 
 export interface AnimeRoutesDependencies {
    userUseCases: IUserUseCases;
+   userRepository: UserRepository;
    animeUseCases: IAnimeUseCases;
 }
 
 export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
    app,
    prefixUrl,
-   { userUseCases, animeUseCases },
+   { userRepository, animeUseCases },
 ) => {
    app.post(
       prefixUrl("/anime"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { body: CreateAnimeInputSchema },
       },
       async (request, reply) => {
@@ -35,7 +37,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
    app.patch(
       prefixUrl("/anime/:id"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema, body: UpdateAnimeInputSchema },
       },
       async (request, reply) => {
@@ -51,7 +53,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
    app.delete(
       prefixUrl("/anime/:id"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema },
       },
       async (request, reply) => {
@@ -67,7 +69,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
    app.post(
       prefixUrl("/anime/:id/restore"),
       {
-         preHandler: authenticate(userUseCases),
+         preHandler: authenticate(userRepository),
          schema: { params: IdParamsSchema },
       },
       async (request, reply) => {
@@ -83,7 +85,7 @@ export const registerAnimeRoutes: RegisterRouteFn<AnimeRoutesDependencies> = (
    app.get(
       prefixUrl("/anime"),
       {
-         preHandler: optionalAuthenticate(userUseCases),
+         preHandler: optionalAuthenticate(userRepository),
          schema: { querystring: ActiveOnlyQuerySchema },
       },
       async (request, reply) => {

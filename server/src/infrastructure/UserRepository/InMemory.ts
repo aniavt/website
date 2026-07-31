@@ -18,6 +18,17 @@ export class InMemoryUserRepository implements UserRepository {
         return this.users.find((u) => u.id === id) ?? null;
     }
 
+    async findByIds(ids: string[]): Promise<Map<string, UserEntity>> {
+        const uniqueIds = [...new Set(ids)];
+        if (uniqueIds.length === 0) return new Map();
+        const result = new Map<string, UserEntity>();
+        for (const id of uniqueIds) {
+            const user = this.users.find((u) => u.id === id);
+            if (user) result.set(id, user);
+        }
+        return result;
+    }
+
     async findByUsername(username: string): Promise<UserEntity | null> {
         return this.users.find((u) => u.username.toLowerCase() === username.toLowerCase()) ?? null;
     }

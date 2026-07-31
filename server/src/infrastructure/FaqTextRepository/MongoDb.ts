@@ -36,6 +36,13 @@ export class MongoDbFaqTextRepository implements FaqTextRepository {
         return doc ? FaqText.fromPersistence(doc) : null;
     }
 
+    async findByIds(ids: string[]): Promise<Map<string, FaqText>> {
+        const uniqueIds = [...new Set(ids)];
+        if (uniqueIds.length === 0) return new Map();
+        const docs = await this.model.find({ id: { $in: uniqueIds } }, null, mongoSessionOption());
+        return new Map(docs.map((doc) => [doc.id, FaqText.fromPersistence(doc)]));
+    }
+
     async findByValue(value: string): Promise<FaqText | null> {
         const doc = await this.model.findOne({ value }, null, mongoSessionOption());
         return doc ? FaqText.fromPersistence(doc) : null;

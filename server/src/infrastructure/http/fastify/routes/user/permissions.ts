@@ -1,20 +1,24 @@
 import type { PermissionNamespace } from "@domain/value-object/Permissions";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import { ManagePermissionBodySchema } from "@ania/api-contract/user";
 import type { RegisterRouteFn } from "../../types";
 import { authenticate } from "../../middlewares/auth";
 import { sendUserError } from "../../errors";
 import { PermissionCheckQuerySchema, UserIdParamsSchema } from "../../route-schemas";
 
-export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUserUseCases }> = (
+export const registerUserPermissionRoutes: RegisterRouteFn<{
+    userUseCases: IUserUseCases;
+    userRepository: UserRepository;
+}> = (
     app,
     prefixUrl,
-    { userUseCases },
+    { userUseCases, userRepository },
 ) => {
     app.post(
         prefixUrl("/user/:userId/permissions/grant"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: UserIdParamsSchema, body: ManagePermissionBodySchema },
         },
         async (request, reply) => {
@@ -40,7 +44,7 @@ export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUser
     app.post(
         prefixUrl("/user/:userId/permissions/revoke"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: UserIdParamsSchema, body: ManagePermissionBodySchema },
         },
         async (request, reply) => {
@@ -66,7 +70,7 @@ export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUser
     app.get(
         prefixUrl("/user/:userId/permissions"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: UserIdParamsSchema },
         },
         async (request, reply) => {
@@ -88,7 +92,7 @@ export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUser
     app.get(
         prefixUrl("/user/:userId/permissions/check"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: {
                 params: UserIdParamsSchema,
                 querystring: PermissionCheckQuerySchema,

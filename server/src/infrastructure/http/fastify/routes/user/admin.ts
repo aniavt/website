@@ -1,5 +1,5 @@
 import { z } from "zod";
-import type { PaginationOptions } from "@domain/repositories/UserRepository";
+import type { PaginationOptions, UserRepository } from "@domain/repositories/UserRepository";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { RegisterRouteFn } from "../../types";
 import { authenticate } from "../../middlewares/auth";
@@ -17,15 +17,18 @@ const ListUsersQuerySchema = z.object({
     updatedAt: z.string().optional(),
 });
 
-export const registerUserAdminRoutes: RegisterRouteFn<{ userUseCases: IUserUseCases }> = (
+export const registerUserAdminRoutes: RegisterRouteFn<{
+    userUseCases: IUserUseCases;
+    userRepository: UserRepository;
+}> = (
     app,
     prefixUrl,
-    { userUseCases },
+    { userUseCases, userRepository },
 ) => {
     app.post(
         prefixUrl("/user/deactivate/:userId"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: UserIdParamsSchema },
         },
         async (request, reply) => {
@@ -41,7 +44,7 @@ export const registerUserAdminRoutes: RegisterRouteFn<{ userUseCases: IUserUseCa
     app.post(
         prefixUrl("/user/activate/:userId"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { params: UserIdParamsSchema },
         },
         async (request, reply) => {
@@ -56,7 +59,7 @@ export const registerUserAdminRoutes: RegisterRouteFn<{ userUseCases: IUserUseCa
     app.get(
         prefixUrl("/users"),
         {
-            preHandler: authenticate(userUseCases),
+            preHandler: authenticate(userRepository),
             schema: { querystring: ListUsersQuerySchema },
         },
         async (request, reply) => {

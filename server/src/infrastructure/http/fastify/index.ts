@@ -5,6 +5,7 @@ import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
 import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
@@ -27,6 +28,7 @@ import { registerNavItemsRoutes } from "./routes/navItems";
 
 export interface FastifyServerDependencies {
     userUseCases: IUserUseCases;
+    userRepository: UserRepository;
     faqUseCases: IFaqUseCases;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
     mediaUseCases: IMediaUseCases;
@@ -40,7 +42,16 @@ export async function createFastifyServer(
     listenHostname: string,
     deps: FastifyServerDependencies
 ): Promise<void> {
-    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, animeUseCases, chapterUseCases, navItemsUseCases } = deps;
+    const {
+        userUseCases,
+        userRepository,
+        faqUseCases,
+        weeklyScheduleUseCases,
+        mediaUseCases,
+        animeUseCases,
+        chapterUseCases,
+        navItemsUseCases,
+    } = deps;
     const app = Fastify({ bodyLimit: UPLOAD_MAX_FILE_BYTES }).withTypeProvider<ZodTypeProvider>();
     app.setValidatorCompiler(validatorCompiler);
     app.setSerializerCompiler(serializerCompiler);
@@ -66,14 +77,15 @@ export async function createFastifyServer(
     // Decorate the FastifyRequest interface to add the user property
     // In "middlewares/auth.ts" we declare the type of the user property
     app.decorateRequest("user", null);
+    app.decorateRequest("userEntity", null);
 
-    registerUserRoutes(app, prefixUrl, { userUseCases });
-    registerFaqRoutes(app, prefixUrl, { userUseCases, faqUseCases });
-    registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, weeklyScheduleUseCases });
-    registerMediaRoutes(app, prefixUrl, { mediaUseCases, userUseCases });
-    registerAnimeRoutes(app, prefixUrl, { userUseCases, animeUseCases });
-    registerChapterRoutes(app, prefixUrl, { userUseCases, chapterUseCases });
-    registerNavItemsRoutes(app, prefixUrl, { userUseCases, navItemsUseCases });
+    registerUserRoutes(app, prefixUrl, { userUseCases, userRepository });
+    registerFaqRoutes(app, prefixUrl, { userUseCases, userRepository, faqUseCases });
+    registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, userRepository, weeklyScheduleUseCases });
+    registerMediaRoutes(app, prefixUrl, { mediaUseCases, userUseCases, userRepository });
+    registerAnimeRoutes(app, prefixUrl, { userUseCases, userRepository, animeUseCases });
+    registerChapterRoutes(app, prefixUrl, { userUseCases, userRepository, chapterUseCases });
+    registerNavItemsRoutes(app, prefixUrl, { userUseCases, userRepository, navItemsUseCases });
 
     await app.listen({ port: listenPort, host: listenHostname }).then(() => {
         console.log(`Server is running on port ${listenPort}`);
