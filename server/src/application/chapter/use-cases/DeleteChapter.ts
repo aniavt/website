@@ -25,7 +25,8 @@ export class DeleteChapterUseCase {
 
       try {
          await this.chapterRepository.delete(chapterId);
-      } catch {
+      } catch (error) {
+         console.error("chapter_delete_failed", error);
          return err("chapter_delete_failed");
       }
 

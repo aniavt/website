@@ -82,7 +82,8 @@ export class CreateWeeklyScheduleUseCase {
                     }),
                 );
             });
-        } catch {
+        } catch (error) {
+            console.error("weekly_schedule_save_failed", error);
             return err("weekly_schedule_save_failed");
         }
 

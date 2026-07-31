@@ -27,6 +27,7 @@ export function sendDomainError<E extends string>(
 }
 
 const MEDIA_ERROR_STATUS: Partial<Record<MediaError, number>> = {
+    media_not_found: 404,
     media_invalid_input: 400,
     media_upload_failed: 500,
     media_delete_failed: 500,
@@ -38,7 +39,7 @@ export function sendMediaError(reply: FastifyReply, error: MediaError) {
 
 const ANIME_ERROR_STATUS: Partial<Record<AnimeError, number>> = {
     anime_not_found: 404,
-    anime_not_authorized: 401,
+    anime_not_authorized: 403,
     anime_invalid_transition: 400,
     anime_save_failed: 500,
 };
@@ -50,7 +51,7 @@ export function sendAnimeError(reply: FastifyReply, error: AnimeError) {
 const FAQ_ERROR_STATUS: Partial<Record<FaqError, number>> = {
     faq_item_not_found: 404,
     faq_text_not_found: 404,
-    faq_not_authorized: 401,
+    faq_not_authorized: 403,
     faq_invalid_transition: 400,
     faq_save_failed: 500,
 };
@@ -62,7 +63,7 @@ export function sendFaqError(reply: FastifyReply, error: FaqError) {
 const CHAPTER_ERROR_STATUS: Partial<Record<ChapterError, number>> = {
     chapter_not_found: 404,
     anime_not_found: 404,
-    chapter_not_authorized: 401,
+    chapter_not_authorized: 403,
     chapter_save_failed: 500,
     chapter_delete_failed: 500,
 };
@@ -73,7 +74,7 @@ export function sendChapterError(reply: FastifyReply, error: ChapterError) {
 
 const NAV_ITEMS_ERROR_STATUS: Partial<Record<NavItemsError, number>> = {
     navItems_not_found: 404,
-    navItems_not_authorized: 401,
+    navItems_not_authorized: 403,
     navItems_invalid_transition: 400,
     navItems_save_failed: 500,
 };
@@ -84,7 +85,7 @@ export function sendNavItemsError(reply: FastifyReply, error: NavItemsError) {
 
 const WEEKLY_SCHEDULE_ERROR_STATUS: Partial<Record<WeeklyScheduleError, number>> = {
     weekly_schedule_not_found: 404,
-    weekly_schedule_not_authorized: 401,
+    weekly_schedule_not_authorized: 403,
     weekly_schedule_invalid_week: 400,
     weekly_schedule_duplicate_week_year: 400,
     weekly_schedule_file_not_found: 400,
@@ -100,18 +101,20 @@ type UserOrPermissionError = UserError | PermissionError;
 
 const USER_ERROR_STATUS: Partial<Record<UserOrPermissionError, number>> = {
     user_not_found: 404,
-    user_not_authorized: 401,
+    user_not_authorized: 403,
     password_verify_failed: 401,
-    permission_not_authorized: 401,
+    permission_not_authorized: 403,
     username_already_exists: 400,
     username_too_long: 400,
     password_too_short: 400,
     password_too_long: 400,
-    password_week_upper_case_letter: 400,
-    password_week_lower_case_letter: 400,
-    password_week_number: 400,
-    password_week_symbol: 400,
+    password_weak_upper_case_letter: 400,
+    password_weak_lower_case_letter: 400,
+    password_weak_number: 400,
+    password_weak_symbol: 400,
     username_too_short: 400,
+    user_cannot_deactivate_root: 400,
+    user_cannot_revoke_self_meta_manage_permissions: 400,
     permission_invalid_action: 400,
     permission_invalid_namespace: 400,
     permission_invalid_slug: 400,

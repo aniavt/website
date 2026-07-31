@@ -35,7 +35,8 @@ export class UpdateChapterUseCase {
 
       try {
          await this.chapterRepository.save(chapter);
-      } catch {
+      } catch (error) {
+         console.error("chapter_save_failed", error);
          return err("chapter_save_failed");
       }
 

@@ -24,7 +24,7 @@ export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
         async (request, reply) => {
             const url = await mediaUseCases.getFileUrl.execute(request.params.id);
             if (!url) {
-                return reply.status(404).send({ error: "media_not_found" });
+                return sendMediaError(reply, "media_not_found");
             }
 
             return reply.redirect(url, 302);

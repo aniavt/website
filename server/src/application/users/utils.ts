@@ -20,16 +20,16 @@ export function validatePassword(password: string): Result<void, UserError> {
         return err("password_too_long");
     }
     if (!password.match(/[A-Z]/)) {
-        return err("password_week_upper_case_letter");
+        return err("password_weak_upper_case_letter");
     }
     if (!password.match(/[a-z]/)) {
-        return err("password_week_lower_case_letter");
+        return err("password_weak_lower_case_letter");
     }
     if (!password.match(/[0-9]/)) {
-        return err("password_week_number");
+        return err("password_weak_number");
     }
     if (!password.match(/[!@#$%^&*()_+\-=\[\]{};':"\\|,.<>\/?]/)) {
-        return err("password_week_symbol");
+        return err("password_weak_symbol");
     }
     return ok(void 0);
 }
@@ -44,6 +44,7 @@ export const handleError = <T, R>(useCase: UseCase<T, R>) => {
             try {
                 return await target.execute(argumentsList[0]);
             } catch (error) {
+                console.error("user_repo_error", error);
                 return err("user_repo_error");
             }
         }

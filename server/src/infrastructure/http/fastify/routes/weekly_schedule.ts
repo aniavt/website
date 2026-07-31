@@ -112,7 +112,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
             const week = parseInt(request.params.week, 10);
             const year = parseInt(request.params.year, 10);
             if (Number.isNaN(week) || Number.isNaN(year)) {
-                return reply.status(400).send({ error: "weekly_schedule_invalid_week" });
+                return sendWeeklyScheduleError(reply, "weekly_schedule_invalid_week");
             }
             const result = await weeklyScheduleUseCases.getByWeekAndYear.execute(null, week, year);
             if (result.isError()) return sendWeeklyScheduleError(reply, result.error);
@@ -130,7 +130,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
             const year =
                 request.query.year !== undefined ? parseInt(request.query.year, 10) : undefined;
             if (request.query.year !== undefined && Number.isNaN(year!)) {
-                return reply.status(400).send({ error: "weekly_schedule_invalid_week" });
+                return sendWeeklyScheduleError(reply, "weekly_schedule_invalid_week");
             }
             const includeDeleted = request.query.includeDeleted === "true";
             const requester = request.userEntity ?? null;
@@ -178,7 +178,7 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
             });
             if (!parsed.ok) {
                 if (parsed.error === "weekly_schedule_invalid_week") {
-                    return reply.status(400).send({ error: "weekly_schedule_invalid_week" });
+                    return sendWeeklyScheduleError(reply, "weekly_schedule_invalid_week");
                 }
                 return sendMediaError(reply, parsed.error);
             }

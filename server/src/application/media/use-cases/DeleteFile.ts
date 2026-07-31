@@ -20,7 +20,8 @@ export class DeleteFileUseCase {
             await this.mediaService.delete(file.id);
             await this.fileRepository.delete(file.id);
             return ok(null);
-        } catch {
+        } catch (error) {
+            console.error("media_delete_failed", error);
             return err("media_delete_failed");
         }
     }

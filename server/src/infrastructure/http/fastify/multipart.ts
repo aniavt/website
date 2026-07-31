@@ -61,7 +61,8 @@ async function readValidatedFile(
     let buffer: Buffer;
     try {
         buffer = await file.toBuffer();
-    } catch {
+    } catch (error) {
+        console.error("media_invalid_input", error);
         return { ok: false, error: "media_invalid_input" };
     }
 

@@ -60,7 +60,8 @@ export class RestoreFaqItemUseCase {
                     }),
                 );
             });
-        } catch {
+        } catch (error) {
+            console.error("faq_save_failed", error);
             return err("faq_save_failed");
         }
 

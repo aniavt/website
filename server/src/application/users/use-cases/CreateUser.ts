@@ -34,6 +34,7 @@ export class CreateUserUseCase {
         try {
             await this.userRepository.save(user);
         } catch (error) {
+            console.error("user_save_failed", error);
             return err("user_save_failed");
         }
 

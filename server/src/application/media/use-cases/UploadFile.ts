@@ -35,13 +35,14 @@ export class UploadFileUseCase {
             });
 
             await this.fileRepository.save(fileEntity);
-        } catch {
+        } catch (error) {
+            console.error("media_upload_failed", error);
             // Si falla guardar metadata o subir, intentamos limpiar en el storage
             if (fileEntity) {
                 try {
                     await this.mediaService.delete(fileEntity.id);
-                } catch {
-                    // si el rollback falla, dejamos el archivo huérfano
+                } catch (rollbackError) {
+                    console.error("media_upload_rollback_failed", rollbackError);
                 }
             }
             return err("media_upload_failed");
@@ -50,4 +51,3 @@ export class UploadFileUseCase {
         return ok(toFileDto(fileEntity));
     }
 }
-

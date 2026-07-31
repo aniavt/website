@@ -7,7 +7,8 @@ export async function saveOrErr<const E>(
   try {
     await savePromise;
     return ok(undefined);
-  } catch {
+  } catch (error) {
+    console.error(saveFailed, error);
     return err(saveFailed);
   }
 }

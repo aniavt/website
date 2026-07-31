@@ -48,7 +48,8 @@ export class ManagePermissionUseCase {
             try {
                 await this.userRepository.save(user);
                 return ok(void 0);
-            } catch {
+            } catch (error) {
+                console.error("user_save_failed", error);
                 return err("user_save_failed");
             }
         }
