@@ -1,10 +1,10 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import { NavItemsPermission } from "@domain/value-object/Permissions";
-import { err, ok, type Result } from "@lib/result";
+import { ok, type Result } from "@lib/result";
 import type { NavItemsError } from "../errors";
 import type { NavItemsRepository } from "@domain/repositories/NavItemsRepository";
 import { assertPermission } from "@application/shared/auth";
-import { saveOrErr } from "@application/shared/saveOrErr";
+import { runSoftDeleteTransition } from "@application/shared/runSoftDeleteTransition";
 
 export class RestoreNavItemsUseCase {
    constructor(
@@ -21,13 +21,15 @@ export class RestoreNavItemsUseCase {
       );
       if (auth.isError()) return auth;
 
-      const navItem = await this.navItemsRepository.findById(id);
-      if (!navItem) return err("navItems_not_found");
-
-      if (!navItem.restore()) return err("navItems_invalid_transition");
-
-      const saved = await saveOrErr(this.navItemsRepository.save(navItem), "navItems_save_failed");
-      if (saved.isError()) return saved;
+      const result = await runSoftDeleteTransition({
+         find: () => this.navItemsRepository.findById(id),
+         notFound: "navItems_not_found",
+         transition: (navItem) => navItem.restore(),
+         invalidTransition: "navItems_invalid_transition",
+         save: (navItem) => this.navItemsRepository.save(navItem),
+         saveFailed: "navItems_save_failed",
+      });
+      if (result.isError()) return result;
 
       return ok(undefined);
    }

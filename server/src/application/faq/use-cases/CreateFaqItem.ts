@@ -14,6 +14,7 @@ import type { FaqError } from "../errors";
 import type { FaqItemPublicDto, CreateFaqItemInput } from "../dto";
 import { toFaqItemPublicDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
+import { saveWithHistory } from "@application/shared/saveWithHistory";
 
 export type { CreateFaqItemInput };
 
@@ -36,14 +37,18 @@ export class CreateFaqItemUseCase {
         );
         if (auth.isError()) return auth;
 
-        try {
-            const { item, queryValue, answerValue } = await this.transactionManager.runInTransaction(async () => {
+        let item!: FaqItem;
+        let queryValue!: string;
+        let answerValue!: string;
+
+        const saved = await saveWithHistory({
+            tx: this.transactionManager,
+            persist: async () => {
                 const queryText = await this.findOrCreateFaqText(input.query);
                 const answerText = await this.findOrCreateFaqText(input.answer);
 
-                const itemId = this.idGenerator.generateUUID();
-                const item = new FaqItem({
-                    id: itemId,
+                item = new FaqItem({
+                    id: this.idGenerator.generateUUID(),
                     queryId: queryText.id,
                     answerId: answerText.id,
                     isActive: true,
@@ -51,7 +56,11 @@ export class CreateFaqItemUseCase {
                 });
 
                 await this.faqItemRepository.save(item);
-                await this.faqHistoryRepository.append(
+                queryValue = queryText.value;
+                answerValue = answerText.value;
+            },
+            append: () =>
+                this.faqHistoryRepository.append(
                     new FaqHistoryEntry({
                         id: this.idGenerator.generateUUID(),
                         faqId: item.id,
@@ -61,16 +70,12 @@ export class CreateFaqItemUseCase {
                         by: auth.data.id,
                         timestamp: new Date(),
                     }),
-                );
+                ),
+            saveFailed: "faq_save_failed",
+        });
+        if (saved.isError()) return saved;
 
-                return { item, queryValue: queryText.value, answerValue: answerText.value };
-            });
-
-            return ok(toFaqItemPublicDto(item, queryValue, answerValue));
-        } catch (error) {
-            console.error("faq_save_failed", error);
-            return err("faq_save_failed");
-        }
+        return ok(toFaqItemPublicDto(item, queryValue, answerValue));
     }
 
     private async findOrCreateFaqText(value: string): Promise<FaqText> {

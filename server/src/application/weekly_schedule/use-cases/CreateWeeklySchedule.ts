@@ -13,6 +13,7 @@ import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto, CreateWeeklyScheduleInput } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
+import { saveWithHistory } from "@application/shared/saveWithHistory";
 
 export type { CreateWeeklyScheduleInput };
 
@@ -66,10 +67,11 @@ export class CreateWeeklyScheduleUseCase {
             tags: input.tags ?? [],
         });
 
-        try {
-            await this.transactionManager.runInTransaction(async () => {
-                await this.weeklyScheduleRepository.save(toSave);
-                await this.weeklyScheduleHistoryRepository.append(
+        const saved = await saveWithHistory({
+            tx: this.transactionManager,
+            persist: () => this.weeklyScheduleRepository.save(toSave),
+            append: () =>
+                this.weeklyScheduleHistoryRepository.append(
                     new WeeklyScheduleHistoryEntry({
                         id: this.idGenerator.generateUUID(),
                         scheduleId: toSave.id,
@@ -80,12 +82,10 @@ export class CreateWeeklyScheduleUseCase {
                         by: auth.data.id,
                         timestamp: new Date(),
                     }),
-                );
-            });
-        } catch (error) {
-            console.error("weekly_schedule_save_failed", error);
-            return err("weekly_schedule_save_failed");
-        }
+                ),
+            saveFailed: "weekly_schedule_save_failed",
+        });
+        if (saved.isError()) return saved;
 
         return ok(toWeeklyScheduleDto(toSave));
     }

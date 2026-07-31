@@ -13,6 +13,7 @@ import type { FaqError } from "../errors";
 import type { FaqItemPublicDto, UpdateFaqItemInput as UpdateFaqItemBody } from "../dto";
 import { resolveItemToPublicDto } from "../resolveFaqItem";
 import { assertPermission } from "@application/shared/auth";
+import { saveWithHistory } from "@application/shared/saveWithHistory";
 
 export type UpdateFaqItemInput = UpdateFaqItemBody & { id: string };
 
@@ -43,8 +44,9 @@ export class UpdateFaqItemUseCase {
             return resolveItemToPublicDto(this.faqTextRepository, item);
         }
 
-        try {
-            await this.transactionManager.runInTransaction(async () => {
+        const saved = await saveWithHistory({
+            tx: this.transactionManager,
+            persist: async () => {
                 let queryId = item.queryId;
                 let answerId = item.answerId;
                 if (input.query !== undefined) {
@@ -55,9 +57,10 @@ export class UpdateFaqItemUseCase {
                 }
 
                 item.applyUpdate(queryId, answerId);
-
                 await this.faqItemRepository.save(item);
-                await this.faqHistoryRepository.append(
+            },
+            append: () =>
+                this.faqHistoryRepository.append(
                     new FaqHistoryEntry({
                         id: this.idGenerator.generateUUID(),
                         faqId: item.id,
@@ -67,14 +70,12 @@ export class UpdateFaqItemUseCase {
                         by: auth.data.id,
                         timestamp: new Date(),
                     }),
-                );
-            });
+                ),
+            saveFailed: "faq_save_failed",
+        });
+        if (saved.isError()) return saved;
 
-            return resolveItemToPublicDto(this.faqTextRepository, item);
-        } catch (error) {
-            console.error("faq_save_failed", error);
-            return err("faq_save_failed");
-        }
+        return resolveItemToPublicDto(this.faqTextRepository, item);
     }
 
     private async findOrCreateFaqText(value: string): Promise<FaqText> {

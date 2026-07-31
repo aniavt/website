@@ -12,6 +12,7 @@ import type { FaqError } from "../errors";
 import type { FaqItemPublicDto } from "../dto";
 import { resolveItemToPublicDto } from "../resolveFaqItem";
 import { assertPermission } from "@application/shared/auth";
+import { saveWithHistory } from "@application/shared/saveWithHistory";
 
 export class DeleteFaqItemUseCase {
     constructor(
@@ -36,10 +37,11 @@ export class DeleteFaqItemUseCase {
         if (!item) return err("faq_item_not_found");
         if (!item.markDeleted()) return err("faq_invalid_transition");
 
-        try {
-            await this.transactionManager.runInTransaction(async () => {
-                await this.faqItemRepository.save(item);
-                await this.faqHistoryRepository.append(
+        const saved = await saveWithHistory({
+            tx: this.transactionManager,
+            persist: () => this.faqItemRepository.save(item),
+            append: () =>
+                this.faqHistoryRepository.append(
                     new FaqHistoryEntry({
                         id: this.idGenerator.generateUUID(),
                         faqId: item.id,
@@ -49,12 +51,10 @@ export class DeleteFaqItemUseCase {
                         by: auth.data.id,
                         timestamp: new Date(),
                     }),
-                );
-            });
-        } catch (error) {
-            console.error("faq_save_failed", error);
-            return err("faq_save_failed");
-        }
+                ),
+            saveFailed: "faq_save_failed",
+        });
+        if (saved.isError()) return saved;
 
         return resolveItemToPublicDto(this.faqTextRepository, item);
     }

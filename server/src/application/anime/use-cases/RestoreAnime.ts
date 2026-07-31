@@ -1,10 +1,10 @@
 import type { AnimeRepository } from "@domain/repositories/AnimeRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import { AnimePermission } from "@domain/value-object/Permissions";
-import { err, ok, type Result } from "@lib/result";
+import { ok, type Result } from "@lib/result";
 import type { AnimeError } from "../errors";
 import { assertPermission } from "@application/shared/auth";
-import { saveOrErr } from "@application/shared/saveOrErr";
+import { runSoftDeleteTransition } from "@application/shared/runSoftDeleteTransition";
 
 export class RestoreAnimeUseCase {
    constructor(
@@ -21,13 +21,15 @@ export class RestoreAnimeUseCase {
       );
       if (auth.isError()) return auth;
 
-      const anime = await this.animeRepository.findById(id);
-      if (!anime) return err("anime_not_found");
-
-      if (!anime.restore()) return err("anime_invalid_transition");
-
-      const saved = await saveOrErr(this.animeRepository.save(anime), "anime_save_failed");
-      if (saved.isError()) return saved;
+      const result = await runSoftDeleteTransition({
+         find: () => this.animeRepository.findById(id),
+         notFound: "anime_not_found",
+         transition: (anime) => anime.restore(),
+         invalidTransition: "anime_invalid_transition",
+         save: (anime) => this.animeRepository.save(anime),
+         saveFailed: "anime_save_failed",
+      });
+      if (result.isError()) return result;
 
       return ok(undefined);
    }

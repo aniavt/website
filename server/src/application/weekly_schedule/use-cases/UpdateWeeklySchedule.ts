@@ -1,4 +1,3 @@
-import { getISOWeekAndYear } from "@ania/date";
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/WeeklyScheduleHistoryRepository";
 import type { FileRepository } from "@domain/repositories/FileRepository";
@@ -13,6 +12,8 @@ import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto, UpdateWeeklyScheduleInput as UpdateWeeklyScheduleBody } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
+import { saveWithHistory } from "@application/shared/saveWithHistory";
+import { assertScheduleNotPast } from "../assertScheduleNotPast";
 
 export type UpdateWeeklyScheduleInput = UpdateWeeklyScheduleBody & { id: string };
 
@@ -38,14 +39,8 @@ export class UpdateWeeklyScheduleUseCase {
         const schedule = await this.weeklyScheduleRepository.findById(input.id);
         if (!schedule) return err("weekly_schedule_not_found");
 
-        const now = new Date();
-        const { week: currentWeek, year: currentYear } = getISOWeekAndYear(now);
-        const isPast =
-            schedule.year < currentYear ||
-            (schedule.year === currentYear && schedule.week < currentWeek);
-        if (isPast) {
-            return err("weekly_schedule_cannot_modify_past");
-        }
+        const notPast = assertScheduleNotPast(schedule);
+        if (notPast.isError()) return notPast;
 
         let fileId = schedule.fileId;
         if (input.fileId !== undefined) {
@@ -62,10 +57,11 @@ export class UpdateWeeklyScheduleUseCase {
             tags: input.tags,
         });
 
-        try {
-            await this.transactionManager.runInTransaction(async () => {
-                await this.weeklyScheduleRepository.save(schedule);
-                await this.weeklyScheduleHistoryRepository.append(
+        const saved = await saveWithHistory({
+            tx: this.transactionManager,
+            persist: () => this.weeklyScheduleRepository.save(schedule),
+            append: () =>
+                this.weeklyScheduleHistoryRepository.append(
                     new WeeklyScheduleHistoryEntry({
                         id: this.idGenerator.generateUUID(),
                         scheduleId: schedule.id,
@@ -76,12 +72,10 @@ export class UpdateWeeklyScheduleUseCase {
                         by: auth.data.id,
                         timestamp: new Date(),
                     }),
-                );
-            });
-        } catch (error) {
-            console.error("weekly_schedule_save_failed", error);
-            return err("weekly_schedule_save_failed");
-        }
+                ),
+            saveFailed: "weekly_schedule_save_failed",
+        });
+        if (saved.isError()) return saved;
 
         return ok(toWeeklyScheduleDto(schedule));
     }
