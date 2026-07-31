@@ -60,8 +60,8 @@ export async function createFastifyServer(
 
     registerUserRoutes(app, prefixUrl, { userUseCases });
     registerFaqRoutes(app, prefixUrl, { userUseCases, faqUseCases });
-    registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, weeklyScheduleUseCases, mediaUseCases });
-    registerMediaRoutes(app, prefixUrl, { mediaUseCases });
+    registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, weeklyScheduleUseCases });
+    registerMediaRoutes(app, prefixUrl, { mediaUseCases, userUseCases });
     registerAnimeRoutes(app, prefixUrl, { userUseCases, animeUseCases });
     registerChapterRoutes(app, prefixUrl, { userUseCases, chapterUseCases });
     registerNavItemsRoutes(app, prefixUrl, { userUseCases, navItemsUseCases });

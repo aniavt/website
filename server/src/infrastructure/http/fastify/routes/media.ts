@@ -1,16 +1,19 @@
-import type { FastifyReply, FastifyRequest } from "fastify";
+import type { FastifyReply } from "fastify";
 import type { RegisterRouteFn } from "../types";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
+import type { IUserUseCases } from "@application/users/IUserUseCases";
 import { sendMediaError } from "../errors";
+import { authenticate } from "../middlewares/auth";
 
 export interface MediaRoutesDependencies {
     mediaUseCases: IMediaUseCases;
+    userUseCases: IUserUseCases;
 }
 
 export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
     app,
     prefixUrl,
-    { mediaUseCases },
+    { mediaUseCases, userUseCases },
 ) => {
     app.get<{ Params: { id: string } }>(prefixUrl("/media/:id"), async (request, reply: FastifyReply) => {
         const { id } = request.params;
@@ -22,8 +25,8 @@ export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
         return reply.redirect(url, 302);
     });
 
-    app.post(prefixUrl("/media/upload"), async (request: FastifyRequest, reply: FastifyReply) => {
-        const file = await (request as any).file?.();
+    app.post(prefixUrl("/media/upload"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
+        const file = await request.file();
         if (!file) {
             return sendMediaError(reply, "media_invalid_input");
         }
@@ -44,4 +47,3 @@ export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
         return reply.status(201).send(uploadResult.data);
     });
 };
-

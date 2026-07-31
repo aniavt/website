@@ -1,7 +1,8 @@
-import type { FastifyReply, FastifySchema } from "fastify";
+import type { FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
-import type { IMediaUseCases } from "@application/media/IMediaUseCases";
+import type { MediaError } from "@application/media/errors";
+import type { WeeklyScheduleError } from "@application/weekly_schedule/errors";
 import type { RegisterRouteFn } from "../types";
 import { sendMediaError, sendWeeklyScheduleError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
@@ -9,7 +10,16 @@ import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 export interface WeeklyScheduleRoutesDependencies {
     userUseCases: IUserUseCases;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
-    mediaUseCases: IMediaUseCases;
+}
+
+function sendUploadWeeklyScheduleError(
+    reply: Parameters<typeof sendMediaError>[0],
+    error: MediaError | WeeklyScheduleError,
+) {
+    if (error.startsWith("media_")) {
+        return sendMediaError(reply, error as MediaError);
+    }
+    return sendWeeklyScheduleError(reply, error as WeeklyScheduleError);
 }
 
 const weeklyScheduleTagSchema = {
@@ -54,7 +64,7 @@ const updateWeeklyScheduleSchema: FastifySchema = {
 export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesDependencies> = (
     app,
     prefixUrl,
-    { userUseCases, weeklyScheduleUseCases, mediaUseCases },
+    { userUseCases, weeklyScheduleUseCases },
 ) => {
     type CreateBody = {
         week: number;
@@ -202,37 +212,18 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
         }
 
         const buffer = await file.toBuffer();
-        const uploadResult = await mediaUseCases.uploadFile.execute({
-            name: file.filename,
-            contentType: file.mimetype,
-            size: buffer.length,
-            body: buffer,
-            isPrivate: false, 
-        });
-
-        if (uploadResult.isError()) {
-            return sendMediaError(reply, uploadResult.error);
-        }
-
-        const fileId = uploadResult.data.id;
-
-        const scheduleResult = await weeklyScheduleUseCases.create.execute(request.user!.id, {
+        const result = await weeklyScheduleUseCases.uploadAndCreate.execute(request.user!.id, {
             week,
             year,
-            fileId,
+            file: {
+                name: file.filename,
+                contentType: file.mimetype,
+                size: buffer.length,
+                body: buffer,
+            },
         });
-
-        if (scheduleResult.isError()) {
-            // rollback best-effort: si falla, dejamos archivo huérfano
-            try {
-                await mediaUseCases.deleteFile.execute(fileId);
-            } catch {
-                // ignore rollback errors
-            }
-            return sendWeeklyScheduleError(reply, scheduleResult.error);
-        }
-
-        return reply.status(201).send(scheduleResult.data);
+        if (result.isError()) return sendUploadWeeklyScheduleError(reply, result.error);
+        return reply.status(201).send(result.data);
     });
 
     app.post<{ Params: { id: string } }>(
@@ -245,36 +236,17 @@ export const registerWeeklyScheduleRoutes: RegisterRouteFn<WeeklyScheduleRoutesD
             }
 
             const buffer = await file.toBuffer();
-            const uploadResult = await mediaUseCases.uploadFile.execute({
-                name: file.filename,
-                contentType: file.mimetype,
-                size: buffer.length,
-                body: buffer,
-                isPrivate: false,
-            });
-
-            if (uploadResult.isError()) {
-                return sendMediaError(reply, uploadResult.error);
-            }
-
-            const fileId = uploadResult.data.id;
-
-            const updateResult = await weeklyScheduleUseCases.update.execute(request.user!.id, {
+            const result = await weeklyScheduleUseCases.uploadAndUpdate.execute(request.user!.id, {
                 id: request.params.id,
-                fileId,
+                file: {
+                    name: file.filename,
+                    contentType: file.mimetype,
+                    size: buffer.length,
+                    body: buffer,
+                },
             });
-
-            if (updateResult.isError()) {
-                // rollback best-effort: si falla, dejamos archivo huérfano
-                try {
-                    await mediaUseCases.deleteFile.execute(fileId);
-                } catch {
-                    // ignore rollback errors
-                }
-                return sendWeeklyScheduleError(reply, updateResult.error);
-            }
-
-            return reply.send(updateResult.data);
+            if (result.isError()) return sendUploadWeeklyScheduleError(reply, result.error);
+            return reply.send(result.data);
         },
     );
 };

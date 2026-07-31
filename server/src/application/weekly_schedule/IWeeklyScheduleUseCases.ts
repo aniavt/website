@@ -7,6 +7,8 @@ import type { GetCurrentWeekScheduleUseCase } from "@application/weekly_schedule
 import type { ListWeeklySchedulesUseCase } from "@application/weekly_schedule/use-cases/ListWeeklySchedules";
 import type { GetWeeklyScheduleHistoryUseCase } from "@application/weekly_schedule/use-cases/GetWeeklyScheduleHistory";
 import type { RestoreWeeklyScheduleUseCase } from "@application/weekly_schedule/use-cases/RestoreWeeklySchedule";
+import type { UploadAndCreateWeeklyScheduleUseCase } from "@application/weekly_schedule/use-cases/UploadAndCreateWeeklySchedule";
+import type { UploadAndUpdateWeeklyScheduleUseCase } from "@application/weekly_schedule/use-cases/UploadAndUpdateWeeklySchedule";
 
 
 export interface IWeeklyScheduleUseCases {
@@ -19,4 +21,6 @@ export interface IWeeklyScheduleUseCases {
     getCurrentWeek: GetCurrentWeekScheduleUseCase;
     list: ListWeeklySchedulesUseCase;
     getHistory: GetWeeklyScheduleHistoryUseCase;
+    uploadAndCreate: UploadAndCreateWeeklyScheduleUseCase;
+    uploadAndUpdate: UploadAndUpdateWeeklyScheduleUseCase;
 }
