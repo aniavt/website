@@ -1,5 +1,5 @@
 {
-  "name": "nebulous-neptune",
+  "name": "client",
   "type": "module",
   "version": "0.0.1",
   "scripts": {

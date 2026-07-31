@@ -115,11 +115,11 @@ export default function App() {
       />
       <Route path={basePath("/profile")} component={() => <AuthGuard component={Profile} />} />
       <Route
-        path={basePath("/navItems")}
+        path={basePath("/nav-items")}
         component={() => (
           <PermissionGuard
             component={NavItems}
-            required={[{ namespace: "navItems", permission: "read_navItems" }]}
+            required={[{ namespace: "nav_items", permission: "read_nav_items" }]}
           />
         )}
       />

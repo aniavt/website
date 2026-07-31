@@ -28,7 +28,7 @@ export function hasPermission(namespace: PermissionNamespace, permission: string
     case "faq": return userHasPermission(user.value, "meta", "manage_faq");
     case "weekly_schedule": return userHasPermission(user.value, "meta", "manage_weekly_schedule");
     case "anime": return userHasPermission(user.value, "meta", "manage_anime");
-    case "navItems" : return userHasPermission(user.value, "meta", "manage_navItems");
+    case "nav_items" : return userHasPermission(user.value, "meta", "manage_nav_items");
   }
 
   return false;
@@ -70,7 +70,7 @@ export const canManageWeeklySchedulePermissions = computed(() =>
   hasPermission("meta", "manage_weekly_schedule"),
 );
 export const canManageAnimePermissions = computed(() => hasPermission("meta", "manage_anime"));
-export const canManageNavItemsPermissions = computed(() => hasPermission("meta", "manage_navItems"));
+export const canManageNavItemsPermissions = computed(() => hasPermission("meta", "manage_nav_items"));
 
 export const canReadAnime = computed(() => hasPermission("anime", "read_anime"));
 export const canCreateAnime = computed(() => hasPermission("anime", "create_anime"));
@@ -78,11 +78,11 @@ export const canUpdateAnime = computed(() => hasPermission("anime", "update_anim
 export const canDeleteAnime = computed(() => hasPermission("anime", "delete_anime"));
 export const canRestoreAnime = computed(() => hasPermission("anime", "restore_anime"));
 
-export const canReadNavItems = computed(() => hasPermission("navItems", "read_navItems"));
-export const canCreateNavItems = computed(() => hasPermission("navItems", "create_navItems"));
-export const canUpdateNavItems = computed(() => hasPermission("navItems", "update_navItems"));
-export const canDeleteNavItems = computed(() => hasPermission("navItems", "delete_navItems"));
-export const canRestoreNavItems = computed(() => hasPermission("navItems", "restore_navItems"));
+export const canReadNavItems = computed(() => hasPermission("nav_items", "read_nav_items"));
+export const canCreateNavItems = computed(() => hasPermission("nav_items", "create_nav_items"));
+export const canUpdateNavItems = computed(() => hasPermission("nav_items", "update_nav_items"));
+export const canDeleteNavItems = computed(() => hasPermission("nav_items", "delete_nav_items"));
+export const canRestoreNavItems = computed(() => hasPermission("nav_items", "restore_nav_items"));
 
 export const isRootDerived = computed(
   () =>

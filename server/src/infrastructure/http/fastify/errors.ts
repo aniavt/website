@@ -3,7 +3,7 @@ import type { AnimeError } from "@application/anime/errors";
 import type { ChapterError } from "@application/chapter/errors";
 import type { FaqError } from "@application/faq/errors";
 import type { MediaError } from "@application/media/errors";
-import type { NavItemsError } from "@application/navItems/errors";
+import type { NavItemsError } from "@application/nav_items/errors";
 import type { WeeklyScheduleError } from "@application/weekly_schedule/errors";
 import type { PermissionError, UserError } from "@application/users/errors";
 
@@ -73,10 +73,10 @@ export function sendChapterError(reply: FastifyReply, error: ChapterError) {
 }
 
 const NAV_ITEMS_ERROR_STATUS: Partial<Record<NavItemsError, number>> = {
-    navItems_not_found: 404,
-    navItems_not_authorized: 403,
-    navItems_invalid_transition: 400,
-    navItems_save_failed: 500,
+    nav_items_not_found: 404,
+    nav_items_not_authorized: 403,
+    nav_items_invalid_transition: 400,
+    nav_items_save_failed: 500,
 };
 
 export function sendNavItemsError(reply: FastifyReply, error: NavItemsError) {

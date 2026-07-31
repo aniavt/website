@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { RestoreNavItemsUseCase } from "@application/navItems/use-cases/RestoreNavItems";
+import { RestoreNavItemsUseCase } from "@application/nav_items/use-cases/RestoreNavItems";
 import { InMemoryNavItemsRepository } from "../../doubles/InMemoryNavItemsRepository";
 import { InMemoryUserRepository } from "../../doubles/InMemoryUserRepository";
 import { NavItemsPermission, createNavItem, createUser } from "../../helpers/factories";
@@ -12,7 +12,7 @@ describe("RestoreNavItemsUseCase", () => {
     await users.save(
       createUser({
         id: "admin",
-        grants: [{ type: "navItems", permission: NavItemsPermission.RESTORE_NAVITEMS }],
+        grants: [{ type: "nav_items", permission: NavItemsPermission.RESTORE_NAVITEMS }],
       }),
     );
     return { navs, users, uc: new RestoreNavItemsUseCase(users, navs) };
@@ -30,9 +30,9 @@ describe("RestoreNavItemsUseCase", () => {
   test("unauthorized / not found / invalid transition", async () => {
     const { navs, users, uc } = await setup();
     await users.save(createUser({ id: "noperm" }));
-    expectErr(await uc.execute("noperm", "n1"), "navItems_not_authorized");
-    expectErr(await uc.execute("admin", "missing"), "navItems_not_found");
+    expectErr(await uc.execute("noperm", "n1"), "nav_items_not_authorized");
+    expectErr(await uc.execute("admin", "missing"), "nav_items_not_found");
     await navs.save(createNavItem({ id: "n1", lastAction: "created" }));
-    expectErr(await uc.execute("admin", "n1"), "navItems_invalid_transition");
+    expectErr(await uc.execute("admin", "n1"), "nav_items_invalid_transition");
   });
 });

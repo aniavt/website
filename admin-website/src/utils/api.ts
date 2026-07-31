@@ -192,25 +192,25 @@ export async function listNavItems(includeInactive = false): Promise<NavItemsDto
   const params = new URLSearchParams();
   if (!includeInactive) params.set("activeOnly", "true");
   const query = params.toString();
-  return api.get<NavItemsDto[]>(`/navItems${query ? `?${query}` : ""}`);
+  return api.get<NavItemsDto[]>(`/nav-items${query ? `?${query}` : ""}`);
 }
 
 export async function getNavItemsById(id: string): Promise<NavItemsDto> {
-  return api.get<NavItemsDto>(`/navItems/${id}`);
+  return api.get<NavItemsDto>(`/nav-items/${id}`);
 }
 
 export async function createNavItems(input: CreateNavItemsInput): Promise<NavItemsDto> {
-  return api.post<NavItemsDto>("/navItems", input);
+  return api.post<NavItemsDto>("/nav-items", input);
 }
 
 export async function updateNavItems(id: string, input: UpdateNavItemsInput): Promise<NavItemsDto> {
-  return api.patch<NavItemsDto>(`/navItems/${id}`, input);
+  return api.patch<NavItemsDto>(`/nav-items/${id}`, input);
 }
 
 export async function deleteNavItems(id: string): Promise<void> {
-  await api.delete<undefined>(`/navItems/${id}`);
+  await api.delete<undefined>(`/nav-items/${id}`);
 }
 
 export async function restoreNavItems(id: string): Promise<NavItemsDto> {
-  return api.post<NavItemsDto>(`/navItems/${id}/restore`);
+  return api.post<NavItemsDto>(`/nav-items/${id}/restore`);
 }

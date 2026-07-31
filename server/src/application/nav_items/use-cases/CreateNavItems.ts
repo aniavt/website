@@ -22,8 +22,8 @@ export class CreateNavItemsUseCase {
     const auth = await assertPermission(
       this.userRepository,
       requesterId,
-      { type: "navItems", permission: NavItemsPermission.CREATE_NAVITEMS },
-      "navItems_not_authorized",
+      { type: "nav_items", permission: NavItemsPermission.CREATE_NAVITEMS },
+      "nav_items_not_authorized",
     );
     if (auth.isError()) return auth;
 
@@ -39,7 +39,7 @@ export class CreateNavItemsUseCase {
       updatedAt: now,
     });
 
-    const saved = await saveOrErr(this.navRepository.save(navItem), "navItems_save_failed");
+    const saved = await saveOrErr(this.navRepository.save(navItem), "nav_items_save_failed");
     if (saved.isError()) return saved;
 
     return ok(toNavItemsDto(navItem));

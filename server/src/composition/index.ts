@@ -6,14 +6,14 @@ export { mediaUseCases } from "./media";
 export { faqUseCases } from "./faq";
 export { weeklyScheduleUseCases } from "./weekly_schedule";
 export { animeUseCases, chapterUseCases } from "./anime";
-export { navItemsUseCases } from "./navItems";
+export { navItemsUseCases } from "./nav_items";
 
 import { userUseCases, userRepository } from "./users";
 import { mediaUseCases } from "./media";
 import { faqUseCases } from "./faq";
 import { weeklyScheduleUseCases } from "./weekly_schedule";
 import { animeUseCases, chapterUseCases } from "./anime";
-import { navItemsUseCases } from "./navItems";
+import { navItemsUseCases } from "./nav_items";
 
 export async function startHttpServer(): Promise<void> {
     const hostname = Bun.env.HOSTNAME || "0.0.0.0";

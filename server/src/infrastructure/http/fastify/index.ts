@@ -4,7 +4,7 @@ import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeek
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
-import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
+import type { INavItemsUseCases } from "@application/nav_items/INavItemsUseCases";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
@@ -23,7 +23,7 @@ import { registerWeeklyScheduleRoutes } from "./routes/weekly_schedule";
 import { registerMediaRoutes } from "./routes/media";
 import { registerAnimeRoutes } from "./routes/anime";
 import { registerChapterRoutes } from "./routes/chapter";
-import { registerNavItemsRoutes } from "./routes/navItems";
+import { registerNavItemsRoutes } from "./routes/nav_items";
 
 
 export interface FastifyServerDependencies {

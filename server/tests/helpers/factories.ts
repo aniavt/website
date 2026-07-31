@@ -24,7 +24,7 @@ type Grant =
   | { type: "faq"; permission: FAQPermission }
   | { type: "weekly_schedule"; permission: WeeklySchedulePermission }
   | { type: "anime"; permission: AnimePermission }
-  | { type: "navItems"; permission: NavItemsPermission };
+  | { type: "nav_items"; permission: NavItemsPermission };
 
 export function createUser(opts?: {
   id?: string;
@@ -66,7 +66,7 @@ export function emptyPermissions(): Record<PermissionNamespace, number> {
     faq: Permission.NONE.valueOf(),
     weekly_schedule: Permission.NONE.valueOf(),
     anime: Permission.NONE.valueOf(),
-    navItems: Permission.NONE.valueOf(),
+    nav_items: Permission.NONE.valueOf(),
   };
 }
 

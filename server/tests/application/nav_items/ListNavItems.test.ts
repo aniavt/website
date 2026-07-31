@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { ListNavItemsUseCase } from "@application/navItems/use-cases/ListNavItems";
+import { ListNavItemsUseCase } from "@application/nav_items/use-cases/ListNavItems";
 import { InMemoryNavItemsRepository } from "../../doubles/InMemoryNavItemsRepository";
 import { InMemoryUserRepository } from "../../doubles/InMemoryUserRepository";
 import { NavItemsPermission, createNavItem, createUser } from "../../helpers/factories";
@@ -14,7 +14,7 @@ describe("ListNavItemsUseCase", () => {
     await users.save(
       createUser({
         id: "reader",
-        grants: [{ type: "navItems", permission: NavItemsPermission.READ_NAVITEMS }],
+        grants: [{ type: "nav_items", permission: NavItemsPermission.READ_NAVITEMS }],
       }),
     );
     return { navs, users, uc: new ListNavItemsUseCase(users, navs) };

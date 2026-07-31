@@ -11,7 +11,7 @@ export class GetNavItemsByIdUseCase {
 
    async execute(id: string): Promise<Result<NavItemsDto, NavItemsError>> {
       const navItem = await this.navItemsRepository.findById(id);
-      if (!navItem) return err("navItems_not_found");
+      if (!navItem) return err("nav_items_not_found");
       return ok(toNavItemsDto(navItem));
    }
 }

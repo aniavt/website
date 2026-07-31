@@ -25,7 +25,7 @@ export default function Sidebar() {
     { label: "Anime", href: "/admin/anime", visible: canReadAnime.value },
     { label: "Usuarios", href: "/admin/users", visible: canReadUsers.value },
     { label: "Perfil", href: "/admin/profile", visible: true },
-    { label: "Navegacion", href: "/admin/navItems", visible: canReadNavItems.value },
+    { label: "Navegacion", href: "/admin/nav-items", visible: canReadNavItems.value },
   ];
 
   const currentPath = typeof window !== "undefined" ? window.location.pathname : "";

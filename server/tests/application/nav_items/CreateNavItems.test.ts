@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { CreateNavItemsUseCase } from "@application/navItems/use-cases/CreateNavItems";
+import { CreateNavItemsUseCase } from "@application/nav_items/use-cases/CreateNavItems";
 import { InMemoryNavItemsRepository } from "../../doubles/InMemoryNavItemsRepository";
 import { InMemoryUserRepository } from "../../doubles/InMemoryUserRepository";
 import { FakeIdGenerator } from "../../doubles/FakeIdGenerator";
@@ -14,7 +14,7 @@ describe("CreateNavItemsUseCase", () => {
     await users.save(
       createUser({
         id: "admin",
-        grants: [{ type: "navItems", permission: NavItemsPermission.CREATE_NAVITEMS }],
+        grants: [{ type: "nav_items", permission: NavItemsPermission.CREATE_NAVITEMS }],
       }),
     );
     return { navs, users, uc: new CreateNavItemsUseCase(users, idGen, navs) };
@@ -36,7 +36,7 @@ describe("CreateNavItemsUseCase", () => {
     await users.save(createUser({ id: "noperm" }));
     expectErr(
       await uc.execute("noperm", { title: "X", path: "/", position: 0 }),
-      "navItems_not_authorized",
+      "nav_items_not_authorized",
     );
   });
 });

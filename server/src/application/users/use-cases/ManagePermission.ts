@@ -31,7 +31,7 @@ function metaPermissionForNamespace(namespace: PermissionNamespace) {
         case "faq": return ManagePermission.MANAGE_FAQ;
         case "weekly_schedule": return ManagePermission.MANAGE_WEEKLY_SCHEDULE;
         case "anime": return ManagePermission.MANAGE_ANIME;
-        case "navItems": return ManagePermission.MANAGE_NAVITEMS;
+        case "nav_items": return ManagePermission.MANAGE_NAVITEMS;
     }
 }
 
@@ -61,7 +61,7 @@ export class ManagePermissionUseCase {
                 case "user": return UserPermission;
                 case "faq":  return FAQPermission;
                 case "weekly_schedule": return WeeklySchedulePermission;
-                case "navItems": return NavItemsPermission;
+                case "nav_items": return NavItemsPermission;
                 case "anime": return AnimePermission;
             }
             return "permission_invalid_namespace";

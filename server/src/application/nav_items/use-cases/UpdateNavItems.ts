@@ -20,23 +20,23 @@ export class UpdateNavItemsUseCase {
       const auth = await assertPermission(
          this.userRepository,
          requesterId,
-         { type: "navItems", permission: NavItemsPermission.UPDATE_NAVITEMS },
-         "navItems_not_authorized",
+         { type: "nav_items", permission: NavItemsPermission.UPDATE_NAVITEMS },
+         "nav_items_not_authorized",
       );
       if (auth.isError()) return auth;
 
       const navItem = await this.navItemsRepository.findById(input.id);
-      if (!navItem) return err("navItems_not_found");
+      if (!navItem) return err("nav_items_not_found");
 
       if (!navItem.applyUpdate({
          title: input.title,
          path: input.path,
          position: input.position,
       })) {
-         return err("navItems_invalid_transition");
+         return err("nav_items_invalid_transition");
       }
 
-      const saved = await saveOrErr(this.navItemsRepository.save(navItem), "navItems_save_failed");
+      const saved = await saveOrErr(this.navItemsRepository.save(navItem), "nav_items_save_failed");
       if (saved.isError()) return saved;
 
       return ok(toNavItemsDto(navItem));

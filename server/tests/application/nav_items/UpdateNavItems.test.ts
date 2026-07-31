@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { UpdateNavItemsUseCase } from "@application/navItems/use-cases/UpdateNavItems";
+import { UpdateNavItemsUseCase } from "@application/nav_items/use-cases/UpdateNavItems";
 import { InMemoryNavItemsRepository } from "../../doubles/InMemoryNavItemsRepository";
 import { InMemoryUserRepository } from "../../doubles/InMemoryUserRepository";
 import { NavItemsPermission, createNavItem, createUser } from "../../helpers/factories";
@@ -12,7 +12,7 @@ describe("UpdateNavItemsUseCase", () => {
     await users.save(
       createUser({
         id: "admin",
-        grants: [{ type: "navItems", permission: NavItemsPermission.UPDATE_NAVITEMS }],
+        grants: [{ type: "nav_items", permission: NavItemsPermission.UPDATE_NAVITEMS }],
       }),
     );
     return { navs, users, uc: new UpdateNavItemsUseCase(users, navs) };
@@ -29,9 +29,9 @@ describe("UpdateNavItemsUseCase", () => {
   test("unauthorized / not found / invalid transition", async () => {
     const { navs, users, uc } = await setup();
     await users.save(createUser({ id: "noperm" }));
-    expectErr(await uc.execute("noperm", { id: "n1", title: "X" }), "navItems_not_authorized");
-    expectErr(await uc.execute("admin", { id: "missing", title: "X" }), "navItems_not_found");
+    expectErr(await uc.execute("noperm", { id: "n1", title: "X" }), "nav_items_not_authorized");
+    expectErr(await uc.execute("admin", { id: "missing", title: "X" }), "nav_items_not_found");
     await navs.save(createNavItem({ id: "n1", lastAction: "deleted", active: false }));
-    expectErr(await uc.execute("admin", { id: "n1", title: "X" }), "navItems_invalid_transition");
+    expectErr(await uc.execute("admin", { id: "n1", title: "X" }), "nav_items_invalid_transition");
   });
 });

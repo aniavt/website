@@ -16,18 +16,18 @@ export class RestoreNavItemsUseCase {
       const auth = await assertPermission(
          this.userRepository,
          requesterId,
-         { type: "navItems", permission: NavItemsPermission.RESTORE_NAVITEMS },
-         "navItems_not_authorized",
+         { type: "nav_items", permission: NavItemsPermission.RESTORE_NAVITEMS },
+         "nav_items_not_authorized",
       );
       if (auth.isError()) return auth;
 
       const result = await runSoftDeleteTransition({
          find: () => this.navItemsRepository.findById(id),
-         notFound: "navItems_not_found",
+         notFound: "nav_items_not_found",
          transition: (navItem) => navItem.restore(),
-         invalidTransition: "navItems_invalid_transition",
+         invalidTransition: "nav_items_invalid_transition",
          save: (navItem) => this.navItemsRepository.save(navItem),
-         saveFailed: "navItems_save_failed",
+         saveFailed: "nav_items_save_failed",
       });
       if (result.isError()) return result;
 

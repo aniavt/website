@@ -1,5 +1,5 @@
 import { describe, expect, test } from "bun:test";
-import { GetNavItemsByIdUseCase } from "@application/navItems/use-cases/GetNavItemsById";
+import { GetNavItemsByIdUseCase } from "@application/nav_items/use-cases/GetNavItemsById";
 import { InMemoryNavItemsRepository } from "../../doubles/InMemoryNavItemsRepository";
 import { createNavItem } from "../../helpers/factories";
 import { expectErr, expectOk } from "../../helpers/result";
@@ -15,6 +15,6 @@ describe("GetNavItemsByIdUseCase", () => {
 
   test("not found", async () => {
     const uc = new GetNavItemsByIdUseCase(new InMemoryNavItemsRepository());
-    expectErr(await uc.execute("missing"), "navItems_not_found");
+    expectErr(await uc.execute("missing"), "nav_items_not_found");
   });
 });

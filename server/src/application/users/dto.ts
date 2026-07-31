@@ -17,7 +17,7 @@ export function toUserDto(user: UserEntity): UserDto {
             faq: user.permissions.faq.getSlugs("faq"),
             weekly_schedule: user.permissions.weekly_schedule.getSlugs("weekly_schedule"),
             anime: user.permissions.anime.getSlugs("anime"),
-            navItems: user.permissions.navItems.getSlugs("navItems"),
+            nav_items: user.permissions.nav_items.getSlugs("nav_items"),
         },
     };
 }

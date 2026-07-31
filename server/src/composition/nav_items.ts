@@ -1,10 +1,10 @@
-import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
-import { CreateNavItemsUseCase } from "@application/navItems/use-cases/CreateNavItems";
-import { UpdateNavItemsUseCase } from "@application/navItems/use-cases/UpdateNavItems";
-import { DeleteNavItemsUseCase } from "@application/navItems/use-cases/DeleteNavItems";
-import { RestoreNavItemsUseCase } from "@application/navItems/use-cases/RestoreNavItems";
-import { ListNavItemsUseCase } from "@application/navItems/use-cases/ListNavItems";
-import { GetNavItemsByIdUseCase } from "@application/navItems/use-cases/GetNavItemsById";
+import type { INavItemsUseCases } from "@application/nav_items/INavItemsUseCases";
+import { CreateNavItemsUseCase } from "@application/nav_items/use-cases/CreateNavItems";
+import { UpdateNavItemsUseCase } from "@application/nav_items/use-cases/UpdateNavItems";
+import { DeleteNavItemsUseCase } from "@application/nav_items/use-cases/DeleteNavItems";
+import { RestoreNavItemsUseCase } from "@application/nav_items/use-cases/RestoreNavItems";
+import { ListNavItemsUseCase } from "@application/nav_items/use-cases/ListNavItems";
+import { GetNavItemsByIdUseCase } from "@application/nav_items/use-cases/GetNavItemsById";
 import { MongoDbNavItemsRepository } from "@infrastructure/NavItemsRepository/MongoDb";
 
 import { mongoClient, idGenerator } from "./infra";

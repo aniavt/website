@@ -20,7 +20,7 @@ export class ListNavItemsUseCase {
       const canSeeInactive =
          requesterId !== null &&
          (await this.userRepository.findById(requesterId))?.hasPermission({
-            type: "navItems",
+            type: "nav_items",
             permission: NavItemsPermission.READ_NAVITEMS,
          }) === true;
 

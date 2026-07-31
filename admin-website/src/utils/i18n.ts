@@ -38,7 +38,7 @@ const es: Record<string, string> = {
   // Anime / Chapter / NavItems authz
   anime_not_authorized: "No tienes permisos para gestionar animes",
   chapter_not_authorized: "No tienes permisos para gestionar capítulos",
-  navItems_not_authorized: "No tienes permisos para gestionar elementos de navegación",
+  nav_items_not_authorized: "No tienes permisos para gestionar elementos de navegación",
 
   // Permission errors
   permission_not_authorized: "No tienes permisos para realizar esta acción",

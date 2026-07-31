@@ -4,7 +4,7 @@ export const PERMISSION_NAMESPACES = [
   "faq",
   "weekly_schedule",
   "anime",
-  "navItems",
+  "nav_items",
 ] as const;
 
 export type PermissionNamespace = (typeof PERMISSION_NAMESPACES)[number];
@@ -16,7 +16,7 @@ export const PERMISSION_SLUGS = {
     "manage_faq",
     "manage_weekly_schedule",
     "manage_anime",
-    "manage_navItems",
+    "manage_nav_items",
   ],
   user: ["read_user", "activate_user", "deactivate_user"],
   faq: ["read_faq", "create_faq", "delete_faq", "update_faq", "restore_faq"],
@@ -27,12 +27,12 @@ export const PERMISSION_SLUGS = {
     "read_weekly_schedule_history",
   ],
   anime: ["read_anime", "create_anime", "delete_anime", "update_anime", "restore_anime"],
-  navItems: [
-    "read_navItems",
-    "create_navItems",
-    "delete_navItems",
-    "update_navItems",
-    "restore_navItems",
+  nav_items: [
+    "read_nav_items",
+    "create_nav_items",
+    "delete_nav_items",
+    "update_nav_items",
+    "restore_nav_items",
   ],
 } as const satisfies Record<PermissionNamespace, readonly string[]>;
 
@@ -49,5 +49,5 @@ export interface UserPermissions {
   readonly faq: readonly NamespacedPermissionSlug<"faq">[];
   readonly weekly_schedule: readonly NamespacedPermissionSlug<"weekly_schedule">[];
   readonly anime: readonly NamespacedPermissionSlug<"anime">[];
-  readonly navItems: readonly NamespacedPermissionSlug<"navItems">[];
+  readonly nav_items: readonly NamespacedPermissionSlug<"nav_items">[];
 }

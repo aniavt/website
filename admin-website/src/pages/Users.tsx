@@ -147,7 +147,7 @@ export default function Users() {
     manage_faq: "Gestionar permisos de FAQ",
     manage_weekly_schedule: "Gestionar permisos de horario semanal",
     manage_anime: "Gestionar permisos de anime",
-    manage_navItems: "Gestionar permisos de navegacion",
+    manage_nav_items: "Gestionar permisos de navegacion",
     read_user: "Ver usuarios",
     activate_user: "Activar usuarios",
     deactivate_user: "Desactivar usuarios",
@@ -160,11 +160,11 @@ export default function Users() {
     update_weekly_schedule: "Editar horario semanal",
     delete_weekly_schedule: "Eliminar horario semanal",
     read_weekly_schedule_history: "Ver historial de horario semanal",
-    read_navItems: "Ver Navegacion",
-    create_navItems: "Crear Navegacion",
-    delete_navItems: "Eliminar Navegacion",
-    update_navItems: "Actualizar Navegacion",
-    restore_navItems: "Restaurar Navegacion",
+    read_nav_items: "Ver Navegacion",
+    create_nav_items: "Crear Navegacion",
+    delete_nav_items: "Eliminar Navegacion",
+    update_nav_items: "Actualizar Navegacion",
+    restore_nav_items: "Restaurar Navegacion",
     read_anime: "Ver anime",
     create_anime: "Crear anime",
     delete_anime: "Eliminar anime",
@@ -183,7 +183,7 @@ export default function Users() {
   const userPermissionsConfig = permissionConfig(PERMISSION_SLUGS.user);
   const faqPermissionsConfig = permissionConfig(PERMISSION_SLUGS.faq);
   const weeklySchedulePermissionsConfig = permissionConfig(PERMISSION_SLUGS.weekly_schedule);
-  const navItemsPermissionsConfig = permissionConfig(PERMISSION_SLUGS.navItems);
+  const navItemsPermissionsConfig = permissionConfig(PERMISSION_SLUGS.nav_items);
   const animePermissionsConfig = permissionConfig(PERMISSION_SLUGS.anime);
 
   function hasNamespacedSlug(
@@ -486,7 +486,7 @@ export default function Users() {
               </h3>
               <div class="flex flex-col gap-1">
                 {navItemsPermissionsConfig.map((p) => {
-                  const checked = hasNamespacedSlug(permissions.navItems, "navItems", p.slug);
+                  const checked = hasNamespacedSlug(permissions.nav_items, "nav_items", p.slug);
                   const canEdit = canManageNavItemsPermissions.value;
                   return (
                     <label
@@ -499,7 +499,7 @@ export default function Users() {
                         disabled={!canEdit}
                         onChange={(e) =>
                           togglePermission(
-                            "navItems",
+                            "nav_items",
                             p.slug,
                             (e.target as HTMLInputElement).checked,
                           )
