@@ -1,4 +1,6 @@
+import { z } from "zod";
 import type { SoftDeleteLastAction } from "@ania/domain-shared/soft-delete";
+import { nonEmptyMax } from "./zod-helpers";
 
 export interface FaqTextDto {
   readonly id: string;
@@ -34,13 +36,21 @@ export interface FaqHistoryEntryDto {
   readonly timestamp: string;
 }
 
-export interface CreateFaqItemInput {
-  query: string;
-  answer: string;
-}
+export const CreateFaqItemInputSchema = z
+  .object({
+    query: nonEmptyMax(500),
+    answer: nonEmptyMax(5000),
+  })
+  .strict();
+
+export type CreateFaqItemInput = z.infer<typeof CreateFaqItemInputSchema>;
 
 /** HTTP body for FAQ update (id comes from the route). */
-export interface UpdateFaqItemInput {
-  query?: string;
-  answer?: string;
-}
+export const UpdateFaqItemInputSchema = z
+  .object({
+    query: nonEmptyMax(500).optional(),
+    answer: nonEmptyMax(5000).optional(),
+  })
+  .strict();
+
+export type UpdateFaqItemInput = z.infer<typeof UpdateFaqItemInputSchema>;

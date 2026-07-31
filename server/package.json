@@ -19,8 +19,10 @@
     "@fastify/cookie": "^11.0.2",
     "@fastify/multipart": "^9.4.0",
     "fastify": "^5.8.1",
+    "fastify-type-provider-zod": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.4"
+    "mongoose": "^9.2.4",
+    "zod": "^4.4.3"
   },
   "scripts": {
     "server": "bun run --watch src/index.ts",

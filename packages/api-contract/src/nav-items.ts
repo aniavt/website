@@ -1,4 +1,6 @@
+import { z } from "zod";
 import type { SoftDeleteLastAction } from "@ania/domain-shared/soft-delete";
+import { nonEmptyMax } from "./zod-helpers";
 
 export interface NavItemsDto {
   readonly id: string;
@@ -11,14 +13,22 @@ export interface NavItemsDto {
   readonly updatedAt: string;
 }
 
-export interface CreateNavItemsInput {
-  title: string;
-  path: string;
-  position: number;
-}
+export const CreateNavItemsInputSchema = z
+  .object({
+    title: nonEmptyMax(100),
+    path: nonEmptyMax(500),
+    position: z.number().int(),
+  })
+  .strict();
 
-export interface UpdateNavItemsInput {
-  title?: string;
-  path?: string;
-  position?: number;
-}
+export type CreateNavItemsInput = z.infer<typeof CreateNavItemsInputSchema>;
+
+export const UpdateNavItemsInputSchema = z
+  .object({
+    title: nonEmptyMax(100).optional(),
+    path: nonEmptyMax(500).optional(),
+    position: z.number().int().optional(),
+  })
+  .strict();
+
+export type UpdateNavItemsInput = z.infer<typeof UpdateNavItemsInputSchema>;

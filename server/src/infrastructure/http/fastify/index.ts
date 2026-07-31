@@ -8,6 +8,12 @@ import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases"
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
+import {
+    serializerCompiler,
+    validatorCompiler,
+    type ZodTypeProvider,
+} from "fastify-type-provider-zod";
+import { UPLOAD_MAX_FILE_BYTES } from "@ania/api-contract/media";
 
 import { startRequestLogging, endRequestLogging } from "./middlewares/logger";
 import { registerUserRoutes } from "./routes/user";
@@ -35,7 +41,10 @@ export async function createFastifyServer(
     deps: FastifyServerDependencies
 ): Promise<void> {
     const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, animeUseCases, chapterUseCases, navItemsUseCases } = deps;
-    const app = Fastify({ bodyLimit: 2 * 1024 * 1024 * 1024 }); // 2 GB
+    const app = Fastify({ bodyLimit: UPLOAD_MAX_FILE_BYTES }).withTypeProvider<ZodTypeProvider>();
+    app.setValidatorCompiler(validatorCompiler);
+    app.setSerializerCompiler(serializerCompiler);
+
     const prefixUrl = (path: string) => path === "/" ? "" : path;
 
     app.register(cookie, {
@@ -43,7 +52,7 @@ export async function createFastifyServer(
     });
     app.register(multipart, {
         limits: {
-            fileSize: 2 * 1024 * 1024 * 1024, // 2 GB
+            fileSize: UPLOAD_MAX_FILE_BYTES,
         },
     });
 

@@ -1,30 +1,22 @@
-import type { FastifySchema } from "fastify";
-import { namespaces, type PermissionNamespace } from "@domain/value-object/Permissions";
+import type { PermissionNamespace } from "@domain/value-object/Permissions";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
+import { ManagePermissionBodySchema } from "@ania/api-contract/user";
 import type { RegisterRouteFn } from "../../types";
 import { authenticate } from "../../middlewares/auth";
 import { sendUserError } from "../../errors";
-
-const managePermissionSchema: FastifySchema = {
-    body: {
-        type: "object",
-        required: ["namespace", "permission"],
-        properties: {
-            namespace: { type: "string", enum: namespaces },
-            permission: { type: "string", minLength: 1 },
-        },
-        additionalProperties: false,
-    },
-};
+import { PermissionCheckQuerySchema, UserIdParamsSchema } from "../../route-schemas";
 
 export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUserUseCases }> = (
     app,
     prefixUrl,
     { userUseCases },
 ) => {
-    app.post<{ Params: { userId: string }; Body: { namespace: PermissionNamespace; permission: string } }>(
+    app.post(
         prefixUrl("/user/:userId/permissions/grant"),
-        { preHandler: authenticate(userUseCases), schema: managePermissionSchema },
+        {
+            preHandler: authenticate(userUseCases),
+            schema: { params: UserIdParamsSchema, body: ManagePermissionBodySchema },
+        },
         async (request, reply) => {
             const { userId } = request.params;
             const { namespace, permission } = request.body;
@@ -45,9 +37,12 @@ export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUser
         },
     );
 
-    app.post<{ Params: { userId: string }; Body: { namespace: PermissionNamespace; permission: string } }>(
+    app.post(
         prefixUrl("/user/:userId/permissions/revoke"),
-        { preHandler: authenticate(userUseCases), schema: managePermissionSchema },
+        {
+            preHandler: authenticate(userUseCases),
+            schema: { params: UserIdParamsSchema, body: ManagePermissionBodySchema },
+        },
         async (request, reply) => {
             const { userId } = request.params;
             const { namespace, permission } = request.body;
@@ -68,9 +63,12 @@ export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUser
         },
     );
 
-    app.get<{ Params: { userId: string } }>(
+    app.get(
         prefixUrl("/user/:userId/permissions"),
-        { preHandler: authenticate(userUseCases) },
+        {
+            preHandler: authenticate(userUseCases),
+            schema: { params: UserIdParamsSchema },
+        },
         async (request, reply) => {
             const requester = request.user!;
             const targetUserId = request.params.userId;
@@ -87,9 +85,15 @@ export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUser
         },
     );
 
-    app.get<{ Params: { userId: string }; Querystring: { namespace: PermissionNamespace; permission: string } }>(
+    app.get(
         prefixUrl("/user/:userId/permissions/check"),
-        { preHandler: authenticate(userUseCases) },
+        {
+            preHandler: authenticate(userUseCases),
+            schema: {
+                params: UserIdParamsSchema,
+                querystring: PermissionCheckQuerySchema,
+            },
+        },
         async (request, reply) => {
             const { userId } = request.params;
             const { namespace, permission } = request.query;
@@ -103,7 +107,7 @@ export const registerUserPermissionRoutes: RegisterRouteFn<{ userUseCases: IUser
                 return sendUserError(reply, result.error);
             }
 
-            const slugs = result.data.permissions[namespace] as readonly string[];
+            const slugs = result.data.permissions[namespace as PermissionNamespace] as readonly string[];
             const hasPermission = slugs.includes(`${namespace}.${permission}`);
 
             return reply.send({ hasPermission });

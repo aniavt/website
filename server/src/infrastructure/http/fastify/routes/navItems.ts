@@ -1,39 +1,18 @@
-import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { RegisterRouteFn } from "../types";
 import { sendNavItemsError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
 import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
+import {
+   CreateNavItemsInputSchema,
+   UpdateNavItemsInputSchema,
+} from "@ania/api-contract/nav-items";
+import { ActiveOnlyQuerySchema, IdParamsSchema } from "../route-schemas";
 
 export interface NavItemsRoutesDependencies {
    userUseCases: IUserUseCases;
    navItemsUseCases: INavItemsUseCases;
 }
-
-const createNavItemsSchema: FastifySchema = {
-   body: {
-      type: "object",
-      required: ["title", "path", "position"],
-      properties: {
-         title: { type: "string" },
-         path: { type: "string" },
-         position: { type: "number"}
-      },
-      additionalProperties: false,
-   },
-};
-
-const updateNavItemsSchema: FastifySchema = {
-   body: {
-      type: "object",
-      properties: {
-         title: { type: "string" },
-         path: { type: "string" },
-         position: { type: "number"}
-      },
-      additionalProperties: false,
-   },
-};
 
 export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies> = (
    app,
@@ -42,32 +21,42 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
 ) => {
    app.post(
       prefixUrl("/navItems"),
-      { preHandler: authenticate(userUseCases), schema: createNavItemsSchema },
+      {
+         preHandler: authenticate(userUseCases),
+         schema: { body: CreateNavItemsInputSchema },
+      },
       async (request, reply) => {
-         const body = request.body as { title: string; path: string, position: number};
-         const result = await navItemsUseCases.createNavItems.execute(request.user!.id, body);
+         const result = await navItemsUseCases.createNavItems.execute(
+            request.user!.id,
+            request.body,
+         );
          if (result.isError()) return sendNavItemsError(reply, result.error);
          return reply.status(201).send(result.data);
       },
    );
 
-   app.patch<{ Params: { id: string } }>(
+   app.patch(
       prefixUrl("/navItems/:id"),
-      { preHandler: authenticate(userUseCases), schema: updateNavItemsSchema },
+      {
+         preHandler: authenticate(userUseCases),
+         schema: { params: IdParamsSchema, body: UpdateNavItemsInputSchema },
+      },
       async (request, reply) => {
-         const body = request.body as { title?: string; path?: string, position: number };
          const result = await navItemsUseCases.updateNavItems.execute(request.user!.id, {
             id: request.params.id,
-            ...body,
+            ...request.body,
          });
          if (result.isError()) return sendNavItemsError(reply, result.error);
          return reply.send(result.data);
       },
    );
 
-   app.delete<{ Params: { id: string } }>(
+   app.delete(
       prefixUrl("/navItems/:id"),
-      { preHandler: authenticate(userUseCases) },
+      {
+         preHandler: authenticate(userUseCases),
+         schema: { params: IdParamsSchema },
+      },
       async (request, reply) => {
          const result = await navItemsUseCases.deleteNavItems.execute(
             request.user!.id,
@@ -78,9 +67,12 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
       },
    );
 
-   app.post<{ Params: { id: string } }>(
+   app.post(
       prefixUrl("/navItems/:id/restore"),
-      { preHandler: authenticate(userUseCases) },
+      {
+         preHandler: authenticate(userUseCases),
+         schema: { params: IdParamsSchema },
+      },
       async (request, reply) => {
          const result = await navItemsUseCases.restoreNavItems.execute(
             request.user!.id,
@@ -91,9 +83,12 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
       },
    );
 
-   app.get<{ Querystring: { activeOnly?: string } }>(
+   app.get(
       prefixUrl("/navItems"),
-      { preHandler: optionalAuthenticate(userUseCases) },
+      {
+         preHandler: optionalAuthenticate(userUseCases),
+         schema: { querystring: ActiveOnlyQuerySchema },
+      },
       async (request, reply) => {
          const activeOnly = request.query.activeOnly === "true";
          const requesterId = activeOnly ? null : (request.user?.id ?? null);
@@ -103,8 +98,9 @@ export const registerNavItemsRoutes: RegisterRouteFn<NavItemsRoutesDependencies>
       },
    );
 
-   app.get<{ Params: { id: string } }>(
+   app.get(
       prefixUrl("/navItems/:id"),
+      { schema: { params: IdParamsSchema } },
       async (request, reply) => {
          const result = await navItemsUseCases.getNavItemsById.execute(request.params.id);
          if (result.isError()) return sendNavItemsError(reply, result.error);

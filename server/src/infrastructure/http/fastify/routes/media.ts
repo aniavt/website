@@ -1,9 +1,10 @@
-import type { FastifyReply } from "fastify";
 import type { RegisterRouteFn } from "../types";
 import type { IMediaUseCases } from "@application/media/IMediaUseCases";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import { sendMediaError } from "../errors";
 import { authenticate } from "../middlewares/auth";
+import { parseMultipartFile } from "../multipart";
+import { IdParamsSchema } from "../route-schemas";
 
 export interface MediaRoutesDependencies {
     mediaUseCases: IMediaUseCases;
@@ -15,35 +16,38 @@ export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
     prefixUrl,
     { mediaUseCases, userUseCases },
 ) => {
-    app.get<{ Params: { id: string } }>(prefixUrl("/media/:id"), async (request, reply: FastifyReply) => {
-        const { id } = request.params;
-        const url = await mediaUseCases.getFileUrl.execute(id);
-        if (!url) {
-            return reply.status(404).send({ error: "media_not_found" });
-        }
+    app.get(
+        prefixUrl("/media/:id"),
+        { schema: { params: IdParamsSchema } },
+        async (request, reply) => {
+            const url = await mediaUseCases.getFileUrl.execute(request.params.id);
+            if (!url) {
+                return reply.status(404).send({ error: "media_not_found" });
+            }
 
-        return reply.redirect(url, 302);
-    });
+            return reply.redirect(url, 302);
+        },
+    );
 
-    app.post(prefixUrl("/media/upload"), { preHandler: authenticate(userUseCases) }, async (request, reply) => {
-        const file = await request.file();
-        if (!file) {
-            return sendMediaError(reply, "media_invalid_input");
-        }
+    app.post(
+        prefixUrl("/media/upload"),
+        { preHandler: authenticate(userUseCases) },
+        async (request, reply) => {
+            const parsed = await parseMultipartFile(request);
+            if (!parsed.ok) {
+                return sendMediaError(reply, "media_invalid_input");
+            }
 
-        const buffer = await file.toBuffer();
-        const uploadResult = await mediaUseCases.uploadFile.execute({
-            name: file.filename,
-            contentType: file.mimetype,
-            size: buffer.length,
-            body: buffer,
-            isPrivate: false,
-        });
+            const uploadResult = await mediaUseCases.uploadFile.execute({
+                ...parsed.file,
+                isPrivate: false,
+            });
 
-        if (uploadResult.isError()) {
-            return sendMediaError(reply, uploadResult.error);
-        }
+            if (uploadResult.isError()) {
+                return sendMediaError(reply, uploadResult.error);
+            }
 
-        return reply.status(201).send(uploadResult.data);
-    });
+            return reply.status(201).send(uploadResult.data);
+        },
+    );
 };

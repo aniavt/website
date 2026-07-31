@@ -1,4 +1,6 @@
-import type { UserPermissions } from "@ania/domain-shared/permissions";
+import { z } from "zod";
+import { type UserPermissions, PERMISSION_NAMESPACES } from "@ania/domain-shared/permissions";
+import { nonEmptyMax } from "./zod-helpers";
 
 export interface UserDto {
   readonly id: string;
@@ -10,12 +12,37 @@ export interface UserDto {
   readonly permissions: UserPermissions;
 }
 
-export interface LoginRequest {
-  username: string;
-  password: string;
-}
+export const LoginRequestSchema = z
+  .object({
+    username: z.string().min(3).max(20),
+    password: z.string().min(1).max(100),
+  })
+  .strict();
 
-export interface CreateUserInput {
-  username: string;
-  password: string;
-}
+export type LoginRequest = z.infer<typeof LoginRequestSchema>;
+
+export const CreateUserInputSchema = z
+  .object({
+    username: z.string().min(3).max(20),
+    password: z.string().min(8).max(100),
+  })
+  .strict();
+
+export type CreateUserInput = z.infer<typeof CreateUserInputSchema>;
+
+export const UpdatePasswordInputSchema = z
+  .object({
+    password: z.string().min(8).max(100),
+  })
+  .strict();
+
+export type UpdatePasswordInput = z.infer<typeof UpdatePasswordInputSchema>;
+
+export const ManagePermissionBodySchema = z
+  .object({
+    namespace: z.enum(PERMISSION_NAMESPACES),
+    permission: nonEmptyMax(100),
+  })
+  .strict();
+
+export type ManagePermissionBody = z.infer<typeof ManagePermissionBodySchema>;
