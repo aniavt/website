@@ -27,6 +27,10 @@
   "scripts": {
     "server": "bun run --watch src/index.ts",
     "cli": "bun run src/index.ts --cli",
-    "cli:dev": "bun run --watch src/index.ts --cli --interactive"
+    "cli:dev": "bun run --watch src/index.ts --cli --interactive",
+    "test": "bun test tests",
+    "test:domain": "bun test tests/domain",
+    "test:application": "bun test tests/application",
+    "test:http": "bun test tests/http"
   }
 }

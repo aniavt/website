@@ -13,11 +13,9 @@ import { ManagePermissionUseCase } from "@application/users/use-cases/ManagePerm
 import { GetUserPermissionsUseCase } from "@application/users/use-cases/GetUserPermissions";
 import { LoginUseCase } from "@application/users/use-cases/Login";
 import { MongoDbUserRepository } from "@infrastructure/UserRepository/MongoDb";
-// import { InMemoryUserRepository } from "@infrastructure/UserRepository/InMemory";
 
 import { mongoClient, passwordHasher, idGenerator } from "./infra";
 
-// export const userRepository = new InMemoryUserRepository();
 export const userRepository = new MongoDbUserRepository(mongoClient);
 
 export const userUseCases: IUserUseCases = {

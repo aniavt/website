@@ -17,8 +17,9 @@ export class LoginUseCase {
 
     async execute(input: LoginInput): Promise<Result<UserDto, UserError>> {
         const user = await this.userRepository.findByUsername(input.username);
+        // Same error whether user is missing or password is wrong (no user enumeration).
         if (!user) {
-            return err("user_not_found");
+            return err("password_verify_failed");
         }
 
         const isPasswordCorrect = await this.passwordHasher.verify(input.password, user.passwordHash);
