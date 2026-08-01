@@ -1,5 +1,8 @@
-import { FaqItem } from "@domain/entities/FaqItem";
+import { FaqItem, type FaqItemLastAction } from "@domain/entities/FaqItem";
 import type { FaqItemRepository, FaqItemFindAllOptions } from "@domain/repositories/FaqItemRepository";
+import { SOFT_DELETE_LAST_ACTIONS } from "@ania/domain-shared/soft-delete";
+import { upsertById } from "@infrastructure/shared/upsertById";
+import { mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const faqItemSchema = new mongoose.Schema({
@@ -7,7 +10,7 @@ const faqItemSchema = new mongoose.Schema({
     queryId: { type: String, required: true },
     answerId: { type: String, required: true },
     isActive: { type: Boolean, required: true },
-    lastAction: { type: String, required: true, enum: ["created", "updated", "deleted", "restore"] },
+    lastAction: { type: String, required: true, enum: [...SOFT_DELETE_LAST_ACTIONS] },
 });
 
 interface FaqItemDocument {
@@ -15,7 +18,7 @@ interface FaqItemDocument {
     queryId: string;
     answerId: string;
     isActive: boolean;
-    lastAction: "created" | "updated" | "deleted" | "restore";
+    lastAction: FaqItemLastAction;
 }
 
 faqItemSchema.index({ isActive: 1 });
@@ -38,17 +41,11 @@ export class MongoDbFaqItemRepository implements FaqItemRepository {
     }
 
     async save(entity: FaqItem): Promise<void> {
-        const doc = toDocument(entity);
-        const existing = await this.model.findOne({ id: entity.id });
-        if (existing) {
-            await this.model.updateOne({ id: entity.id }, { $set: doc });
-        } else {
-            await this.model.create(doc);
-        }
+        await upsertById(this.model, toDocument(entity));
     }
 
     async findById(id: string): Promise<FaqItem | null> {
-        const doc = await this.model.findOne({ id });
+        const doc = await this.model.findOne({ id }, null, mongoSessionOption());
         return doc ? FaqItem.fromPersistence(doc) : null;
     }
 
@@ -57,7 +54,7 @@ export class MongoDbFaqItemRepository implements FaqItemRepository {
         if (options?.isActive !== undefined) {
             query.isActive = options.isActive;
         }
-        const docs = await this.model.find(query).exec();
+        const docs = await this.model.find(query, null, mongoSessionOption()).exec();
         return docs.map((d) => FaqItem.fromPersistence(d));
     }
 }

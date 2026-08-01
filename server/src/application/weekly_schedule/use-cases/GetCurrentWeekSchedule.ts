@@ -1,12 +1,14 @@
-import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
+import { getISOWeekAndYear } from "@ania/date";
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { FileRepository } from "@domain/repositories/FileRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
+import { resolveRequester } from "@application/shared/auth";
 
 
 export class GetCurrentWeekScheduleUseCase {
@@ -16,16 +18,18 @@ export class GetCurrentWeekScheduleUseCase {
         private readonly userRepository: UserRepository,
     ) {}
 
-    async execute(requesterId: string | null): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
+    async execute(
+        requester: UserEntity | string | null,
+    ): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
+        const user = await resolveRequester(this.userRepository, requester);
         const canSeeDeleted =
-            requesterId !== null &&
-            (await this.userRepository.findById(requesterId))?.hasPermission({
+            user?.hasPermission({
                 type: "weekly_schedule",
                 permission: WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE,
             }) === true;
 
         const now = new Date();
-        const { week: currentWeek, year: currentYear } = WeeklySchedule.getISOWeekAndYear(now);
+        const { week: currentWeek, year: currentYear } = getISOWeekAndYear(now);
 
         const schedule = await this.weeklyScheduleRepository.findByWeekAndYear(currentWeek, currentYear, {
             includeDeleted: canSeeDeleted,

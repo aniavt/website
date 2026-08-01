@@ -1,75 +1,26 @@
-export interface WeeklyScheduleTagDto {
-  readonly label: string;
-  readonly bgColor: string;
-  readonly txColor: string;
-}
-
-export interface WeeklyScheduleDto {
-  readonly id: string;
-  readonly week: number;
-  readonly year: number;
-  readonly fileId: string;
-  readonly isDeleted: boolean;
-  readonly title: string;
-  readonly description: string;
-  readonly tags: readonly WeeklyScheduleTagDto[];
-  readonly fileContentType?: string | null;
-}
-
-export interface FaqItemPublicDto {
-  readonly id: string;
-  readonly query: string;
-  readonly answer: string;
-  readonly isActive: boolean;
-  readonly lastAction: string;
-}
+import type { WeeklyScheduleDto } from "@ania/api-contract/weekly-schedule";
+import type { FaqItemPublicDto } from "@ania/api-contract/faq";
+import { throwApiError } from "@ania/api-contract/error";
+import { buildApiUrl } from "./buildApiUrl";
 
 export async function getCurrentWeeklySchedule(): Promise<WeeklyScheduleDto | null> {
-  let url: string;
-
-  if (typeof window === "undefined") {
-    // SSR: use process.env (set at container runtime); import.meta.env is build-time only
-    const g = typeof globalThis !== "undefined" ? (globalThis as { process?: { env?: Record<string, string> } }) : null;
-    const envUrl = g?.process?.env?.PUBLIC_SERVER_URL;
-    const base = envUrl || import.meta.env.PUBLIC_SERVER_URL || "";
-    url = `${base.replace(/\/+$/, "")}${g === null ? "/api" : ""}/weekly-schedule/current`;
-  } else {
-    url = "/api/weekly-schedule/current";
-  }
-
-  const res = await fetch(url);
+  const res = await fetch(buildApiUrl("/weekly-schedule/current"));
 
   if (res.status === 404) {
     return null;
   }
 
-  if (!res.ok) {
-    throw new Error("weekly_schedule_load_failed");
-  }
+  if (!res.ok) await throwApiError(res);
 
   const data = await res.json();
   return data;
 }
 
 export async function getFaqs(): Promise<FaqItemPublicDto[]> {
-  let url: string;
+  const res = await fetch(buildApiUrl("/faq?activeOnly=true"));
 
-  if (typeof window === "undefined") {
-    const g = typeof globalThis !== "undefined" ? (globalThis as { process?: { env?: Record<string, string> } }) : null;
-    const envUrl = g?.process?.env?.PUBLIC_SERVER_URL;
-    const base = envUrl || import.meta.env.PUBLIC_SERVER_URL || "";
-    url = `${base.replace(/\/+$/, "")}${g === null ? "/api" : ""}/faq?activeOnly=true`;
-  } else {
-    url = "/api/faq?activeOnly=true";
-  }
-
-  const res = await fetch(url);
-
-  if (!res.ok) {
-    throw new Error("faq_load_failed");
-  }
+  if (!res.ok) await throwApiError(res);
 
   const data = await res.json();
   return data as FaqItemPublicDto[];
 }
-

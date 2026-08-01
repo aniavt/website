@@ -5,10 +5,11 @@ services:
       dockerfile: docker/server/Dockerfile.dev
     container_name: ania_server_dev
     image: ania_server:dev
+    working_dir: /workspace
     env_file:
       - .env
     volumes:
-      - ../server:/app
+      - ..:/workspace
 
   web_admin:
     build:
@@ -16,9 +17,11 @@ services:
       dockerfile: docker/admin-website/Dockerfile.dev
     container_name: ania_web_admin_dev
     image: ania_web_admin:dev
+    working_dir: /workspace
     volumes:
-      - ../admin-website:/app
-      - /app/node_modules
+      - ..:/workspace
+      - web_admin_node_modules:/workspace/admin-website/node_modules
+      - root_node_modules:/workspace/node_modules
     environment:
       - NODE_ENV=development
       - VITE_API_NODE_ENV=development
@@ -30,6 +33,13 @@ services:
       target: dev
     image: ania_web:dev
     container_name: ania_web_dev
+    working_dir: /workspace
     volumes:
-      - ../client:/app
-      - /app/node_modules
+      - ..:/workspace
+      - web_node_modules:/workspace/client/node_modules
+      - root_node_modules:/workspace/node_modules
+
+volumes:
+  web_admin_node_modules:
+  web_node_modules:
+  root_node_modules:

@@ -1,16 +1,10 @@
-import type { FileEntity } from '../entities/File';
+import type { FileEntity } from "../entities/File";
+import type { UploadParams } from "./ObjectStorage";
 
-/** Parámetros para subir un archivo. body: contenido binario (Buffer en Node/Bun extiende Uint8Array). */
-export interface UploadParams {
-    isPrivate: boolean;
-    name: string;
-    contentType: string;
-    size: number;
-    body: Uint8Array;
-}
+export type { UploadParams };
 
 export interface MediaService {
     upload(params: UploadParams): Promise<FileEntity>;
     delete(id: string): Promise<void>;
-    getObjectUrl(id: string): Promise<string>;
+    getUrl(id: string): Promise<string | null>;
 }

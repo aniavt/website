@@ -1,7 +1,8 @@
 ---
 // src/components/AnimeCard.astro
 import { Image } from "astro:assets";
-import { type AnimeDto, slugify } from "../lib/anime";
+import type { AnimeDto } from "@ania/api-contract/anime";
+import { slugify } from "../lib/slugify";
 
 interface Props {
     anime: AnimeDto;

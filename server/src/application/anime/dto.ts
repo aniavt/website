@@ -1,17 +1,7 @@
-import type { Anime, AnimeStatus } from "@domain/entities/Anime";
+import type { Anime } from "@domain/entities/Anime";
+import type { AnimeDto } from "@ania/api-contract/anime";
 
-export interface AnimeDto {
-   readonly id: string;
-   readonly title: string;
-   readonly description?: string;
-   readonly coverImageURL?: string;
-   readonly genre: string;
-   readonly status: AnimeStatus;
-   readonly active: boolean;
-   readonly lastAction: string;
-   readonly createdAt: Date;
-   readonly updatedAt: Date;
-}
+export type { AnimeDto, CreateAnimeInput, UpdateAnimeInput } from "@ania/api-contract/anime";
 
 export function toAnimeDto(entity: Anime): AnimeDto {
    return {
@@ -23,7 +13,7 @@ export function toAnimeDto(entity: Anime): AnimeDto {
       status: entity.status,
       active: entity.active,
       lastAction: entity.lastAction,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
    };
 }

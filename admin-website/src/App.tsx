@@ -1,19 +1,18 @@
 import "./App.css";
 import { Router, Route } from "preact-router";
 import { useEffect } from "preact/hooks";
+import type { PermissionNamespace } from "@ania/domain-shared/permissions";
 import {
   checkAuth,
   authLoading,
   isAuthenticated,
   hasPermission,
-  type PermissionNamespace,
 } from "@store/auth";
 import Login from "@pages/Login";
 import Faq from "@pages/Faq";
 import Users from "@pages/Users";
 import Profile from "@pages/Profile";
 import WeeklySchedule from "@pages/WeeklySchedule";
-import Vault from "@pages/Vault";
 import Anime from "@pages/Anime";
 import NavItems from "@pages/NavItems";
 
@@ -106,15 +105,6 @@ export default function App() {
         )}
       />
       <Route
-        path={basePath("/vault")}
-        component={() => (
-          <PermissionGuard
-            component={Vault}
-            required={[{ namespace: "vault", permission: "create_node" }]}
-          />
-        )}
-      />
-      <Route
         path={basePath("/anime")}
         component={() => (
           <PermissionGuard
@@ -125,11 +115,11 @@ export default function App() {
       />
       <Route path={basePath("/profile")} component={() => <AuthGuard component={Profile} />} />
       <Route
-        path={basePath("/navItems")}
+        path={basePath("/nav-items")}
         component={() => (
           <PermissionGuard
             component={NavItems}
-            required={[{ namespace: "navItems", permission: "read_navItems" }]}
+            required={[{ namespace: "nav_items", permission: "read_nav_items" }]}
           />
         )}
       />

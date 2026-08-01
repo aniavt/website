@@ -1,5 +1,5 @@
 import { FileEntity } from "@domain/entities/File";
-import type { MediaService, UploadParams } from "@domain/services/MediaService";
+import type { ObjectStorage, UploadParams } from "@domain/services/ObjectStorage";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import {
   DeleteObjectCommand,
@@ -9,7 +9,7 @@ import {
 } from "@aws-sdk/client-s3";
 import { getSignedUrl } from "@aws-sdk/s3-request-presigner";
 
-export class S3Service implements MediaService {
+export class S3Service implements ObjectStorage {
   constructor(
     private readonly s3Client: S3Client,
     private readonly s3SigningClient: S3Client,
@@ -22,14 +22,13 @@ export class S3Service implements MediaService {
     contentType,
     size,
     body,
-    isPrivate,
   }: UploadParams): Promise<FileEntity> {
     const id = this.idGenerator.generateUUID();
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: id,
       Body: body,
-      ACL: isPrivate ? "private" : "public-read",
+      ACL: "public-read",
       ContentType: contentType,
     });
 
@@ -40,7 +39,6 @@ export class S3Service implements MediaService {
       contentType,
       name,
       size,
-      isPrivate,
       url: `/api/media/${id}`,
     });
   }

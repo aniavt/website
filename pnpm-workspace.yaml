@@ -1,0 +1,8 @@
+packages:
+  - "server"
+  - "admin-website"
+  - "client"
+  - "packages/*"
+allowBuilds:
+  esbuild: true
+  sharp: true

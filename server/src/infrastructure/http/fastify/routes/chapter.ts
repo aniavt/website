@@ -1,69 +1,29 @@
-import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
+import {
+   CreateChapterInputSchema,
+   UpdateChapterInputSchema,
+} from "@ania/api-contract/chapter";
 import type { RegisterRouteFn } from "../types";
-import type { ChapterError } from "@application/chapter/errors";
+import { sendChapterError } from "../errors";
 import { authenticate } from "../middlewares/auth";
+import { AnimeIdParamsSchema, IdParamsSchema } from "../route-schemas";
 
 export interface ChapterRoutesDependencies {
    userUseCases: IUserUseCases;
+   userRepository: UserRepository;
    chapterUseCases: IChapterUseCases;
 }
-
-function mapChapterErrorToHttpCode(error: ChapterError): number {
-   switch (error) {
-      case "chapter_not_found":
-      case "anime_not_found":
-         return 404;
-      case "chapter_not_authorized":
-         return 401;
-      case "chapter_save_failed":
-      case "chapter_delete_failed":
-         return 500;
-      default:
-         return 500;
-   }
-}
-
-function sendChapterError(reply: FastifyReply, error: ChapterError) {
-   return reply.status(mapChapterErrorToHttpCode(error)).send({ error });
-}
-
-const createChapterSchema: FastifySchema = {
-   body: {
-      type: "object",
-      required: ["number"],
-      properties: {
-         number: { type: "number" },
-         title: { type: "string" },
-         videoURL: { type: "string" },
-         coverImageURL: { type: "string" },
-      },
-      additionalProperties: false,
-   },
-};
-
-const updateChapterSchema: FastifySchema = {
-   body: {
-      type: "object",
-      properties: {
-         number: { type: "number" },
-         title: { type: "string" },
-         videoURL: { type: "string" },
-         coverImageURL: { type: "string" },
-      },
-      additionalProperties: false,
-   },
-};
 
 export const registerChapterRoutes: RegisterRouteFn<ChapterRoutesDependencies> = (
    app,
    prefixUrl,
-   { userUseCases, chapterUseCases },
+   { userRepository, chapterUseCases },
 ) => {
-   // List chapters for an anime (public)
-   app.get<{ Params: { animeId: string } }>(
+   app.get(
       prefixUrl("/anime/:animeId/chapters"),
+      { schema: { params: AnimeIdParamsSchema } },
       async (request, reply) => {
          const result = await chapterUseCases.listChaptersByAnime.execute(request.params.animeId);
          if (result.isError()) return sendChapterError(reply, result.error);
@@ -71,50 +31,44 @@ export const registerChapterRoutes: RegisterRouteFn<ChapterRoutesDependencies> =
       },
    );
 
-   // Create a chapter
-   app.post<{ Params: { animeId: string } }>(
+   app.post(
       prefixUrl("/anime/:animeId/chapters"),
-      { preHandler: authenticate(userUseCases), schema: createChapterSchema },
+      {
+         preHandler: authenticate(userRepository),
+         schema: { params: AnimeIdParamsSchema, body: CreateChapterInputSchema },
+      },
       async (request, reply) => {
-         const body = request.body as {
-            number: number;
-            title?: string;
-            videoURL?: string;
-            coverImageURL?: string;
-         };
          const result = await chapterUseCases.createChapter.execute(request.user!.id, {
             animeId: request.params.animeId,
-            ...body,
+            ...request.body,
          });
          if (result.isError()) return sendChapterError(reply, result.error);
          return reply.status(201).send(result.data);
       },
    );
 
-   // Update a chapter
-   app.patch<{ Params: { id: string } }>(
+   app.patch(
       prefixUrl("/chapters/:id"),
-      { preHandler: authenticate(userUseCases), schema: updateChapterSchema },
+      {
+         preHandler: authenticate(userRepository),
+         schema: { params: IdParamsSchema, body: UpdateChapterInputSchema },
+      },
       async (request, reply) => {
-         const body = request.body as {
-            number?: number;
-            title?: string;
-            videoURL?: string;
-            coverImageURL?: string;
-         };
          const result = await chapterUseCases.updateChapter.execute(request.user!.id, {
             id: request.params.id,
-            ...body,
+            ...request.body,
          });
          if (result.isError()) return sendChapterError(reply, result.error);
          return reply.send(result.data);
       },
    );
 
-   // Delete a chapter
-   app.delete<{ Params: { id: string } }>(
+   app.delete(
       prefixUrl("/chapters/:id"),
-      { preHandler: authenticate(userUseCases) },
+      {
+         preHandler: authenticate(userRepository),
+         schema: { params: IdParamsSchema },
+      },
       async (request, reply) => {
          const result = await chapterUseCases.deleteChapter.execute(
             request.user!.id,

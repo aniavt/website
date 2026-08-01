@@ -5,7 +5,6 @@ import {
     UserPermission,
     FAQPermission,
     WeeklySchedulePermission,
-    VaultPermission,
     AnimePermission,
     NavItemsPermission
 } from "@domain/value-object/Permissions";
@@ -29,9 +28,8 @@ type PermissionType =
     | { type: "user", permission: UserPermission }
     | { type: "faq", permission: FAQPermission }
     | { type: "weekly_schedule", permission: WeeklySchedulePermission }
-    | { type: "vault", permission: VaultPermission }
     | { type: "anime", permission: AnimePermission }
-    | { type: "navItems", permission: NavItemsPermission }
+    | { type: "nav_items", permission: NavItemsPermission }
 
 export class UserEntity {
     readonly id: string;
@@ -70,9 +68,8 @@ export class UserEntity {
                 user: UserPermission.fromValue(Permission.NONE.valueOf()),
                 faq: FAQPermission.fromValue(Permission.NONE.valueOf()),
                 weekly_schedule: WeeklySchedulePermission.fromValue(Permission.NONE.valueOf()),
-                vault: VaultPermission.fromValue(Permission.NONE.valueOf()),
                 anime: AnimePermission.fromValue(Permission.NONE.valueOf()),
-                navItems : NavItemsPermission.fromValue(Permission.NONE.valueOf()),
+                nav_items: NavItemsPermission.fromValue(Permission.NONE.valueOf()),
             }
         });
 
@@ -93,9 +90,8 @@ export class UserEntity {
                 user: UserPermission.fromValue(props.permissions.user),
                 faq: FAQPermission.fromValue(props.permissions.faq),
                 weekly_schedule: WeeklySchedulePermission.fromValue(props.permissions.weekly_schedule ?? Permission.NONE.valueOf()),
-                vault: VaultPermission.fromValue(props.permissions.vault ?? Permission.NONE.valueOf()),
                 anime: AnimePermission.fromValue(props.permissions.anime ?? Permission.NONE.valueOf()),
-                navItems : NavItemsPermission.fromValue(props.permissions.navItems ?? Permission.NONE.valueOf())
+                nav_items: NavItemsPermission.fromValue(props.permissions.nav_items ?? Permission.NONE.valueOf())
             }
         });
     }
@@ -135,9 +131,8 @@ export class UserEntity {
             case "user": return this.permissions.meta.has(ManagePermission.MANAGE_USER);
             case "faq": return this.permissions.meta.has(ManagePermission.MANAGE_FAQ);
             case "weekly_schedule": return this.permissions.meta.has(ManagePermission.MANAGE_WEEKLY_SCHEDULE);
-            case "vault": return this.permissions.meta.has(ManagePermission.MANAGE_VAULT);
             case "anime": return this.permissions.meta.has(ManagePermission.MANAGE_ANIME);
-            case "navItems": return this.permissions.meta.has(ManagePermission.MANAGE_NAVITEMS);
+            case "nav_items": return this.permissions.meta.has(ManagePermission.MANAGE_NAVITEMS);
         }
         return false;
     }

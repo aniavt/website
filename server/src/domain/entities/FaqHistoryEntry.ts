@@ -1,11 +1,11 @@
-export type FaqHistoryAction = "created" | "updated" | "deleted" | "restore";
+import type { SoftDeleteLastAction } from "@ania/domain-shared/soft-delete";
 
 export interface FaqHistoryEntryProps {
     readonly id: string;
     readonly faqId: string;
     readonly queryId: string;
     readonly answerId: string;
-    readonly action: FaqHistoryAction;
+    readonly action: SoftDeleteLastAction;
     readonly by: string;
     readonly timestamp: Date;
 }
@@ -15,7 +15,7 @@ export class FaqHistoryEntry {
     readonly faqId: string;
     readonly queryId: string;
     readonly answerId: string;
-    readonly action: FaqHistoryAction;
+    readonly action: SoftDeleteLastAction;
     readonly by: string;
     readonly timestamp: Date;
 

@@ -1,15 +1,7 @@
 import type { Chapter } from "@domain/entities/Chapter";
+import type { ChapterDto } from "@ania/api-contract/chapter";
 
-export interface ChapterDto {
-   readonly id: string;
-   readonly animeId: string;
-   readonly number: number;
-   readonly title?: string;
-   readonly videoURL?: string;
-   readonly coverImageURL?: string;
-   readonly createdAt: Date;
-   readonly updatedAt: Date;
-}
+export type { ChapterDto, CreateChapterInput, UpdateChapterInput } from "@ania/api-contract/chapter";
 
 export function toChapterDto(entity: Chapter): ChapterDto {
    return {
@@ -19,7 +11,7 @@ export function toChapterDto(entity: Chapter): ChapterDto {
       title: entity.title,
       videoURL: entity.videoURL,
       coverImageURL: entity.coverImageURL,
-      createdAt: entity.createdAt,
-      updatedAt: entity.updatedAt,
+      createdAt: entity.createdAt.toISOString(),
+      updatedAt: entity.updatedAt.toISOString(),
    };
 }

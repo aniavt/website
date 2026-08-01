@@ -7,6 +7,11 @@ const es: Record<string, string> = {
   username_too_long: "El nombre de usuario es demasiado largo",
   password_too_short: "La contraseña es demasiado corta",
   password_too_long: "La contraseña es demasiado larga",
+  password_weak_upper_case_letter: "La contraseña debe contener al menos una mayúscula",
+  password_weak_lower_case_letter: "La contraseña debe contener al menos una minúscula",
+  password_weak_number: "La contraseña debe contener al menos un número",
+  password_weak_symbol: "La contraseña debe contener al menos un símbolo",
+  // aliases (pre-rename typo)
   password_week_upper_case_letter: "La contraseña debe contener al menos una mayúscula",
   password_week_lower_case_letter: "La contraseña debe contener al menos una minúscula",
   password_week_number: "La contraseña debe contener al menos un número",
@@ -29,6 +34,11 @@ const es: Record<string, string> = {
   faq_invalid_transition: "Transición de estado no válida para este FAQ",
   faq_not_authorized: "No tienes permisos para gestionar FAQ",
   faq_save_failed: "Error al guardar la pregunta frecuente",
+
+  // Anime / Chapter / NavItems authz
+  anime_not_authorized: "No tienes permisos para gestionar animes",
+  chapter_not_authorized: "No tienes permisos para gestionar capítulos",
+  nav_items_not_authorized: "No tienes permisos para gestionar elementos de navegación",
 
   // Permission errors
   permission_not_authorized: "No tienes permisos para realizar esta acción",

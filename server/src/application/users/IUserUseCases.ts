@@ -10,6 +10,7 @@ import type { GetUserByIdUseCase } from "./use-cases/GetUserById";
 import type { CreateRootUseCase } from "./use-cases/CreateRoot";
 import type { ManagePermissionUseCase } from "./use-cases/ManagePermission";
 import type { GetUserPermissionsUseCase } from "./use-cases/GetUserPermissions";
+import type { LoginUseCase } from "./use-cases/Login";
 
 
 export interface IUserUseCases {
@@ -25,4 +26,5 @@ export interface IUserUseCases {
     createRoot: CreateRootUseCase;
     managePermission: ManagePermissionUseCase;
     getUserPermissions: GetUserPermissionsUseCase;
+    login: LoginUseCase;
 }

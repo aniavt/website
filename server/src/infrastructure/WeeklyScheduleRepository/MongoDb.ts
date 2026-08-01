@@ -5,6 +5,8 @@ import type {
     FindByIdOptions,
     FindByWeekAndYearOptions,
 } from "@domain/repositories/WeeklyScheduleRepository";
+import { upsertById } from "@infrastructure/shared/upsertById";
+import { mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const weeklyScheduleTagSchema = new mongoose.Schema(
@@ -83,13 +85,7 @@ export class MongoDbWeeklyScheduleRepository implements WeeklyScheduleRepository
     }
 
     async save(schedule: WeeklySchedule): Promise<void> {
-        const doc = toDocument(schedule);
-        const existing = await this.model.findOne({ id: schedule.id });
-        if (existing) {
-            await this.model.updateOne({ id: schedule.id }, { $set: doc });
-        } else {
-            await this.model.create(doc);
-        }
+        await upsertById(this.model, toDocument(schedule));
     }
 
     async findById(id: string, options?: FindByIdOptions): Promise<WeeklySchedule | null> {
@@ -97,7 +93,7 @@ export class MongoDbWeeklyScheduleRepository implements WeeklyScheduleRepository
         if (options?.includeDeleted !== true) {
             filter.isDeleted = false;
         }
-        const doc = await this.model.findOne(filter);
+        const doc = await this.model.findOne(filter, null, mongoSessionOption());
         return doc ? toEntity(doc) : null;
     }
 
@@ -106,7 +102,7 @@ export class MongoDbWeeklyScheduleRepository implements WeeklyScheduleRepository
         if (options?.includeDeleted !== true) {
             filter.isDeleted = false;
         }
-        const doc = await this.model.findOne(filter);
+        const doc = await this.model.findOne(filter, null, mongoSessionOption());
         return doc ? toEntity(doc) : null;
     }
 
@@ -118,11 +114,14 @@ export class MongoDbWeeklyScheduleRepository implements WeeklyScheduleRepository
         if (options?.includeDeleted !== true) {
             query.isDeleted = false;
         }
-        const docs = await this.model.find(query).sort({ year: 1, week: 1 }).exec();
+        const docs = await this.model
+            .find(query, null, mongoSessionOption())
+            .sort({ year: 1, week: 1 })
+            .exec();
         return docs.map(toEntity);
     }
 
     async delete(id: string): Promise<void> {
-        await this.model.deleteOne({ id });
+        await this.model.deleteOne({ id }, mongoSessionOption());
     }
 }

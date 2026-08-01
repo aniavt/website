@@ -16,8 +16,10 @@ import {
   canManageUserPermissions,
   canManageFaqPermissions,
 } from "@store/auth";
-import { api, ApiError, t } from "@utils";
-import { addToast } from "@store/toast";
+import { api } from "@utils/api";
+import { t } from "@utils/i18n";
+import { formatDate } from "@utils/labels";
+import { addToast, toastApiError } from "@store/toast";
 import Layout from "@components/Layout";
 import Button from "@components/Button";
 import Input from "@components/Input";
@@ -70,7 +72,7 @@ export default function Profile() {
       setPassword("");
       setConfirm("");
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setSaving(false);
     }
@@ -83,7 +85,7 @@ export default function Profile() {
       addToast(t(res.message), "info");
       await logout();
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setDeactivating(false);
       setDeactivateOpen(false);
@@ -102,7 +104,7 @@ export default function Profile() {
           </div>
           <div>
             <h2 class="text-lg font-semibold text-[var(--text-primary)]">{u.username}</h2>
-            <p class="text-xs text-[var(--text-muted)]">Miembro desde {new Date(u.createdAt).toLocaleDateString()}</p>
+            <p class="text-xs text-[var(--text-muted)]">Miembro desde {formatDate(u.createdAt)}</p>
           </div>
         </div>
         <div class="flex flex-col gap-2">

@@ -1,5 +1,7 @@
 import { NavItems, type NavItemsLastAction } from "@domain/entities/NavItems";
 import type { NavItemsRepository, NavItemsFindAllOptions } from "@domain/repositories/NavItemsRepository";
+import { upsertById } from "@infrastructure/shared/upsertById";
+import { SOFT_DELETE_LAST_ACTIONS } from "@ania/domain-shared/soft-delete";
 import mongoose from "mongoose";
 
 const navItemsSchema = new mongoose.Schema({
@@ -11,7 +13,7 @@ const navItemsSchema = new mongoose.Schema({
    lastAction: {
       type: String,
       required: true,
-      enum: ["created", "updated", "deleted", "restore"],
+      enum: [...SOFT_DELETE_LAST_ACTIONS],
    },
    createdAt: { type: Date, required: true },
    updatedAt: { type: Date, required: true },
@@ -51,13 +53,7 @@ export class MongoDbNavItemsRepository implements NavItemsRepository {
    }
 
    async save(entity: NavItems): Promise<void> {
-      const doc = toDocument(entity);
-      const existing = await this.model.findOne({ id: entity.id });
-      if (existing) {
-         await this.model.updateOne({ id: entity.id }, { $set: doc });
-      } else {
-         await this.model.create(doc);
-      }
+      await upsertById(this.model, toDocument(entity));
    }
 
    async findById(id: string): Promise<NavItems | null> {

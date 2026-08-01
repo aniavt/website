@@ -4,7 +4,7 @@ import Table, { type Column } from "@components/Table";
 import Button from "@components/Button";
 import Modal from "@components/Modal";
 import Pagination from "@components/Pagination";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import {
    canReadAnime,
    canCreateAnime,
@@ -12,13 +12,10 @@ import {
    canDeleteAnime,
    canRestoreAnime,
 } from "@store/auth";
+import type { AnimeDto, CreateAnimeInput, UpdateAnimeInput } from "@ania/api-contract/anime";
+import type { ChapterDto, CreateChapterInput, UpdateChapterInput } from "@ania/api-contract/chapter";
+import type { AnimeStatus } from "@ania/domain-shared/anime";
 import {
-   type AnimeDto,
-   type ChapterDto,
-   type CreateAnimeInput,
-   type UpdateAnimeInput,
-   type CreateChapterInput,
-   type UpdateChapterInput,
    listAnimes,
    createAnime,
    updateAnime,
@@ -29,8 +26,8 @@ import {
    updateChapter,
    deleteChapter,
    uploadMediaFile,
-   ApiError,
-} from "@utils";
+} from "@utils/api";
+import { lastActionLabel } from "@utils/labels";
 
 const LIMIT = 15;
 
@@ -49,7 +46,7 @@ export default function Anime() {
    const [createCoverFile, setCreateCoverFile] = useState<File | null>(null);
    const [createCoverPreviewUrl, setCreateCoverPreviewUrl] = useState<string | null>(null);
    const [createGenre, setCreateGenre] = useState("");
-   const [createStatus, setCreateStatus] = useState<"watching" | "completed" | "upcoming">("upcoming");
+   const [createStatus, setCreateStatus] = useState<AnimeStatus>("upcoming");
    const [createLoading, setCreateLoading] = useState(false);
 
    // ── Edit anime modal ────────────────────────────────────────────────────────
@@ -60,7 +57,7 @@ export default function Anime() {
    const [editCoverFile, setEditCoverFile] = useState<File | null>(null);
    const [editCoverPreviewUrl, setEditCoverPreviewUrl] = useState<string | null>(null);
    const [editGenre, setEditGenre] = useState("");
-   const [editStatus, setEditStatus] = useState<"watching" | "completed" | "upcoming">("upcoming");
+   const [editStatus, setEditStatus] = useState<AnimeStatus>("upcoming");
    const [editLoading, setEditLoading] = useState(false);
 
    // ── Delete anime confirm modal ──────────────────────────────────────────────
@@ -103,15 +100,6 @@ export default function Anime() {
    // Chapter delete confirm
    const [chapterDeleteTarget, setChapterDeleteTarget] = useState<ChapterDto | null>(null);
    const [chapterDeleteLoading, setChapterDeleteLoading] = useState(false);
-
-   // ── Labels ──────────────────────────────────────────────────────────────────
-
-   const lastActionLabel: Record<string, string> = {
-      created: "Creado",
-      updated: "Actualizado",
-      deleted: "Eliminado",
-      restore: "Restaurado",
-   };
 
    // ── Cover/video preview effects ─────────────────────────────────────────────
    useEffect(() => {
@@ -169,10 +157,7 @@ export default function Anime() {
          setTotal(data.length);
          setItems(data.slice(offset, offset + LIMIT));
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al cargar los animes",
-            "error",
-         );
+         toastApiError(err, "Error al cargar los animes");
       } finally {
          setLoading(false);
       }
@@ -189,10 +174,7 @@ export default function Anime() {
          const data = await listChaptersByAnime(animeId);
          setChapters(data);
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al cargar capítulos",
-            "error",
-         );
+         toastApiError(err, "Error al cargar capítulos");
       } finally {
          setChaptersLoading(false);
       }
@@ -238,10 +220,7 @@ export default function Anime() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al crear el anime",
-            "error",
-         );
+         toastApiError(err, "Error al crear el anime");
       } finally {
          setCreateLoading(false);
       }
@@ -284,10 +263,7 @@ export default function Anime() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al actualizar el anime",
-            "error",
-         );
+         toastApiError(err, "Error al actualizar el anime");
       } finally {
          setEditLoading(false);
       }
@@ -312,10 +288,7 @@ export default function Anime() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al eliminar el anime",
-            "error",
-         );
+         toastApiError(err, "Error al eliminar el anime");
       } finally {
          setConfirmLoading(false);
       }
@@ -332,10 +305,7 @@ export default function Anime() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al restaurar el anime",
-            "error",
-         );
+         toastApiError(err, "Error al restaurar el anime");
       } finally {
          setRestoreLoadingId(null);
       }
@@ -391,10 +361,7 @@ export default function Anime() {
          resetChapterCreateForm();
          fetchChapters(chaptersAnime.id);
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al crear el capítulo",
-            "error",
-         );
+         toastApiError(err, "Error al crear el capítulo");
       } finally {
          setChapterCreateLoading(false);
       }
@@ -439,10 +406,7 @@ export default function Anime() {
          setChapterEditTarget(null);
          if (chaptersAnime) fetchChapters(chaptersAnime.id);
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al actualizar el capítulo",
-            "error",
-         );
+         toastApiError(err, "Error al actualizar el capítulo");
       } finally {
          setChapterEditLoading(false);
       }
@@ -457,10 +421,7 @@ export default function Anime() {
          setChapterDeleteTarget(null);
          fetchChapters(chaptersAnime.id);
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al eliminar el capítulo",
-            "error",
-         );
+         toastApiError(err, "Error al eliminar el capítulo");
       } finally {
          setChapterDeleteLoading(false);
       }
@@ -694,7 +655,7 @@ export default function Anime() {
                   <span>Seguimiento <span class="text-[var(--error)]">*</span></span>
                   <select
                      value={createStatus}
-                     onChange={(e) => setCreateStatus((e.target as HTMLSelectElement).value as "watching" | "completed" | "upcoming")}
+                     onChange={(e) => setCreateStatus((e.target as HTMLSelectElement).value as AnimeStatus)}
                      class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none"
                   >
                      <option value="upcoming">Próximo</option>
@@ -814,7 +775,7 @@ export default function Anime() {
                   <span>Seguimiento</span>
                   <select
                      value={editStatus}
-                     onChange={(e) => setEditStatus((e.target as HTMLSelectElement).value as "watching" | "completed" | "upcoming")}
+                     onChange={(e) => setEditStatus((e.target as HTMLSelectElement).value as AnimeStatus)}
                      class="rounded-lg border border-[var(--border-subtle)] bg-[var(--bg-tertiary)] px-3 py-1.5 text-sm text-[var(--text-primary)] outline-none"
                   >
                      <option value="upcoming">Próximo</option>

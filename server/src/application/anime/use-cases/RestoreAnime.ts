@@ -1,8 +1,10 @@
 import type { AnimeRepository } from "@domain/repositories/AnimeRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import { AnimePermission } from "@domain/value-object/Permissions";
-import { err, ok, type Result } from "@lib/result";
+import { ok, type Result } from "@lib/result";
 import type { AnimeError } from "../errors";
+import { assertPermission } from "@application/shared/auth";
+import { runSoftDeleteTransition } from "@application/shared/runSoftDeleteTransition";
 
 export class RestoreAnimeUseCase {
    constructor(
@@ -11,26 +13,23 @@ export class RestoreAnimeUseCase {
    ) { }
 
    async execute(requesterId: string, id: string): Promise<Result<void, AnimeError>> {
-      const requester = await this.userRepository.findById(requesterId);
-      if (!requester) return err("anime_not_authorized");
-      if (!requester.hasPermission({ type: "anime", permission: AnimePermission.RESTORE_ANIME })) {
-         return err("anime_not_authorized");
-      }
+      const auth = await assertPermission(
+         this.userRepository,
+         requesterId,
+         { type: "anime", permission: AnimePermission.RESTORE_ANIME },
+         "anime_not_authorized",
+      );
+      if (auth.isError()) return auth;
 
-      const anime = await this.animeRepository.findById(id);
-      if (!anime) return err("anime_not_found");
-
-      if (!anime.canTransitionTo("restore")) return err("anime_invalid_transition");
-
-      anime.active = true;
-      anime.lastAction = "restore";
-      anime.updatedAt = new Date();
-
-      try {
-         await this.animeRepository.save(anime);
-      } catch {
-         return err("anime_save_failed");
-      }
+      const result = await runSoftDeleteTransition({
+         find: () => this.animeRepository.findById(id),
+         notFound: "anime_not_found",
+         transition: (anime) => anime.restore(),
+         invalidTransition: "anime_invalid_transition",
+         save: (anime) => this.animeRepository.save(anime),
+         saveFailed: "anime_save_failed",
+      });
+      if (result.isError()) return result;
 
       return ok(undefined);
    }

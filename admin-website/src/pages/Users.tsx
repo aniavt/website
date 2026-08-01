@@ -1,6 +1,13 @@
 import { useState, useEffect, useCallback } from "preact/hooks";
-import { api, ApiError, t } from "@utils";
-import { addToast } from "@store/toast";
+import { api } from "@utils/api";
+import { t } from "@utils/i18n";
+import { formatDate } from "@utils/labels";
+import { addToast, toastApiError } from "@store/toast";
+import {
+  PERMISSION_SLUGS,
+  type PermissionNamespace,
+  type UserPermissions,
+} from "@ania/domain-shared/permissions";
 import {
   user as currentUser,
   canActivateUsers,
@@ -9,9 +16,10 @@ import {
   canManageUserPermissions,
   canManageFaqPermissions,
   canManageWeeklySchedulePermissions,
-  canManageVaultNodes,
+  canManageAnimePermissions,
+  canManageNavItemsPermissions,
   userHasPermission,
-  type UserPermissions,
+  type User,
 } from "@store/auth";
 import Layout from "@components/Layout";
 import Table, { type Column } from "@components/Table";
@@ -19,8 +27,6 @@ import Button from "@components/Button";
 import Badge from "@components/Badge";
 import Pagination from "@components/Pagination";
 import Modal from "@components/Modal";
-
-import type { User } from "@store/auth";
 
 const LIMIT = 15;
 
@@ -78,7 +84,7 @@ export default function Users() {
       await confirmAction.fn();
       fetchUsers();
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setConfirmOpen(false);
       setConfirmAction(null);
@@ -90,7 +96,8 @@ export default function Users() {
     canManageUserPermissions.value ||
     canManageFaqPermissions.value ||
     canManageWeeklySchedulePermissions.value ||
-    canManageVaultNodes.value;
+    canManageAnimePermissions.value ||
+    canManageNavItemsPermissions.value;
 
   async function openPermissions(u: User) {
     if (!canManageAnyPermissions) return;
@@ -102,14 +109,14 @@ export default function Users() {
       setPermissions(res.permissions);
     } catch (err) {
       setPermissionsOpen(false);
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     } finally {
       setPermissionsLoading(false);
     }
   }
 
   async function togglePermission(
-    namespace: keyof UserPermissions,
+    namespace: PermissionNamespace,
     permission: string,
     enabled: boolean,
   ) {
@@ -120,7 +127,7 @@ export default function Users() {
       const full = `${namespace}.${permission}`;
       setPermissions((prev) => {
         if (!prev) return prev;
-        const current = prev[namespace] ?? [];
+        const current = prev[namespace] as readonly string[];
         const next = enabled
           ? current.includes(full)
             ? current
@@ -130,54 +137,62 @@ export default function Users() {
       });
       addToast(t(enabled ? "permission_granted" : "permission_revoked"), "success");
     } catch (err) {
-      addToast(err instanceof ApiError ? t(err.code) : t("unknown_error"), "error");
+      toastApiError(err);
     }
   }
 
-  const metaPermissionsConfig: { slug: string; label: string; required?: boolean }[] = [
-    { slug: "meta_manage_permissions", label: "Gestionar permisos meta" },
-    { slug: "manage_user", label: "Gestionar permisos de usuarios" },
-    { slug: "manage_faq", label: "Gestionar permisos de FAQ" },
-    { slug: "manage_weekly_schedule", label: "Gestionar permisos de horario semanal" },
-  ];
+  const permissionLabels: Record<string, string> = {
+    meta_manage_permissions: "Gestionar permisos meta",
+    manage_user: "Gestionar permisos de usuarios",
+    manage_faq: "Gestionar permisos de FAQ",
+    manage_weekly_schedule: "Gestionar permisos de horario semanal",
+    manage_anime: "Gestionar permisos de anime",
+    manage_nav_items: "Gestionar permisos de navegacion",
+    read_user: "Ver usuarios",
+    activate_user: "Activar usuarios",
+    deactivate_user: "Desactivar usuarios",
+    read_faq: "Ver FAQ",
+    create_faq: "Crear FAQ",
+    update_faq: "Editar FAQ",
+    delete_faq: "Eliminar FAQ",
+    restore_faq: "Restaurar FAQ",
+    create_weekly_schedule: "Crear horario semanal",
+    update_weekly_schedule: "Editar horario semanal",
+    delete_weekly_schedule: "Eliminar horario semanal",
+    read_weekly_schedule_history: "Ver historial de horario semanal",
+    read_nav_items: "Ver Navegacion",
+    create_nav_items: "Crear Navegacion",
+    delete_nav_items: "Eliminar Navegacion",
+    update_nav_items: "Actualizar Navegacion",
+    restore_nav_items: "Restaurar Navegacion",
+    read_anime: "Ver anime",
+    create_anime: "Crear anime",
+    delete_anime: "Eliminar anime",
+    update_anime: "Editar anime",
+    restore_anime: "Restaurar anime",
+  };
 
-  const userPermissionsConfig: { slug: string; label: string }[] = [
-    { slug: "read_user", label: "Ver usuarios" },
-    { slug: "activate_user", label: "Activar usuarios" },
-    { slug: "deactivate_user", label: "Desactivar usuarios" },
-  ];
+  function permissionConfig<S extends string>(slugs: readonly S[]) {
+    return slugs.map((slug) => ({
+      slug,
+      label: permissionLabels[slug] ?? slug,
+    }));
+  }
 
-  const faqPermissionsConfig: { slug: string; label: string }[] = [
-    { slug: "read_faq", label: "Ver FAQ" },
-    { slug: "create_faq", label: "Crear FAQ" },
-    { slug: "update_faq", label: "Editar FAQ" },
-    { slug: "delete_faq", label: "Eliminar FAQ" },
-    { slug: "restore_faq", label: "Restaurar FAQ" },
-  ];
+  const metaPermissionsConfig = permissionConfig(PERMISSION_SLUGS.meta);
+  const userPermissionsConfig = permissionConfig(PERMISSION_SLUGS.user);
+  const faqPermissionsConfig = permissionConfig(PERMISSION_SLUGS.faq);
+  const weeklySchedulePermissionsConfig = permissionConfig(PERMISSION_SLUGS.weekly_schedule);
+  const navItemsPermissionsConfig = permissionConfig(PERMISSION_SLUGS.nav_items);
+  const animePermissionsConfig = permissionConfig(PERMISSION_SLUGS.anime);
 
-  const weeklySchedulePermissionsConfig: { slug: string; label: string }[] = [
-    { slug: "create_weekly_schedule", label: "Crear horario semanal" },
-    { slug: "update_weekly_schedule", label: "Editar horario semanal" },
-    { slug: "delete_weekly_schedule", label: "Eliminar horario semanal" },
-    {
-      slug: "read_weekly_schedule_history",
-      label: "Ver historial de horario semanal",
-    },
-  ];
-
-  const navItemsPermissionsConfig: { slug: string; label: string }[] = [
-    { slug: "read_navItems", label: "Ver Navegacion" },
-    { slug: "create_navItems", label: "Crear Navegacion" },
-    { slug: "delete_navItems", label: "Eliminar Navegacion" },
-    { slug: "update_navItems", label: "Actualizar Navegacion"},
-    { slug: "restore_navItems", label: "Restaurar Navegacion" },
-  ];
-
-  const vaultPermissionsConfig: { slug: string; label: string }[] = [
-    { slug: "create_node", label: "Crear nodos" },
-    { slug: "update_node", label: "Actualizar nodos" },
-    { slug: "delete_node", label: "Eliminar nodos" },
-  ];
+  function hasNamespacedSlug(
+    list: readonly string[],
+    namespace: PermissionNamespace,
+    slug: string,
+  ): boolean {
+    return list.includes(`${namespace}.${slug}`);
+  }
 
   function userActions(u: User) {
     const isSelf = u.id === currentUser.value?.id;
@@ -263,14 +278,9 @@ export default function Users() {
           userHasPermission(u, "meta", "meta_manage_permissions") ||
           userHasPermission(u, "meta", "manage_user") ||
           userHasPermission(u, "meta", "manage_faq") ||
-          userHasPermission(u, "meta", "manage_weekly_schedule") ||
-          userHasPermission(u, "meta", "manage_vault");
-        const managesVault =
-          userHasPermission(u, "vault", "create_node") ||
-          userHasPermission(u, "vault", "update_node") ||
-          userHasPermission(u, "vault", "delete_node");
+          userHasPermission(u, "meta", "manage_weekly_schedule");
 
-        if (!managesUsers && !managesFaq && !managesPermissions && !managesVault) {
+        if (!managesUsers && !managesFaq && !managesPermissions) {
           return <span class="text-xs text-[var(--text-muted)]">—</span>;
         }
 
@@ -279,7 +289,6 @@ export default function Users() {
             {managesUsers && <Badge variant="admin">Usuarios</Badge>}
             {managesFaq && <Badge variant="admin">FAQ</Badge>}
             {managesPermissions && <Badge variant="root">Permisos</Badge>}
-            {managesVault && <Badge variant="admin">Vault</Badge>}
           </div>
         );
       },
@@ -288,7 +297,7 @@ export default function Users() {
     {
       key: "createdAt",
       header: "Creado",
-      render: (u) => <span class="text-xs text-[var(--text-muted)]">{new Date(u.createdAt).toLocaleDateString()}</span>,
+      render: (u) => <span class="text-xs text-[var(--text-muted)]">{formatDate(u.createdAt)}</span>,
       class: "w-28",
     },
     {
@@ -370,8 +379,7 @@ export default function Users() {
               <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Meta</h3>
               <div class="flex flex-col gap-1">
                 {metaPermissionsConfig.map((p) => {
-                  const full = `meta.${p.slug}`;
-                  const checked = permissions.meta.includes(full);
+                  const checked = hasNamespacedSlug(permissions.meta, "meta", p.slug);
                   const canEdit = canManagePermissionsMeta.value;
                   return (
                     <label key={p.slug} class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
@@ -394,8 +402,7 @@ export default function Users() {
               <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Usuarios</h3>
               <div class="flex flex-col gap-1">
                 {userPermissionsConfig.map((p) => {
-                  const full = `user.${p.slug}`;
-                  const checked = permissions.user.includes(full);
+                  const checked = hasNamespacedSlug(permissions.user, "user", p.slug);
                   const canEdit = canManageUserPermissions.value;
                   return (
                     <label key={p.slug} class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
@@ -418,8 +425,7 @@ export default function Users() {
               <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">FAQ</h3>
               <div class="flex flex-col gap-1">
                 {faqPermissionsConfig.map((p) => {
-                  const full = `faq.${p.slug}`;
-                  const checked = permissions.faq.includes(full);
+                  const checked = hasNamespacedSlug(permissions.faq, "faq", p.slug);
                   const canEdit = canManageFaqPermissions.value;
                   return (
                     <label key={p.slug} class="flex items-center gap-2 text-sm text-[var(--text-secondary)]">
@@ -444,9 +450,12 @@ export default function Users() {
               </h3>
               <div class="flex flex-col gap-1">
                 {weeklySchedulePermissionsConfig.map((p) => {
-                  const full = `weekly_schedule.${p.slug}`;
-                  const checked = permissions.weekly_schedule.includes(full);
-                  const canEdit = canManageUserPermissions.value;
+                  const checked = hasNamespacedSlug(
+                    permissions.weekly_schedule,
+                    "weekly_schedule",
+                    p.slug,
+                  );
+                  const canEdit = canManageWeeklySchedulePermissions.value;
                   return (
                     <label
                       key={p.slug}
@@ -477,9 +486,8 @@ export default function Users() {
               </h3>
               <div class="flex flex-col gap-1">
                 {navItemsPermissionsConfig.map((p) => {
-                  const full = `navItems.${p.slug}`;
-                  const checked = permissions.navItems.includes(full);
-                  const canEdit = canManageUserPermissions.value;
+                  const checked = hasNamespacedSlug(permissions.nav_items, "nav_items", p.slug);
+                  const canEdit = canManageNavItemsPermissions.value;
                   return (
                     <label
                       key={p.slug}
@@ -491,7 +499,7 @@ export default function Users() {
                         disabled={!canEdit}
                         onChange={(e) =>
                           togglePermission(
-                            "navItems",
+                            "nav_items",
                             p.slug,
                             (e.target as HTMLInputElement).checked,
                           )
@@ -505,12 +513,11 @@ export default function Users() {
             </div>
 
             <div>
-              <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Bodega</h3>
+              <h3 class="text-sm font-semibold text-[var(--text-primary)] mb-2">Anime</h3>
               <div class="flex flex-col gap-1">
-                {vaultPermissionsConfig.map((p) => {
-                  const full = `vault.${p.slug}`;
-                  const checked = permissions.vault.includes(full);
-                  const canEdit = canManageVaultNodes.value;
+                {animePermissionsConfig.map((p) => {
+                  const checked = hasNamespacedSlug(permissions.anime, "anime", p.slug);
+                  const canEdit = canManageAnimePermissions.value;
                   return (
                     <label
                       key={p.slug}
@@ -522,7 +529,7 @@ export default function Users() {
                         disabled={!canEdit}
                         onChange={(e) =>
                           togglePermission(
-                            "vault",
+                            "anime",
                             p.slug,
                             (e.target as HTMLInputElement).checked,
                           )

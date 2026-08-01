@@ -1,0 +1,27 @@
+{
+  "name": "@ania/api-contract",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./anime": "./src/anime.ts",
+    "./chapter": "./src/chapter.ts",
+    "./faq": "./src/faq.ts",
+    "./media": "./src/media.ts",
+    "./nav-items": "./src/nav-items.ts",
+    "./user": "./src/user.ts",
+    "./weekly-schedule": "./src/weekly-schedule.ts",
+    "./error": "./src/error.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "dependencies": {
+    "@ania/domain-shared": "workspace:*",
+    "zod": "^4.4.3"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.2"
+  }
+}

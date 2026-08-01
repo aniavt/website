@@ -1,5 +1,8 @@
-import { Anime, type AnimeLastAction, type AnimeStatus } from "@domain/entities/Anime";
+import { Anime, type AnimeLastAction } from "@domain/entities/Anime";
+import { ANIME_STATUSES, type AnimeStatus } from "@ania/domain-shared/anime";
 import type { AnimeRepository, AnimeFindAllOptions } from "@domain/repositories/AnimeRepository";
+import { upsertById } from "@infrastructure/shared/upsertById";
+import { SOFT_DELETE_LAST_ACTIONS } from "@ania/domain-shared/soft-delete";
 import mongoose from "mongoose";
 
 const animeSchema = new mongoose.Schema({
@@ -8,12 +11,12 @@ const animeSchema = new mongoose.Schema({
    description: { type: String },
    coverImageURL: { type: String },
    genre: { type: String, required: true },
-   status: { type: String, required: true, enum: ["watching", "completed", "upcoming"] },
+   status: { type: String, required: true, enum: [...ANIME_STATUSES] },
    active: { type: Boolean, required: true },
    lastAction: {
       type: String,
       required: true,
-      enum: ["created", "updated", "deleted", "restore"],
+      enum: [...SOFT_DELETE_LAST_ACTIONS],
    },
    createdAt: { type: Date, required: true },
    updatedAt: { type: Date, required: true },
@@ -57,13 +60,7 @@ export class MongoDbAnimeRepository implements AnimeRepository {
    }
 
    async save(entity: Anime): Promise<void> {
-      const doc = toDocument(entity);
-      const existing = await this.model.findOne({ id: entity.id });
-      if (existing) {
-         await this.model.updateOne({ id: entity.id }, { $set: doc });
-      } else {
-         await this.model.create(doc);
-      }
+      await upsertById(this.model, toDocument(entity));
    }
 
    async findById(id: string): Promise<Anime | null> {

@@ -4,6 +4,9 @@
 set -e
 source .env
 
+SCRIPT_DIR="$(cd "$(dirname "$0")" && pwd)"
+"$SCRIPT_DIR/check-docker-workspace-packages.sh"
+
 # Build Docker image
 docker compose -f ../docker/docker-compose.yml build --parallel nginx web server web_admin s3
 

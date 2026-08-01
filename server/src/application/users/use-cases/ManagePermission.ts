@@ -1,18 +1,19 @@
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import {
+    AnimePermission,
     FAQPermission,
     isPermissionNamespace,
     ManagePermission,
     type PermissionNamespace,
     UserPermission,
     WeeklySchedulePermission,
-    VaultPermission,
     type Permission,
     NavItemsPermission,
 } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { UserEntity } from "@domain/entities/User";
 import type { UserError, PermissionError } from "../errors";
+import { assertPermission } from "@application/shared/auth";
 
 
 export interface ManagePermissionInput {
@@ -21,6 +22,17 @@ export interface ManagePermissionInput {
     permission: string; // slug
     namespace: PermissionNamespace;
     action: "grant" | "revoke";
+}
+
+function metaPermissionForNamespace(namespace: PermissionNamespace) {
+    switch (namespace) {
+        case "meta": return ManagePermission.META_MANAGE_PERMISSIONS;
+        case "user": return ManagePermission.MANAGE_USER;
+        case "faq": return ManagePermission.MANAGE_FAQ;
+        case "weekly_schedule": return ManagePermission.MANAGE_WEEKLY_SCHEDULE;
+        case "anime": return ManagePermission.MANAGE_ANIME;
+        case "nav_items": return ManagePermission.MANAGE_NAVITEMS;
+    }
 }
 
 export class ManagePermissionUseCase {
@@ -36,7 +48,8 @@ export class ManagePermissionUseCase {
             try {
                 await this.userRepository.save(user);
                 return ok(void 0);
-            } catch {
+            } catch (error) {
+                console.error("user_save_failed", error);
                 return err("user_save_failed");
             }
         }
@@ -48,8 +61,8 @@ export class ManagePermissionUseCase {
                 case "user": return UserPermission;
                 case "faq":  return FAQPermission;
                 case "weekly_schedule": return WeeklySchedulePermission;
-                case "navItems": return NavItemsPermission;
-                case "vault": return VaultPermission;
+                case "nav_items": return NavItemsPermission;
+                case "anime": return AnimePermission;
             }
             return "permission_invalid_namespace";
         })();
@@ -59,40 +72,17 @@ export class ManagePermissionUseCase {
         const target = targetClass.fromSlug(permission);
         if (!target) return err("permission_invalid_slug");
 
-        const [user, requester] = await Promise.all([
-            this.userRepository.findById(userId),
-            this.userRepository.findById(requesterId),
-        ]);
+        const auth = await assertPermission(
+            this.userRepository,
+            requesterId,
+            { type: "meta", permission: metaPermissionForNamespace(namespace) },
+            "permission_not_authorized",
+        );
+        if (auth.isError()) return auth;
+        const requester = auth.data;
 
-        if (!user || !requester) return err("user_not_found");
-
-        switch (namespace) {
-            case "meta":
-                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.META_MANAGE_PERMISSIONS }))
-                    return err("permission_not_authorized");
-                break;
-            case "user":
-                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_USER }))
-                    return err("permission_not_authorized");
-                break;
-            case "faq":
-                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_FAQ }))
-                    return err("permission_not_authorized");
-                break;
-            case "weekly_schedule":
-                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_WEEKLY_SCHEDULE }))
-                    return err("permission_not_authorized");
-                break;
-            case "vault":
-                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_VAULT }))
-                    return err("permission_not_authorized");
-                break;
-
-            case "navItems":
-                if (!requester.hasPermission({ type: "meta", permission: ManagePermission.MANAGE_NAVITEMS }))
-                        return err("permission_not_authorized");
-                break;
-        }
+        const user = await this.userRepository.findById(userId);
+        if (!user) return err("user_not_found");
 
         if (action === "revoke" && requester.id === user.id && namespace === "meta" && target.valueOf() === ManagePermission.META_MANAGE_PERMISSIONS.valueOf()) {
             return err("user_cannot_revoke_self_meta_manage_permissions");

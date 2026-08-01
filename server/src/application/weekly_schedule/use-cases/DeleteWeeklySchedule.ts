@@ -1,15 +1,18 @@
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { WeeklyScheduleHistoryRepository } from "@domain/repositories/WeeklyScheduleHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
-import { WeeklySchedule } from "@domain/entities/WeeklySchedule";
+import type { TransactionManager } from "@application/shared/TransactionManager";
 import { WeeklyScheduleHistoryEntry } from "@domain/entities/WeeklyScheduleHistoryEntry";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
-
+import { assertPermission } from "@application/shared/auth";
+import { saveWithHistory } from "@application/shared/saveWithHistory";
+import { assertScheduleNotPast } from "../assertScheduleNotPast";
 
 export class DeleteWeeklyScheduleUseCase {
     constructor(
@@ -17,57 +20,45 @@ export class DeleteWeeklyScheduleUseCase {
         private readonly weeklyScheduleHistoryRepository: WeeklyScheduleHistoryRepository,
         private readonly userRepository: UserRepository,
         private readonly idGenerator: IdGenerator,
+        private readonly transactionManager: TransactionManager,
     ) {}
 
-    async execute(requesterId: string, id: string): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("weekly_schedule_not_authorized");
-        if (!requester.hasPermission({ type: "weekly_schedule", permission: WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE })) {
-            return err("weekly_schedule_not_authorized");
-        }
+    async execute(requester: UserEntity | string, id: string): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
+        const auth = await assertPermission(
+            this.userRepository,
+            requester,
+            { type: "weekly_schedule", permission: WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE },
+            "weekly_schedule_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
         const schedule = await this.weeklyScheduleRepository.findById(id);
         if (!schedule) return err("weekly_schedule_not_found");
 
-        const now = new Date();
-        const currentWeek = WeeklySchedule.getWeekNumber(now);
-        const currentYear = now.getFullYear();
-        const isPast =
-            schedule.year < currentYear ||
-            (schedule.year === currentYear && schedule.week < currentWeek);
-        if (isPast) {
-            return err("weekly_schedule_cannot_modify_past");
-        }
+        const notPast = assertScheduleNotPast(schedule);
+        if (notPast.isError()) return notPast;
 
-        const toSave = new WeeklySchedule({
-            id: schedule.id,
-            week: schedule.week,
-            year: schedule.year,
-            fileId: schedule.fileId,
-            isDeleted: true,
-            title: schedule.title,
-            description: schedule.description,
-            tags: schedule.tags,
+        schedule.markDeleted();
+
+        const saved = await saveWithHistory({
+            tx: this.transactionManager,
+            persist: () => this.weeklyScheduleRepository.save(schedule),
+            append: () =>
+                this.weeklyScheduleHistoryRepository.append(
+                    new WeeklyScheduleHistoryEntry({
+                        id: this.idGenerator.generateUUID(),
+                        scheduleId: schedule.id,
+                        week: schedule.week,
+                        year: schedule.year,
+                        fileId: schedule.fileId,
+                        action: "deleted",
+                        by: auth.data.id,
+                        timestamp: new Date(),
+                    }),
+                ),
+            saveFailed: "weekly_schedule_save_failed",
         });
-
-        try {
-            await this.weeklyScheduleRepository.save(toSave);
-            const historyId = this.idGenerator.generateUUID();
-            await this.weeklyScheduleHistoryRepository.append(
-                new WeeklyScheduleHistoryEntry({
-                    id: historyId,
-                    scheduleId: toSave.id,
-                    week: toSave.week,
-                    year: toSave.year,
-                    fileId: toSave.fileId,
-                    action: "deleted",
-                    by: requesterId,
-                    timestamp: new Date(),
-                }),
-            );
-        } catch {
-            return err("weekly_schedule_save_failed");
-        }
+        if (saved.isError()) return saved;
 
         return ok(toWeeklyScheduleDto(schedule));
     }

@@ -5,16 +5,18 @@ import Button from "@components/Button";
 import ColorPicker from "@components/ColorPicker";
 import Modal from "@components/Modal";
 import Pagination from "@components/Pagination";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import {
   canReadWeeklySchedule,
   canCreateWeeklySchedule,
   canDeleteWeeklySchedule,
   canViewWeeklyScheduleHistory,
 } from "@store/auth";
+import type {
+  WeeklyScheduleDto,
+  WeeklyScheduleHistoryEntryDto,
+} from "@ania/api-contract/weekly-schedule";
 import {
-  type WeeklyScheduleDto,
-  type WeeklyScheduleHistoryEntryDto,
   deleteWeeklySchedule,
   getWeeklyScheduleHistory,
   listWeeklySchedules,
@@ -22,29 +24,17 @@ import {
   restoreWeeklySchedule,
   updateWeeklyScheduleFile,
   updateWeeklySchedule,
-  ApiError,
-  t,
-} from "@utils";
+} from "@utils/api";
+import { t } from "@utils/i18n";
+import { formatDate, lastActionLabel } from "@utils/labels";
+import { getISOWeekAndYear } from "@ania/date";
 
 type ScheduleTag = { label: string; bgColor: string; txColor: string };
 
 const LIMIT = 15;
 
-function getCurrentWeekYear() {
-  const now = new Date();
-  // Copia para no mutar `now`
-  const date = new Date(Date.UTC(now.getFullYear(), now.getMonth(), now.getDate()));
-  // Ajustar al jueves de la semana actual (regla ISO-8601)
-  const day = date.getUTCDay() || 7;
-  date.setUTCDate(date.getUTCDate() + 4 - day);
-  const yearStart = new Date(Date.UTC(date.getUTCFullYear(), 0, 1));
-  const week = Math.ceil(((date.getTime() - yearStart.getTime()) / 86400000 + 1) / 7);
-  const year = date.getUTCFullYear();
-  return { week, year };
-}
-
 export default function WeeklySchedule() {
-  const { week: currentWeek, year: currentYear } = getCurrentWeekYear();
+  const { week: currentWeek, year: currentYear } = getISOWeekAndYear(new Date());
 
   const [items, setItems] = useState<WeeklyScheduleDto[]>([]);
   const [loading, setLoading] = useState(true);
@@ -86,13 +76,6 @@ export default function WeeklySchedule() {
   const [viewOpen, setViewOpen] = useState(false);
   const [viewTarget, setViewTarget] = useState<WeeklyScheduleDto | null>(null);
 
-  const historyActionLabels: Record<string, string> = {
-    created: "Creado",
-    updated: "Actualizado",
-    deleted: "Eliminado",
-    restored: "Restaurado",
-  };
-
   const fetchItems = useCallback(async () => {
     if (!canReadWeeklySchedule.value) {
       setItems([]);
@@ -110,10 +93,7 @@ export default function WeeklySchedule() {
       setItems(data.slice(start, end));
       setTotal(data.length);
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_load_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_load_failed");
     } finally {
       setLoading(false);
     }
@@ -199,10 +179,7 @@ export default function WeeklySchedule() {
       setOffset(0);
       fetchItems();
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_upload_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_upload_failed");
     } finally {
       setUploadLoading(false);
     }
@@ -218,10 +195,7 @@ export default function WeeklySchedule() {
       setHistoryItems(data);
     } catch (err) {
       setHistoryOpen(false);
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_history_load_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_history_load_failed");
     } finally {
       setHistoryLoading(false);
     }
@@ -244,10 +218,7 @@ export default function WeeklySchedule() {
       setOffset(0);
       fetchItems();
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_delete_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_delete_failed");
     } finally {
       setConfirmLoading(false);
     }
@@ -261,10 +232,7 @@ export default function WeeklySchedule() {
       setOffset(0);
       fetchItems();
     } catch (err) {
-      addToast(
-        err instanceof ApiError ? t(err.code) : t("weekly_schedule_restore_failed"),
-        "error",
-      );
+      toastApiError(err, "weekly_schedule_restore_failed");
     } finally {
       setRestoreLoadingId(null);
     }
@@ -804,11 +772,11 @@ export default function WeeklySchedule() {
               >
                 <div>
                   <div class="font-medium text-[var(--text-primary)]">
-                    {historyActionLabels[h.action] ?? h.action} por {h.byUsername}
+                    {lastActionLabel[h.action] ?? h.action} por {h.byUsername}
                   </div>
                 </div>
                 <div class="text-xs text-[var(--text-muted)]">
-                  {new Date(h.timestamp).toLocaleString()}
+                  {formatDate(h.timestamp, { withTime: true })}
                 </div>
               </div>
             ))}

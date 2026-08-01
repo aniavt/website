@@ -1,0 +1,19 @@
+{
+  "name": "@ania/domain-shared",
+  "version": "0.0.0",
+  "private": true,
+  "type": "module",
+  "exports": {
+    "./soft-delete": "./src/soft-delete.ts",
+    "./permissions": "./src/permissions.ts",
+    "./anime": "./src/anime.ts",
+    "./weekly-schedule": "./src/weekly-schedule.ts"
+  },
+  "scripts": {
+    "typecheck": "tsc --noEmit"
+  },
+  "devDependencies": {
+    "@types/bun": "latest",
+    "typescript": "^5.7.2"
+  }
+}

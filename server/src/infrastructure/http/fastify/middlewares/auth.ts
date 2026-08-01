@@ -2,8 +2,10 @@ import type { FastifyReply, FastifyRequest } from "fastify";
 import jsonwebtoken from "jsonwebtoken";
 
 import { err, ok, type Result } from "@lib/result";
-import type { IUserUseCases } from "@application/users/IUserUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import type { UserDto } from "@application/users/dto";
+import { toUserDto } from "@application/users/dto";
 import type { UserError } from "@application/users/errors";
 
 import { jwt } from "../config";
@@ -16,16 +18,16 @@ export type UserAuthenticationError =
     | "token_not_found"
     | "token_expired";
 
-// Extension of the FastifyRequest interface to add the user property
 declare module "fastify" {
     interface FastifyRequest {
         user?: UserDto | null;
+        userEntity?: UserEntity | null;
     }
 }
 
-export function authenticate(userUseCases: IUserUseCases) {
+export function authenticate(userRepository: UserRepository) {
     return async (request: FastifyRequest, reply: FastifyReply) =>  {
-        const result = await getUserFromRequest(request, userUseCases);
+        const result = await getUserFromRequest(request, userRepository);
         if (result.isError()) {
             if (result.error.startsWith("token_") || result.error === "user_not_found") {
                 return reply.status(401).send({ error: result.error });
@@ -33,29 +35,38 @@ export function authenticate(userUseCases: IUserUseCases) {
             return reply.status(500).send({ error: result.error });
         }
 
-        request.user = result.data;
+        request.userEntity = result.data;
+        request.user = toUserDto(result.data);
     }
 }
 
 /** Sets request.user when auth succeeds; leaves it undefined when no/invalid token. Does not reply 401. */
-export function optionalAuthenticate(userUseCases: IUserUseCases) {
+export function optionalAuthenticate(userRepository: UserRepository) {
     return async (request: FastifyRequest, _reply: FastifyReply) => {
-        const result = await getUserFromRequest(request, userUseCases);
-        request.user = result.isSuccess() ? result.data : undefined;
+        const result = await getUserFromRequest(request, userRepository);
+        if (result.isSuccess()) {
+            request.userEntity = result.data;
+            request.user = toUserDto(result.data);
+        } else {
+            request.userEntity = undefined;
+            request.user = undefined;
+        }
     }
 }
 
-export async function getUserFromRequest(request: FastifyRequest, userUseCases: IUserUseCases): Promise<Result<UserDto, UserAuthenticationError>> {
+export async function getUserFromRequest(
+    request: FastifyRequest,
+    userRepository: UserRepository,
+): Promise<Result<UserEntity, UserAuthenticationError>> {
     const token = request.cookies.auth;
     if (!token) return err("token_not_found");
 
     const decoded = verifyToken(token);
     if (!decoded) return err("token_verification_failed");
 
-    const result = await userUseCases.getById.execute(decoded.userId);
-    if (result.isError() || !result.data.isActive) return err("user_not_found");
+    const user = await userRepository.findById(decoded.userId);
+    if (!user || !user.isActive) return err("user_not_found");
 
-    const user = result.data;
     if (user.sessionVersion !== decoded.version) return err("token_revoked");
 
     return ok(user);

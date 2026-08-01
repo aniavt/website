@@ -1,5 +1,7 @@
 import { FileEntity } from "@domain/entities/File";
 import type { FileRepository } from "@domain/repositories/FileRepository";
+import { upsertById } from "@infrastructure/shared/upsertById";
+import { mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const fileSchema = new mongoose.Schema({
@@ -8,7 +10,6 @@ const fileSchema = new mongoose.Schema({
     contentType: { type: String, required: true },
     size: { type: Number, required: true },
     url: { type: String, required: true },
-    isPrivate: { type: Boolean, required: true },
 });
 
 interface FileDocument {
@@ -17,7 +18,6 @@ interface FileDocument {
     contentType: string;
     size: number;
     url: string;
-    isPrivate: boolean;
 }
 
 function toDocument(file: FileEntity): FileDocument {
@@ -27,7 +27,6 @@ function toDocument(file: FileEntity): FileDocument {
         contentType: file.contentType,
         size: file.size,
         url: file.url,
-        isPrivate: file.isPrivate,
     };
 }
 
@@ -38,7 +37,6 @@ function toEntity(doc: FileDocument): FileEntity {
         contentType: doc.contentType,
         size: doc.size,
         url: doc.url,
-        isPrivate: doc.isPrivate,
     });
 }
 
@@ -50,21 +48,22 @@ export class MongoDbFileRepository implements FileRepository {
     }
 
     async save(file: FileEntity): Promise<void> {
-        const doc = toDocument(file);
-        const existing = await this.model.findOne({ id: file.id });
-        if (existing) {
-            await this.model.updateOne({ id: file.id }, { $set: doc });
-        } else {
-            await this.model.create(doc);
-        }
+        await upsertById(this.model, toDocument(file));
     }
 
     async findById(id: string): Promise<FileEntity | null> {
-        const doc = await this.model.findOne({ id });
+        const doc = await this.model.findOne({ id }, null, mongoSessionOption());
         return doc ? toEntity(doc) : null;
     }
 
+    async findByIds(ids: string[]): Promise<Map<string, FileEntity>> {
+        const uniqueIds = [...new Set(ids)];
+        if (uniqueIds.length === 0) return new Map();
+        const docs = await this.model.find({ id: { $in: uniqueIds } }, null, mongoSessionOption());
+        return new Map(docs.map((doc) => [doc.id, toEntity(doc)]));
+    }
+
     async delete(id: string): Promise<void> {
-        await this.model.deleteOne({ id });
+        await this.model.deleteOne({ id }, mongoSessionOption());
     }
 }

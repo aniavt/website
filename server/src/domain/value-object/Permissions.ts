@@ -1,14 +1,18 @@
 import { BiMap } from "@lib/bi-map";
+import {
+    PERMISSION_NAMESPACES,
+    PERMISSION_SLUGS,
+    type NamespacedPermissionSlug,
+    type PermissionNamespace,
+} from "@ania/domain-shared/permissions";
 
-
-const mask = (bit: number) => 1 << bit;
-export const namespaces = ["meta", "user", "faq", "weekly_schedule", "vault", "anime", "navItems"] as const;
-
-export type PermissionNamespace = typeof namespaces[number];
+export { PERMISSION_NAMESPACES as namespaces, type PermissionNamespace };
 
 export function isPermissionNamespace(namespace: any): namespace is PermissionNamespace {
-    return namespaces.includes(namespace);
+    return (PERMISSION_NAMESPACES as readonly string[]).includes(namespace);
 }
+
+const mask = (bit: number) => 1 << bit;
 
 export class Permission {
     constructor(protected readonly mask: number = 0) { }
@@ -45,14 +49,14 @@ export class Permission {
         return this.mask;
     }
 
-    getSlugs(namespace: PermissionNamespace): string[] {
-        const slugs: string[] = [];
+    getSlugs<N extends PermissionNamespace>(namespace: N): NamespacedPermissionSlug<N>[] {
+        const slugs: NamespacedPermissionSlug<N>[] = [];
         let m = this.mask;
         let bit = 0;
         while (m > 0) {
             const slug = (this.constructor as typeof Permission).slugMap.get(bit);
             if ((m & 1) === 1 && slug) {
-                slugs.push(`${namespace}.${slug}`);
+                slugs.push(`${namespace}.${slug}` as NamespacedPermissionSlug<N>);
             }
             m >>= 1;
             bit++;
@@ -89,18 +93,18 @@ export class ManagePermission extends Permission {
     static readonly MANAGE_USER = new this(mask(this.getLastBitSlugMap() + 2));
     static readonly MANAGE_FAQ = new this(mask(this.getLastBitSlugMap() + 3));
     static readonly MANAGE_WEEKLY_SCHEDULE = new this(mask(this.getLastBitSlugMap() + 4));
-    static readonly MANAGE_VAULT = new this(mask(this.getLastBitSlugMap() + 5));
+    // bit +5 reserved (was manage_vault) — keep anime/nav_items at +6/+7 for persisted masks
     static readonly MANAGE_ANIME = new this(mask(this.getLastBitSlugMap() + 6));
     static readonly MANAGE_NAVITEMS = new this(mask(this.getLastBitSlugMap() + 7));
 
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, "meta_manage_permissions"],
-        [this.getLastBitSlugMap() + 2, "manage_user"],
-        [this.getLastBitSlugMap() + 3, "manage_faq"],
-        [this.getLastBitSlugMap() + 4, "manage_weekly_schedule"],
-        [this.getLastBitSlugMap() + 5, "manage_vault"],
-        [this.getLastBitSlugMap() + 6, "manage_anime"],
-        [this.getLastBitSlugMap() + 7, "manage_navItems"],
+        [this.getLastBitSlugMap() + 1, PERMISSION_SLUGS.meta[0]],
+        [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.meta[1]],
+        [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.meta[2]],
+        [this.getLastBitSlugMap() + 4, PERMISSION_SLUGS.meta[3]],
+        // bit +5 reserved (was manage_vault)
+        [this.getLastBitSlugMap() + 6, PERMISSION_SLUGS.meta[4]],
+        [this.getLastBitSlugMap() + 7, PERMISSION_SLUGS.meta[5]],
     ]);
 }
 
@@ -116,9 +120,9 @@ export class UserPermission extends Permission {
     );
 
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, "read_user"],
-        [this.getLastBitSlugMap() + 2, "activate_user"],
-        [this.getLastBitSlugMap() + 3, "deactivate_user"],
+        [this.getLastBitSlugMap() + 1, PERMISSION_SLUGS.user[0]],
+        [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.user[1]],
+        [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.user[2]],
     ]);
 }
 
@@ -138,11 +142,11 @@ export class FAQPermission extends Permission {
     );
 
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, "read_faq"],
-        [this.getLastBitSlugMap() + 2, "create_faq"],
-        [this.getLastBitSlugMap() + 3, "delete_faq"],
-        [this.getLastBitSlugMap() + 4, "update_faq"],
-        [this.getLastBitSlugMap() + 5, "restore_faq"],
+        [this.getLastBitSlugMap() + 1, PERMISSION_SLUGS.faq[0]],
+        [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.faq[1]],
+        [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.faq[2]],
+        [this.getLastBitSlugMap() + 4, PERMISSION_SLUGS.faq[3]],
+        [this.getLastBitSlugMap() + 5, PERMISSION_SLUGS.faq[4]],
     ]);
 }
 
@@ -160,28 +164,10 @@ export class WeeklySchedulePermission extends Permission {
     );
 
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, "create_weekly_schedule"],
-        [this.getLastBitSlugMap() + 2, "delete_weekly_schedule"],
-        [this.getLastBitSlugMap() + 3, "update_weekly_schedule"],
-        [this.getLastBitSlugMap() + 4, "read_weekly_schedule_history"],
-    ]);
-}
-
-export class VaultPermission extends Permission {
-    static readonly CREATE_NODE = new this(mask(this.getLastBitSlugMap() + 1));
-    static readonly UPDATE_NODE = new this(mask(this.getLastBitSlugMap() + 2));
-    static readonly DELETE_NODE = new this(mask(this.getLastBitSlugMap() + 3));
-
-    static readonly MANAGE_VAULT = new this().add(
-        this.CREATE_NODE,
-        this.UPDATE_NODE,
-        this.DELETE_NODE,
-    );
-
-    protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, "create_node"],
-        [this.getLastBitSlugMap() + 2, "update_node"],
-        [this.getLastBitSlugMap() + 3, "delete_node"],
+        [this.getLastBitSlugMap() + 1, PERMISSION_SLUGS.weekly_schedule[0]],
+        [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.weekly_schedule[1]],
+        [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.weekly_schedule[2]],
+        [this.getLastBitSlugMap() + 4, PERMISSION_SLUGS.weekly_schedule[3]],
     ]);
 }
 
@@ -201,11 +187,11 @@ export class AnimePermission extends Permission {
     );
 
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, "read_anime"],
-        [this.getLastBitSlugMap() + 2, "create_anime"],
-        [this.getLastBitSlugMap() + 3, "delete_anime"],
-        [this.getLastBitSlugMap() + 4, "update_anime"],
-        [this.getLastBitSlugMap() + 5, "restore_anime"],
+        [this.getLastBitSlugMap() + 1, PERMISSION_SLUGS.anime[0]],
+        [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.anime[1]],
+        [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.anime[2]],
+        [this.getLastBitSlugMap() + 4, PERMISSION_SLUGS.anime[3]],
+        [this.getLastBitSlugMap() + 5, PERMISSION_SLUGS.anime[4]],
     ]);
 }
 
@@ -225,10 +211,10 @@ export class NavItemsPermission extends Permission {
     );
 
     protected static override readonly slugMap: BiMap<number, string> = this.extendSlugMap([
-        [this.getLastBitSlugMap() + 1, "read_navItems"],
-        [this.getLastBitSlugMap() + 2, "create_navItems"],
-        [this.getLastBitSlugMap() + 3, "delete_navItems"],
-        [this.getLastBitSlugMap() + 4, "update_navItems"],
-        [this.getLastBitSlugMap() + 5, "restore_navItems"],
+        [this.getLastBitSlugMap() + 1, PERMISSION_SLUGS.nav_items[0]],
+        [this.getLastBitSlugMap() + 2, PERMISSION_SLUGS.nav_items[1]],
+        [this.getLastBitSlugMap() + 3, PERMISSION_SLUGS.nav_items[2]],
+        [this.getLastBitSlugMap() + 4, PERMISSION_SLUGS.nav_items[3]],
+        [this.getLastBitSlugMap() + 5, PERMISSION_SLUGS.nav_items[4]],
     ]);
 }

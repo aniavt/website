@@ -1,4 +1,4 @@
-export type WeeklyScheduleHistoryAction = "created" | "updated" | "deleted" | "restored";
+import type { WeeklyScheduleHistoryAction } from "@ania/domain-shared/weekly-schedule";
 
 export interface WeeklyScheduleHistoryEntryProps {
     readonly id: string;

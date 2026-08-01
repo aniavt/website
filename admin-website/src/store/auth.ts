@@ -1,28 +1,10 @@
 import { signal, computed } from "@preact/signals";
-import { api } from "@utils";
+import { api } from "@utils/api";
 import { route } from "preact-router";
+import type { UserDto } from "@ania/api-contract/user";
+import type { PermissionNamespace } from "@ania/domain-shared/permissions";
 
-export type PermissionNamespace = "meta" | "user" | "faq" | "weekly_schedule" | "vault" | "anime" | "navItems";
-
-export interface UserPermissions {
-  readonly meta: string[];
-  readonly user: string[];
-  readonly faq: string[];
-  readonly weekly_schedule: string[];
-  readonly vault: string[];
-  readonly anime: string[];
-  readonly navItems : string[];
-}
-
-export interface User {
-  id: string;
-  username: string;
-  createdAt: string;
-  updatedAt: string;
-  isActive: boolean;
-  sessionVersion: number;
-  permissions: UserPermissions;
-}
+export type User = UserDto;
 
 export const user = signal<User | null>(null);
 export const authLoading = signal(true);
@@ -35,7 +17,7 @@ export function userHasPermission(
 ): boolean {
   if (!target) return false;
   const full = `${namespace}.${permission}`;
-  return target.permissions[namespace]?.includes(full) ?? false;
+  return (target.permissions[namespace] as readonly string[] | undefined)?.includes(full) ?? false;
 }
 
 export function hasPermission(namespace: PermissionNamespace, permission: string): boolean {
@@ -45,9 +27,8 @@ export function hasPermission(namespace: PermissionNamespace, permission: string
     case "user": return userHasPermission(user.value, "meta", "manage_user");
     case "faq": return userHasPermission(user.value, "meta", "manage_faq");
     case "weekly_schedule": return userHasPermission(user.value, "meta", "manage_weekly_schedule");
-    case "vault": return userHasPermission(user.value, "meta", "manage_vault");
     case "anime": return userHasPermission(user.value, "meta", "manage_anime");
-    case "navItems" : return userHasPermission(user.value, "meta", "manage_navItems");
+    case "nav_items" : return userHasPermission(user.value, "meta", "manage_nav_items");
   }
 
   return false;
@@ -88,12 +69,8 @@ export const canManageFaqPermissions = computed(() => hasPermission("meta", "man
 export const canManageWeeklySchedulePermissions = computed(() =>
   hasPermission("meta", "manage_weekly_schedule"),
 );
-
-export const canReadVault = computed(() =>
-  hasPermission("vault", "create_node") ||
-  hasPermission("vault", "update_node") ||
-  hasPermission("vault", "delete_node"),
-);
+export const canManageAnimePermissions = computed(() => hasPermission("meta", "manage_anime"));
+export const canManageNavItemsPermissions = computed(() => hasPermission("meta", "manage_nav_items"));
 
 export const canReadAnime = computed(() => hasPermission("anime", "read_anime"));
 export const canCreateAnime = computed(() => hasPermission("anime", "create_anime"));
@@ -101,17 +78,11 @@ export const canUpdateAnime = computed(() => hasPermission("anime", "update_anim
 export const canDeleteAnime = computed(() => hasPermission("anime", "delete_anime"));
 export const canRestoreAnime = computed(() => hasPermission("anime", "restore_anime"));
 
-export const canManageVaultNodes = computed(() =>
-  hasPermission("vault", "create_node") ||
-  hasPermission("vault", "update_node") ||
-  hasPermission("vault", "delete_node"),
-);
-
-export const canReadNavItems = computed(() => hasPermission("navItems", "restore_navItems"));
-export const canCreateNavItems = computed(() => hasPermission("navItems", "create_navItems"));
-export const canUpdateNavItems = computed(() => hasPermission("navItems", "update_navItems"));
-export const canDeleteNavItems = computed(() => hasPermission("navItems", "delete_navItems"));
-export const canRestoreNavItems = computed(() => hasPermission("navItems", "restore_navItems"));
+export const canReadNavItems = computed(() => hasPermission("nav_items", "read_nav_items"));
+export const canCreateNavItems = computed(() => hasPermission("nav_items", "create_nav_items"));
+export const canUpdateNavItems = computed(() => hasPermission("nav_items", "update_nav_items"));
+export const canDeleteNavItems = computed(() => hasPermission("nav_items", "delete_nav_items"));
+export const canRestoreNavItems = computed(() => hasPermission("nav_items", "restore_nav_items"));
 
 export const isRootDerived = computed(
   () =>

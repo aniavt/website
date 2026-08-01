@@ -1,17 +1,22 @@
-export type FaqItemLastAction = "created" | "updated" | "deleted" | "restore";
+import {
+    canTransitionLastAction,
+    type SoftDeleteLastAction,
+} from "@domain/shared/canTransitionLastAction";
+
+export type FaqItemLastAction = SoftDeleteLastAction;
 
 export interface FaqItemProps {
     readonly id: string;
-    readonly queryId: string;
-    readonly answerId: string;
+    queryId: string;
+    answerId: string;
     isActive: boolean;
     lastAction: FaqItemLastAction;
 }
 
 export class FaqItem {
     readonly id: string;
-    readonly queryId: string;
-    readonly answerId: string;
+    queryId: string;
+    answerId: string;
     isActive: boolean;
     lastAction: FaqItemLastAction;
 
@@ -28,15 +33,28 @@ export class FaqItem {
     }
 
     canTransitionTo(action: FaqItemLastAction): boolean {
-        switch (this.lastAction) {
-            case "created":
-            case "updated":
-            case "restore":
-                return action === "updated" || action === "deleted";
-            case "deleted":
-                return action === "restore";
-            default:
-                return false;
-        }
+        return canTransitionLastAction(this.lastAction, action);
+    }
+
+    applyUpdate(queryId: string, answerId: string): boolean {
+        if (!this.canTransitionTo("updated")) return false;
+        this.queryId = queryId;
+        this.answerId = answerId;
+        this.lastAction = "updated";
+        return true;
+    }
+
+    markDeleted(): boolean {
+        if (!this.canTransitionTo("deleted")) return false;
+        this.isActive = false;
+        this.lastAction = "deleted";
+        return true;
+    }
+
+    restore(): boolean {
+        if (!this.canTransitionTo("restore")) return false;
+        this.isActive = true;
+        this.lastAction = "restore";
+        return true;
     }
 }

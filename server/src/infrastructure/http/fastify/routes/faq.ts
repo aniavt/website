@@ -1,97 +1,67 @@
-import type { FastifyReply, FastifySchema } from "fastify";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
+import {
+  CreateFaqItemInputSchema,
+  UpdateFaqItemInputSchema,
+} from "@ania/api-contract/faq";
 import type { RegisterRouteFn } from "../types";
-import type { FaqError } from "@application/faq/errors";
+import { sendFaqError } from "../errors";
 import { authenticate, optionalAuthenticate } from "../middlewares/auth";
+import { ActiveOnlyQuerySchema, IdParamsSchema } from "../route-schemas";
 
 export interface FaqRoutesDependencies {
   userUseCases: IUserUseCases;
+  userRepository: UserRepository;
   faqUseCases: IFaqUseCases;
 }
-
-function mapFaqErrorToHttpCode(error: FaqError): number {
-  switch (error) {
-    case "faq_item_not_found":
-    case "faq_text_not_found":
-      return 404;
-    case "faq_not_authorized":
-      return 401;
-    case "faq_invalid_transition":
-      return 400;
-    case "faq_save_failed":
-      return 500;
-    default:
-      return 500;
-  }
-}
-
-function sendFaqError(reply: FastifyReply, error: FaqError) {
-  return reply.status(mapFaqErrorToHttpCode(error)).send({ error });
-}
-
-const createFaqItemSchema: FastifySchema = {
-  body: {
-    type: "object",
-    required: ["query", "answer"],
-    properties: {
-      query: { type: "string" },
-      answer: { type: "string" },
-    },
-    additionalProperties: false,
-  },
-};
-
-const updateFaqItemSchema: FastifySchema = {
-  body: {
-    type: "object",
-    properties: {
-      query: { type: "string" },
-      answer: { type: "string" },
-    },
-    additionalProperties: false,
-  },
-};
 
 export const registerFaqRoutes: RegisterRouteFn<FaqRoutesDependencies> = (
   app,
   prefixUrl,
-  { userUseCases, faqUseCases },
+  { userRepository, faqUseCases },
 ) => {
   app.post(
     prefixUrl("/faq"),
-    { preHandler: authenticate(userUseCases), schema: createFaqItemSchema },
+    {
+      preHandler: authenticate(userRepository),
+      schema: { body: CreateFaqItemInputSchema },
+    },
     async (request, reply) => {
-      const body = request.body as { query: string; answer: string };
       const result = await faqUseCases.createFaqItem.execute(
-        request.user!.id,
-        body,
+        request.userEntity!,
+        request.body,
       );
       if (result.isError()) return sendFaqError(reply, result.error);
       return reply.status(201).send(result.data);
     },
   );
 
-  app.patch<{ Params: { id: string } }>(
+  app.patch(
     prefixUrl("/faq/:id"),
-    { preHandler: authenticate(userUseCases), schema: updateFaqItemSchema },
+    {
+      preHandler: authenticate(userRepository),
+      schema: { params: IdParamsSchema, body: UpdateFaqItemInputSchema },
+    },
     async (request, reply) => {
-      const body = request.body as { query?: string; answer?: string };
-      const result = await faqUseCases.updateFaqItem.execute(request.user!.id, {
+      const result = await faqUseCases.updateFaqItem.execute(request.userEntity!, {
         id: request.params.id,
-        ...body,
+        ...request.body,
       });
       if (result.isError()) return sendFaqError(reply, result.error);
       return reply.send(result.data);
     },
   );
 
-  app.delete<{ Params: { id: string } }>(
+  app.delete(
     prefixUrl("/faq/:id"),
-    { preHandler: authenticate(userUseCases) },
+    {
+      preHandler: authenticate(userRepository),
+      schema: { params: IdParamsSchema },
+    },
     async (request, reply) => {
       const result = await faqUseCases.deleteFaqItem.execute(
-        request.user!.id,
+        request.userEntity!,
         request.params.id,
       );
       if (result.isError()) return sendFaqError(reply, result.error);
@@ -99,12 +69,15 @@ export const registerFaqRoutes: RegisterRouteFn<FaqRoutesDependencies> = (
     },
   );
 
-  app.post<{ Params: { id: string } }>(
+  app.post(
     prefixUrl("/faq/:id/restore"),
-    { preHandler: authenticate(userUseCases) },
+    {
+      preHandler: authenticate(userRepository),
+      schema: { params: IdParamsSchema },
+    },
     async (request, reply) => {
       const result = await faqUseCases.restoreFaqItem.execute(
-        request.user!.id,
+        request.userEntity!,
         request.params.id,
       );
       if (result.isError()) return sendFaqError(reply, result.error);
@@ -112,22 +85,26 @@ export const registerFaqRoutes: RegisterRouteFn<FaqRoutesDependencies> = (
     },
   );
 
-  app.get<{ Querystring: { activeOnly?: string } }>(
+  app.get(
     prefixUrl("/faq"),
-    { preHandler: optionalAuthenticate(userUseCases) },
+    {
+      preHandler: optionalAuthenticate(userRepository),
+      schema: { querystring: ActiveOnlyQuerySchema },
+    },
     async (request, reply) => {
       const activeOnly = request.query.activeOnly === "true";
-      const requesterId = request.user?.id ?? null;
+      const requester = request.userEntity ?? null;
       const result = !activeOnly
-        ? await faqUseCases.listFaqItems.execute(requesterId, { activeOnly })
+        ? await faqUseCases.listFaqItems.execute(requester, { activeOnly })
         : await faqUseCases.listFaqItems.execute(null, { activeOnly });
       if (result.isError()) return sendFaqError(reply, result.error);
       return reply.send(result.data);
     },
   );
 
-  app.get<{ Params: { id: string } }>(
+  app.get(
     prefixUrl("/faq/:id"),
+    { schema: { params: IdParamsSchema } },
     async (request, reply) => {
       const result = await faqUseCases.getFaqItem.execute(request.params.id);
       if (result.isError()) return sendFaqError(reply, result.error);
@@ -135,12 +112,15 @@ export const registerFaqRoutes: RegisterRouteFn<FaqRoutesDependencies> = (
     },
   );
 
-  app.get<{ Params: { id: string } }>(
+  app.get(
     prefixUrl("/faq/:id/history"),
-    { preHandler: authenticate(userUseCases) },
+    {
+      preHandler: authenticate(userRepository),
+      schema: { params: IdParamsSchema },
+    },
     async (request, reply) => {
       const result = await faqUseCases.getFaqHistory.execute(
-        request.user!.id,
+        request.userEntity!,
         request.params.id,
       );
       if (result.isError()) return sendFaqError(reply, result.error);

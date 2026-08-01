@@ -1,32 +1,38 @@
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import type { IFaqUseCases } from "@application/faq/IFaqUseCases";
 import type { IWeeklyScheduleUseCases } from "@application/weekly_schedule/IWeeklyScheduleUseCases";
-import type { IMediaUseCases } from "@application/media/IMediaUseCases";
-import type { IVaultUseCases } from "@application/vault/IVaultUseCases";
+import type { MediaService } from "@domain/services/MediaService";
 import type { IAnimeUseCases } from "@application/anime/IAnimeUseCases";
 import type { IChapterUseCases } from "@application/chapter/IChapterUseCases";
-import type { INavItemsUseCases } from "@application/navItems/INavItemsUseCases";
+import type { INavItemsUseCases } from "@application/nav_items/INavItemsUseCases";
+import type { UserRepository } from "@domain/repositories/UserRepository";
 import Fastify from "fastify";
 import cookie from "@fastify/cookie";
 import multipart from "@fastify/multipart";
+import {
+    serializerCompiler,
+    validatorCompiler,
+    type ZodTypeProvider,
+} from "fastify-type-provider-zod";
+import { UPLOAD_MAX_FILE_BYTES } from "@ania/api-contract/media";
 
+import { registerDomainErrorHandler } from "./errors";
 import { startRequestLogging, endRequestLogging } from "./middlewares/logger";
 import { registerUserRoutes } from "./routes/user";
 import { registerFaqRoutes } from "./routes/faq";
 import { registerWeeklyScheduleRoutes } from "./routes/weekly_schedule";
 import { registerMediaRoutes } from "./routes/media";
-import { registerVaultRoutes } from "./routes/vault";
 import { registerAnimeRoutes } from "./routes/anime";
 import { registerChapterRoutes } from "./routes/chapter";
-import { registerNavItemsRoutes } from "./routes/navItems";
+import { registerNavItemsRoutes } from "./routes/nav_items";
 
 
 export interface FastifyServerDependencies {
     userUseCases: IUserUseCases;
+    userRepository: UserRepository;
     faqUseCases: IFaqUseCases;
     weeklyScheduleUseCases: IWeeklyScheduleUseCases;
-    mediaUseCases: IMediaUseCases;
-    vaultUseCases: IVaultUseCases;
+    mediaService: MediaService;
     animeUseCases: IAnimeUseCases;
     chapterUseCases: IChapterUseCases;
     navItemsUseCases: INavItemsUseCases;
@@ -37,8 +43,21 @@ export async function createFastifyServer(
     listenHostname: string,
     deps: FastifyServerDependencies
 ): Promise<void> {
-    const { userUseCases, faqUseCases, weeklyScheduleUseCases, mediaUseCases, vaultUseCases, animeUseCases, chapterUseCases, navItemsUseCases } = deps;
-    const app = Fastify({ bodyLimit: 2 * 1024 * 1024 * 1024 }); // 2 GB
+    const {
+        userUseCases,
+        userRepository,
+        faqUseCases,
+        weeklyScheduleUseCases,
+        mediaService,
+        animeUseCases,
+        chapterUseCases,
+        navItemsUseCases,
+    } = deps;
+    const app = Fastify({ bodyLimit: UPLOAD_MAX_FILE_BYTES }).withTypeProvider<ZodTypeProvider>();
+    app.setValidatorCompiler(validatorCompiler);
+    app.setSerializerCompiler(serializerCompiler);
+    registerDomainErrorHandler(app);
+
     const prefixUrl = (path: string) => path === "/" ? "" : path;
 
     app.register(cookie, {
@@ -46,7 +65,7 @@ export async function createFastifyServer(
     });
     app.register(multipart, {
         limits: {
-            fileSize: 2 * 1024 * 1024 * 1024, // 2 GB
+            fileSize: UPLOAD_MAX_FILE_BYTES,
         },
     });
 
@@ -60,15 +79,15 @@ export async function createFastifyServer(
     // Decorate the FastifyRequest interface to add the user property
     // In "middlewares/auth.ts" we declare the type of the user property
     app.decorateRequest("user", null);
+    app.decorateRequest("userEntity", null);
 
-    registerUserRoutes(app, prefixUrl, { userUseCases });
-    registerFaqRoutes(app, prefixUrl, { userUseCases, faqUseCases });
-    registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, weeklyScheduleUseCases, mediaUseCases });
-    registerMediaRoutes(app, prefixUrl, { mediaUseCases });
-    registerVaultRoutes(app, prefixUrl, { userUseCases, vaultUseCases, mediaUseCases });
-    registerAnimeRoutes(app, prefixUrl, { userUseCases, animeUseCases });
-    registerChapterRoutes(app, prefixUrl, { userUseCases, chapterUseCases });
-    registerNavItemsRoutes(app, prefixUrl, { userUseCases, navItemsUseCases });
+    registerUserRoutes(app, prefixUrl, { userUseCases, userRepository });
+    registerFaqRoutes(app, prefixUrl, { userUseCases, userRepository, faqUseCases });
+    registerWeeklyScheduleRoutes(app, prefixUrl, { userUseCases, userRepository, weeklyScheduleUseCases });
+    registerMediaRoutes(app, prefixUrl, { mediaService, userUseCases, userRepository });
+    registerAnimeRoutes(app, prefixUrl, { userUseCases, userRepository, animeUseCases });
+    registerChapterRoutes(app, prefixUrl, { userUseCases, userRepository, chapterUseCases });
+    registerNavItemsRoutes(app, prefixUrl, { userUseCases, userRepository, navItemsUseCases });
 
     await app.listen({ port: listenPort, host: listenHostname }).then(() => {
         console.log(`Server is running on port ${listenPort}`);

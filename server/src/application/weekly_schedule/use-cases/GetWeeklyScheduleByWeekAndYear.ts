@@ -1,11 +1,13 @@
 import type { WeeklyScheduleRepository } from "@domain/repositories/WeeklyScheduleRepository";
 import type { FileRepository } from "@domain/repositories/FileRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import { WeeklySchedulePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { WeeklyScheduleError } from "../errors";
 import type { WeeklyScheduleDto } from "../dto";
 import { toWeeklyScheduleDto } from "../dto";
+import { resolveRequester } from "@application/shared/auth";
 
 
 export class GetWeeklyScheduleByWeekAndYearUseCase {
@@ -15,12 +17,16 @@ export class GetWeeklyScheduleByWeekAndYearUseCase {
         private readonly userRepository: UserRepository,
     ) {}
 
-    async execute(requesterId: string | null, week: number, year: number): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
+    async execute(
+        requester: UserEntity | string | null,
+        week: number,
+        year: number,
+    ): Promise<Result<WeeklyScheduleDto, WeeklyScheduleError>> {
         if (week < 1 || week > 53) return err("weekly_schedule_invalid_week");
 
+        const user = await resolveRequester(this.userRepository, requester);
         const canSeeDeleted =
-            requesterId !== null &&
-            (await this.userRepository.findById(requesterId))?.hasPermission({
+            user?.hasPermission({
                 type: "weekly_schedule",
                 permission: WeeklySchedulePermission.DELETE_WEEKLY_SCHEDULE,
             }) === true;

@@ -2,21 +2,21 @@ import type { FaqTextRepository } from "@domain/repositories/FaqTextRepository";
 import type { FaqItemRepository } from "@domain/repositories/FaqItemRepository";
 import type { FaqHistoryRepository } from "@domain/repositories/FaqHistoryRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
+import type { UserEntity } from "@domain/entities/User";
 import type { IdGenerator } from "@domain/services/IdGenerator";
+import type { TransactionManager } from "@application/shared/TransactionManager";
 import { FaqText } from "@domain/entities/FaqText";
 import { FaqItem } from "@domain/entities/FaqItem";
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import { FAQPermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
 import type { FaqError } from "../errors";
-import type { FaqItemPublicDto } from "../dto";
+import type { FaqItemPublicDto, CreateFaqItemInput } from "../dto";
 import { toFaqItemPublicDto } from "../dto";
+import { assertPermission } from "@application/shared/auth";
+import { saveWithHistory } from "@application/shared/saveWithHistory";
 
-
-export interface CreateFaqItemInput {
-    query: string;
-    answer: string;
-}
+export type { CreateFaqItemInput };
 
 export class CreateFaqItemUseCase {
     constructor(
@@ -25,57 +25,64 @@ export class CreateFaqItemUseCase {
         private readonly faqHistoryRepository: FaqHistoryRepository,
         private readonly userRepository: UserRepository,
         private readonly idGenerator: IdGenerator,
+        private readonly transactionManager: TransactionManager,
     ) {}
 
-    async execute(requesterId: string, input: CreateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
-        const requester = await this.userRepository.findById(requesterId);
-        if (!requester) return err("faq_not_authorized");
-        if (!requester.hasPermission({ type: "faq", permission: FAQPermission.CREATE_FAQ })) return err("faq_not_authorized");
+    async execute(requester: UserEntity | string, input: CreateFaqItemInput): Promise<Result<FaqItemPublicDto, FaqError>> {
+        const auth = await assertPermission(
+            this.userRepository,
+            requester,
+            { type: "faq", permission: FAQPermission.CREATE_FAQ },
+            "faq_not_authorized",
+        );
+        if (auth.isError()) return auth;
 
-        const queryText = await this.findOrCreateFaqText(input.query);
-        const answerText = await this.findOrCreateFaqText(input.answer);
+        let item!: FaqItem;
+        let queryValue!: string;
+        let answerValue!: string;
 
-        if (queryText.isError() || answerText.isError()) return err("faq_save_failed");
+        const saved = await saveWithHistory({
+            tx: this.transactionManager,
+            persist: async () => {
+                const queryText = await this.findOrCreateFaqText(input.query);
+                const answerText = await this.findOrCreateFaqText(input.answer);
 
-        const itemId = this.idGenerator.generateUUID();
-        const item = new FaqItem({
-            id: itemId,
-            queryId: queryText.data.id,
-            answerId: answerText.data.id,
-            isActive: true,
-            lastAction: "created",
+                item = new FaqItem({
+                    id: this.idGenerator.generateUUID(),
+                    queryId: queryText.id,
+                    answerId: answerText.id,
+                    isActive: true,
+                    lastAction: "created",
+                });
+
+                await this.faqItemRepository.save(item);
+                queryValue = queryText.value;
+                answerValue = answerText.value;
+            },
+            append: () =>
+                this.faqHistoryRepository.append(
+                    new FaqHistoryEntry({
+                        id: this.idGenerator.generateUUID(),
+                        faqId: item.id,
+                        queryId: item.queryId,
+                        answerId: item.answerId,
+                        action: "created",
+                        by: auth.data.id,
+                        timestamp: new Date(),
+                    }),
+                ),
+            saveFailed: "faq_save_failed",
         });
+        if (saved.isError()) return saved;
 
-        try {
-            await this.faqItemRepository.save(item);
-            const historyId = this.idGenerator.generateUUID();
-            await this.faqHistoryRepository.append(
-                new FaqHistoryEntry({
-                    id: historyId,
-                    faqId: item.id,
-                    queryId: item.queryId,
-                    answerId: item.answerId,
-                    action: "created",
-                    by: requesterId,
-                    timestamp: new Date(),
-                }),
-            );
-        } catch {
-            return err("faq_save_failed");
-        }
-
-        return ok(toFaqItemPublicDto(item, queryText.data.value, answerText.data.value));
+        return ok(toFaqItemPublicDto(item, queryValue, answerValue));
     }
 
-    private async findOrCreateFaqText(value: string): Promise<Result<FaqText, FaqError>> {
+    private async findOrCreateFaqText(value: string): Promise<FaqText> {
         const existing = await this.faqTextRepository.findByValue(value);
-        if (existing) return ok(existing);
-        try {
-            const text = new FaqText({ id: this.idGenerator.generateUUID(), value });
-            await this.faqTextRepository.save(text);
-            return ok(text);
-        } catch {
-            return err("faq_save_failed");
-        }
+        if (existing) return existing;
+        const text = new FaqText({ id: this.idGenerator.generateUUID(), value });
+        await this.faqTextRepository.save(text);
+        return text;
     }
 }

@@ -4,7 +4,7 @@ import Table, { type Column } from "@components/Table";
 import Button from "@components/Button";
 import Modal from "@components/Modal";
 import Pagination from "@components/Pagination";
-import { addToast } from "@store/toast";
+import { addToast, toastApiError } from "@store/toast";
 import {
    canReadNavItems,
    canCreateNavItems,
@@ -12,17 +12,19 @@ import {
    canDeleteNavItems,
    canRestoreNavItems,
 } from "@store/auth";
+import type {
+   NavItemsDto,
+   CreateNavItemsInput,
+   UpdateNavItemsInput,
+} from "@ania/api-contract/nav-items";
 import {
-   type NavItemsDto,
-   type CreateNavItemsInput,
-   type UpdateNavItemsInput,
    listNavItems,
    createNavItems,
    updateNavItems,
    deleteNavItems,
    restoreNavItems,
-   ApiError,
-} from "@utils";
+} from "@utils/api";
+import { lastActionLabel } from "@utils/labels";
 
 const LIMIT = 15;
 
@@ -55,15 +57,6 @@ export default function NavItems() {
    // ── Restore loading ─────────────────────────────────────────────────────────
    const [restoreLoadingId, setRestoreLoadingId] = useState<string | null>(null);
 
-   // ── Labels ──────────────────────────────────────────────────────────────────
-
-   const lastActionLabel: Record<string, string> = {
-      created: "Creado",
-      updated: "Actualizado",
-      deleted: "Eliminado",
-      restore: "Restaurado",
-   };
-
    // ── Fetch animes ────────────────────────────────────────────────────────────────────────────────────────────────────────────────
    const fetchItems = useCallback(async () => {
       if (!canReadNavItems.value) {
@@ -77,10 +70,7 @@ export default function NavItems() {
          setTotal(data.length);
          setItems(data.slice(offset, offset + LIMIT));
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al cargar la navegación",
-            "error",
-         );
+         toastApiError(err, "Error al cargar la navegación");
       } finally {
          setLoading(false);
       }
@@ -127,10 +117,7 @@ export default function NavItems() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al crear el navItems",
-            "error",
-         );
+         toastApiError(err, "Error al crear el navItems");
       } finally {
          setCreateLoading(false);
       }
@@ -161,10 +148,7 @@ export default function NavItems() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al actualizar la navegacion",
-            "error",
-         );
+         toastApiError(err, "Error al actualizar la navegacion");
       } finally {
          setEditLoading(false);
       }
@@ -189,10 +173,7 @@ export default function NavItems() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al eliminar la navegacion",
-            "error",
-         );
+         toastApiError(err, "Error al eliminar la navegacion");
       } finally {
          setConfirmLoading(false);
       }
@@ -209,10 +190,7 @@ export default function NavItems() {
          setOffset(0);
          fetchItems();
       } catch (err) {
-         addToast(
-            err instanceof ApiError ? err.code : "Error al restaurar la navegacion",
-            "error",
-         );
+         toastApiError(err, "Error al restaurar la navegacion");
       } finally {
          setRestoreLoadingId(null);
       }

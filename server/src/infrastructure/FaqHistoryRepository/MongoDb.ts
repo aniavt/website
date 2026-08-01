@@ -1,5 +1,10 @@
 import { FaqHistoryEntry } from "@domain/entities/FaqHistoryEntry";
 import type { FaqHistoryRepository } from "@domain/repositories/FaqHistoryRepository";
+import {
+    SOFT_DELETE_LAST_ACTIONS,
+    type SoftDeleteLastAction,
+} from "@ania/domain-shared/soft-delete";
+import { getMongoSession, mongoSessionOption } from "@infrastructure/shared/mongoSessionStore";
 import mongoose from "mongoose";
 
 const faqHistorySchema = new mongoose.Schema({
@@ -7,7 +12,7 @@ const faqHistorySchema = new mongoose.Schema({
     faqId: { type: String, required: true },
     queryId: { type: String, required: true },
     answerId: { type: String, required: true },
-    action: { type: String, required: true, enum: ["created", "updated", "deleted", "restore"] },
+    action: { type: String, required: true, enum: [...SOFT_DELETE_LAST_ACTIONS] },
     by: { type: String, required: true },
     timestamp: { type: Date, required: true },
 });
@@ -17,7 +22,7 @@ interface FaqHistoryDocument {
     faqId: string;
     queryId: string;
     answerId: string;
-    action: "created" | "updated" | "deleted" | "restore";
+    action: SoftDeleteLastAction;
     by: string;
     timestamp: Date;
 }
@@ -44,11 +49,20 @@ export class MongoDbFaqHistoryRepository implements FaqHistoryRepository {
     }
 
     async append(entry: FaqHistoryEntry): Promise<void> {
-        await this.model.create(toDocument(entry));
+        const doc = toDocument(entry);
+        const session = getMongoSession();
+        if (session) {
+            await this.model.create([doc], { session });
+        } else {
+            await this.model.create(doc);
+        }
     }
 
     async findByFaqId(faqId: string): Promise<FaqHistoryEntry[]> {
-        const docs = await this.model.find({ faqId }).sort({ timestamp: 1 }).exec();
+        const docs = await this.model
+            .find({ faqId }, null, mongoSessionOption())
+            .sort({ timestamp: 1 })
+            .exec();
         return docs.map((d) => FaqHistoryEntry.fromPersistence(d));
     }
 }

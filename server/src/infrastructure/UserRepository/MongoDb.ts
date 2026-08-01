@@ -12,12 +12,14 @@ const userSchema = new mongoose.Schema({
     updatedAt: { type: Date, required: true },
     isActive: { type: Boolean, required: true, default: true },
     permissions: {
-        meta: { type: [Number], required: true },
-        user: { type: [Number], required: true },
-        faq: { type: [Number], required: true },
+        meta: { type: Number, required: true },
+        user: { type: Number, required: true },
+        faq: { type: Number, required: true },
         weekly_schedule: { type: Number, required: true, default: 0 },
-        vault: { type: Number, required: true, default: 0 },
         anime: { type: Number, required: true, default: 0 },
+        nav_items: { type: Number, required: true, default: 0 },
+        // Legacy camelCase field kept optional for dual-read of old documents.
+        navItems: { type: Number, required: false },
     },
 });
 
@@ -34,8 +36,9 @@ interface UserDocument {
         user: number;
         faq: number;
         weekly_schedule: number;
-        vault: number;
         anime: number;
+        nav_items: number;
+        navItems?: number;
     }
 }
 
@@ -64,10 +67,32 @@ function userToDocument(user: UserEntity): UserDocument {
             user: user.permissions.user.valueOf(),
             faq: user.permissions.faq.valueOf(),
             weekly_schedule: user.permissions.weekly_schedule.valueOf(),
-            vault: user.permissions.vault.valueOf(),
             anime: user.permissions.anime.valueOf(),
+            nav_items: user.permissions.nav_items.valueOf(),
         },
     };
+}
+
+function documentToEntity(doc: UserDocument): UserEntity {
+    // Compatibility: legacy docs may still have permissions.navItems (camelCase).
+    const navItemsMask = doc.permissions.nav_items ?? doc.permissions.navItems ?? 0;
+    return UserEntity.fromPersistence({
+        id: doc.id,
+        username: doc.username,
+        passwordHash: doc.passwordHash,
+        sessionVersion: doc.sessionVersion,
+        createdAt: doc.createdAt,
+        updatedAt: doc.updatedAt,
+        isActive: doc.isActive,
+        permissions: {
+            meta: doc.permissions.meta,
+            user: doc.permissions.user,
+            faq: doc.permissions.faq,
+            weekly_schedule: doc.permissions.weekly_schedule,
+            anime: doc.permissions.anime,
+            nav_items: navItemsMask,
+        },
+    });
 }
 
 
@@ -81,20 +106,30 @@ export class MongoDbUserRepository implements UserRepository {
     async save(user: UserEntity): Promise<void> {
         const existingUser = await this.userModel.findOne({ id: user.id });
         if (existingUser) {
-            await this.userModel.updateOne({ id: user.id }, { $set: userToDocument(user) });
+            await this.userModel.updateOne(
+                { id: user.id },
+                { $set: userToDocument(user) },
+            );
         } else {
             await this.userModel.create(userToDocument(user));
         }
     }
 
     async findById(id: string): Promise<UserEntity | null> {
-        const user = await this.userModel.findOne({ id });
-        return user ? UserEntity.fromPersistence(user) : null;
+        const user = await this.userModel.findOne({ id }).lean<UserDocument>();
+        return user ? documentToEntity(user) : null;
+    }
+
+    async findByIds(ids: string[]): Promise<Map<string, UserEntity>> {
+        const uniqueIds = [...new Set(ids)];
+        if (uniqueIds.length === 0) return new Map();
+        const users = await this.userModel.find({ id: { $in: uniqueIds } }).lean<UserDocument[]>();
+        return new Map(users.map((user) => [user.id, documentToEntity(user)]));
     }
 
     async findByUsername(username: string): Promise<UserEntity | null> {
-        const user = await this.userModel.findOne({ username });
-        return user ? UserEntity.fromPersistence(user) : null;
+        const user = await this.userModel.findOne({ username }).lean<UserDocument>();
+        return user ? documentToEntity(user) : null;
     }
     async delete(id: string): Promise<void> {
         await this.userModel.deleteOne({ id });
@@ -127,7 +162,7 @@ export class MongoDbUserRepository implements UserRepository {
             queryBuilder.sort({ [sortBy]: sort === "asc" ? 1 : -1 });
         }
 
-        const users = await queryBuilder.exec();
-        return users.map(user => UserEntity.fromPersistence(user));
+        const users = await queryBuilder.lean<UserDocument[]>().exec();
+        return users.map(user => documentToEntity(user));
     }
 }
