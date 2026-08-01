@@ -43,10 +43,7 @@ export const registerMediaRoutes: RegisterRouteFn<MediaRoutesDependencies> = (
             }
 
             try {
-                const file = await mediaService.upload({
-                    ...parsed.file,
-                    isPrivate: false,
-                });
+                const file = await mediaService.upload(parsed.file);
                 return reply.status(201).send(toFileDto(file));
             } catch (error) {
                 return sendMediaError(reply, mediaErrorFromUnknown(error, "media_upload_failed"));

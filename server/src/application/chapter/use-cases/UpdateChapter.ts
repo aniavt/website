@@ -1,4 +1,5 @@
 import type { ChapterRepository } from "@domain/repositories/ChapterRepository";
+import type { FileRepository } from "@domain/repositories/FileRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import { AnimePermission } from "@domain/value-object/Permissions";
 import { err, ok, type Result } from "@lib/result";
@@ -6,6 +7,7 @@ import type { ChapterError } from "../errors";
 import type { ChapterDto, UpdateChapterInput as UpdateChapterBody } from "../dto";
 import { toChapterDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
+import { assertMediaUrl } from "@application/shared/assertMediaUrl";
 import { saveOrErr } from "@application/shared/saveOrErr";
 
 export type UpdateChapterInput = UpdateChapterBody & { id: string };
@@ -14,6 +16,7 @@ export class UpdateChapterUseCase {
    constructor(
       private readonly chapterRepository: ChapterRepository,
       private readonly userRepository: UserRepository,
+      private readonly fileRepository: FileRepository,
    ) { }
 
    async execute(requesterId: string, input: UpdateChapterInput): Promise<Result<ChapterDto, ChapterError>> {
@@ -27,6 +30,24 @@ export class UpdateChapterUseCase {
 
       const chapter = await this.chapterRepository.findById(input.id);
       if (!chapter) return err("chapter_not_found");
+
+      if (input.coverImageURL !== undefined) {
+         const cover = await assertMediaUrl(
+            this.fileRepository,
+            input.coverImageURL,
+            "chapter_file_not_found",
+         );
+         if (cover.isError()) return cover;
+      }
+
+      if (input.videoURL !== undefined) {
+         const video = await assertMediaUrl(
+            this.fileRepository,
+            input.videoURL,
+            "chapter_file_not_found",
+         );
+         if (video.isError()) return video;
+      }
 
       chapter.applyUpdate({
          number: input.number,

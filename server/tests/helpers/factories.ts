@@ -168,7 +168,6 @@ export function createChapter(opts?: {
 
 export function createFile(opts?: {
   id?: string;
-  isPrivate?: boolean;
 }): FileEntity {
   return new FileEntity({
     id: opts?.id ?? "file-1",
@@ -176,7 +175,6 @@ export function createFile(opts?: {
     contentType: "image/png",
     size: 100,
     url: `https://fake.local/${opts?.id ?? "file-1"}`,
-    isPrivate: opts?.isPrivate ?? false,
   });
 }
 

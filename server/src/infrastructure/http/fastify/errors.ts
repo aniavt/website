@@ -42,6 +42,7 @@ const ANIME_ERROR_STATUS: Partial<Record<AnimeError, number>> = {
     anime_not_authorized: 403,
     anime_invalid_transition: 400,
     anime_save_failed: 500,
+    anime_file_not_found: 404,
 };
 
 export function sendAnimeError(reply: FastifyReply, error: AnimeError) {
@@ -66,6 +67,7 @@ const CHAPTER_ERROR_STATUS: Partial<Record<ChapterError, number>> = {
     chapter_not_authorized: 403,
     chapter_save_failed: 500,
     chapter_delete_failed: 500,
+    chapter_file_not_found: 404,
 };
 
 export function sendChapterError(reply: FastifyReply, error: ChapterError) {

@@ -66,7 +66,7 @@ describe("UploadAndUpdateWeeklyScheduleUseCase", () => {
         grants: [{ type: "weekly_schedule", permission: WeeklySchedulePermission.UPDATE_WEEKLY_SCHEDULE }],
       }),
     );
-    await files.save(createFile({ id: "old-file", isPrivate: false }));
+    await files.save(createFile({ id: "old-file" }));
     await schedules.save(
       createWeeklySchedule({ id: "ws-1", week: wy.week, year: wy.year, fileId: "old-file" }),
     );
@@ -90,7 +90,7 @@ describe("UploadAndUpdateWeeklyScheduleUseCase", () => {
         grants: [{ type: "weekly_schedule", permission: WeeklySchedulePermission.UPDATE_WEEKLY_SCHEDULE }],
       }),
     );
-    await fileRepo.save(createFile({ id: "old-file", isPrivate: false }));
+    await fileRepo.save(createFile({ id: "old-file" }));
     await repo.save(createWeeklySchedule({ id: "ws-past", week: 1, year: 2020, fileId: "old-file" }));
     const updateUc = new UpdateWeeklyScheduleUseCase(
       repo,
@@ -115,7 +115,7 @@ describe("UploadAndUpdateWeeklyScheduleUseCase", () => {
         grants: [{ type: "weekly_schedule", permission: WeeklySchedulePermission.UPDATE_WEEKLY_SCHEDULE }],
       }),
     );
-    await files.save(createFile({ id: "old-file", isPrivate: false }));
+    await files.save(createFile({ id: "old-file" }));
     await schedules.save(
       createWeeklySchedule({ id: "ws-1", week: wy.week, year: wy.year, fileId: "old-file" }),
     );

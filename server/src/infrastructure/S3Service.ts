@@ -22,14 +22,13 @@ export class S3Service implements ObjectStorage {
     contentType,
     size,
     body,
-    isPrivate,
   }: UploadParams): Promise<FileEntity> {
     const id = this.idGenerator.generateUUID();
     const command = new PutObjectCommand({
       Bucket: this.bucketName,
       Key: id,
       Body: body,
-      ACL: isPrivate ? "private" : "public-read",
+      ACL: "public-read",
       ContentType: contentType,
     });
 
@@ -40,7 +39,6 @@ export class S3Service implements ObjectStorage {
       contentType,
       name,
       size,
-      isPrivate,
       url: `/api/media/${id}`,
     });
   }

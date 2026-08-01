@@ -46,7 +46,6 @@ export class UpdateWeeklyScheduleUseCase {
         if (input.fileId !== undefined) {
             const file = await this.fileRepository.findById(input.fileId);
             if (!file) return err("weekly_schedule_file_not_found");
-            if (file.isPrivate) return err("weekly_schedule_file_not_found");
             fileId = input.fileId;
         }
 

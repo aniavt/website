@@ -16,7 +16,7 @@ describe("GetWeeklyScheduleByIdUseCase", () => {
     const schedules = new InMemoryWeeklyScheduleRepository();
     const files = new InMemoryFileRepository();
     const users = new InMemoryUserRepository();
-    await files.save(createFile({ id: "file-1", isPrivate: false }));
+    await files.save(createFile({ id: "file-1" }));
     await schedules.save(createWeeklySchedule({ id: "ws-active", fileId: "file-1" }));
     await schedules.save(
       createWeeklySchedule({ id: "ws-deleted", isDeleted: true, fileId: "file-1" }),

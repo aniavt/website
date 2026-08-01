@@ -35,8 +35,7 @@ describe("CreateWeeklyScheduleUseCase", () => {
         grants: [{ type: "weekly_schedule", permission: WeeklySchedulePermission.CREATE_WEEKLY_SCHEDULE }],
       }),
     );
-    await files.save(createFile({ id: "file-public", isPrivate: false }));
-    await files.save(createFile({ id: "file-private", isPrivate: true }));
+    await files.save(createFile({ id: "file-public" }));
     const uc = new CreateWeeklyScheduleUseCase(schedules, history, files, users, idGen, tx);
     return { schedules, history, files, users, uc };
   }
@@ -67,13 +66,9 @@ describe("CreateWeeklyScheduleUseCase", () => {
     expectErr(await uc.execute("admin", { week: 54, year, fileId: "file-public" }), "weekly_schedule_invalid_week");
   });
 
-  test("rejects private or missing file", async () => {
+  test("rejects missing file", async () => {
     const { uc } = await setup();
     const { week, year } = futureWeekYear();
-    expectErr(
-      await uc.execute("admin", { week, year, fileId: "file-private" }),
-      "weekly_schedule_file_not_found",
-    );
     expectErr(
       await uc.execute("admin", { week, year, fileId: "missing" }),
       "weekly_schedule_file_not_found",

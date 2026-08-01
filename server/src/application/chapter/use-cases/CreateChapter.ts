@@ -1,5 +1,6 @@
 import type { ChapterRepository } from "@domain/repositories/ChapterRepository";
 import type { AnimeRepository } from "@domain/repositories/AnimeRepository";
+import type { FileRepository } from "@domain/repositories/FileRepository";
 import type { UserRepository } from "@domain/repositories/UserRepository";
 import type { IdGenerator } from "@domain/services/IdGenerator";
 import { Chapter } from "@domain/entities/Chapter";
@@ -9,6 +10,7 @@ import type { ChapterError } from "../errors";
 import type { ChapterDto, CreateChapterInput as CreateChapterBody } from "../dto";
 import { toChapterDto } from "../dto";
 import { assertPermission } from "@application/shared/auth";
+import { assertMediaUrl } from "@application/shared/assertMediaUrl";
 
 export type CreateChapterInput = CreateChapterBody & { animeId: string };
 
@@ -18,6 +20,7 @@ export class CreateChapterUseCase {
       private readonly animeRepository: AnimeRepository,
       private readonly userRepository: UserRepository,
       private readonly idGenerator: IdGenerator,
+      private readonly fileRepository: FileRepository,
    ) { }
 
    async execute(requesterId: string, input: CreateChapterInput): Promise<Result<ChapterDto, ChapterError>> {
@@ -31,6 +34,20 @@ export class CreateChapterUseCase {
 
       const anime = await this.animeRepository.findById(input.animeId);
       if (!anime) return err("anime_not_found");
+
+      const cover = await assertMediaUrl(
+         this.fileRepository,
+         input.coverImageURL,
+         "chapter_file_not_found",
+      );
+      if (cover.isError()) return cover;
+
+      const video = await assertMediaUrl(
+         this.fileRepository,
+         input.videoURL,
+         "chapter_file_not_found",
+      );
+      if (video.isError()) return video;
 
       const now = new Date();
       const chapter = new Chapter({

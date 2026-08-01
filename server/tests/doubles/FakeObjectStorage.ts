@@ -15,7 +15,6 @@ export class FakeObjectStorage implements ObjectStorage {
       contentType: params.contentType,
       size: params.size,
       url: `https://fake.local/${id}`,
-      isPrivate: params.isPrivate,
     });
     this.files.set(id, file);
     return file;

@@ -50,7 +50,6 @@ export class CreateWeeklyScheduleUseCase {
 
         const file = await this.fileRepository.findById(input.fileId);
         if (!file) return err("weekly_schedule_file_not_found");
-        if (file.isPrivate) return err("weekly_schedule_file_not_found");
 
         const existing = await this.weeklyScheduleRepository.findByWeekAndYear(input.week, input.year);
         if (existing) return err("weekly_schedule_duplicate_week_year");

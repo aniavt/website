@@ -14,14 +14,15 @@ import { MongoDbAnimeRepository } from "@infrastructure/AnimeRepository/MongoDb"
 import { MongoDbChapterRepository } from "@infrastructure/ChapterRepository/MongoDb";
 
 import { mongoClient, idGenerator } from "./infra";
+import { fileRepository } from "./media";
 import { userRepository } from "./users";
 
 const animeRepository = new MongoDbAnimeRepository(mongoClient);
 const chapterRepository = new MongoDbChapterRepository(mongoClient);
 
 export const animeUseCases: IAnimeUseCases = {
-    createAnime: new CreateAnimeUseCase(animeRepository, userRepository, idGenerator),
-    updateAnime: new UpdateAnimeUseCase(animeRepository, userRepository),
+    createAnime: new CreateAnimeUseCase(animeRepository, userRepository, idGenerator, fileRepository),
+    updateAnime: new UpdateAnimeUseCase(animeRepository, userRepository, fileRepository),
     deleteAnime: new DeleteAnimeUseCase(animeRepository, userRepository),
     restoreAnime: new RestoreAnimeUseCase(animeRepository, userRepository),
     listAnimes: new ListAnimesUseCase(animeRepository, userRepository),
@@ -29,8 +30,14 @@ export const animeUseCases: IAnimeUseCases = {
 };
 
 export const chapterUseCases: IChapterUseCases = {
-    createChapter: new CreateChapterUseCase(chapterRepository, animeRepository, userRepository, idGenerator),
-    updateChapter: new UpdateChapterUseCase(chapterRepository, userRepository),
+    createChapter: new CreateChapterUseCase(
+        chapterRepository,
+        animeRepository,
+        userRepository,
+        idGenerator,
+        fileRepository,
+    ),
+    updateChapter: new UpdateChapterUseCase(chapterRepository, userRepository, fileRepository),
     deleteChapter: new DeleteChapterUseCase(chapterRepository, userRepository),
     listChaptersByAnime: new ListChaptersByAnimeUseCase(chapterRepository),
 };

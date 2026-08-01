@@ -10,7 +10,6 @@ const fileSchema = new mongoose.Schema({
     contentType: { type: String, required: true },
     size: { type: Number, required: true },
     url: { type: String, required: true },
-    isPrivate: { type: Boolean, required: true },
 });
 
 interface FileDocument {
@@ -19,7 +18,6 @@ interface FileDocument {
     contentType: string;
     size: number;
     url: string;
-    isPrivate: boolean;
 }
 
 function toDocument(file: FileEntity): FileDocument {
@@ -29,7 +27,6 @@ function toDocument(file: FileEntity): FileDocument {
         contentType: file.contentType,
         size: file.size,
         url: file.url,
-        isPrivate: file.isPrivate,
     };
 }
 
@@ -40,7 +37,6 @@ function toEntity(doc: FileDocument): FileEntity {
         contentType: doc.contentType,
         size: doc.size,
         url: doc.url,
-        isPrivate: doc.isPrivate,
     });
 }
 

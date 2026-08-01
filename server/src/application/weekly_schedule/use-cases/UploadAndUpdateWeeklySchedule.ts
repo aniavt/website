@@ -12,7 +12,7 @@ export type UploadAndUpdateWeeklyScheduleError = MediaError | WeeklyScheduleErro
 
 export interface UploadAndUpdateWeeklyScheduleInput {
     readonly id: string;
-    readonly file: Omit<UploadParams, "isPrivate">;
+    readonly file: UploadParams;
 }
 
 export class UploadAndUpdateWeeklyScheduleUseCase {
@@ -31,10 +31,7 @@ export class UploadAndUpdateWeeklyScheduleUseCase {
 
         let fileId: string;
         try {
-            const file = await this.mediaService.upload({
-                ...input.file,
-                isPrivate: false,
-            });
+            const file = await this.mediaService.upload(input.file);
             fileId = file.id;
         } catch (error) {
             return err(mediaErrorFromUnknown(error, "media_upload_failed"));

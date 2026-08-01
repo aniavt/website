@@ -10,6 +10,5 @@ export function toFileDto(file: FileEntity): FileDto {
         contentType: file.contentType,
         size: file.size,
         url: file.url,
-        isPrivate: file.isPrivate,
     };
 }

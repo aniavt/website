@@ -35,9 +35,8 @@ describe("UpdateWeeklyScheduleUseCase", () => {
         grants: [{ type: "weekly_schedule", permission: WeeklySchedulePermission.UPDATE_WEEKLY_SCHEDULE }],
       }),
     );
-    await files.save(createFile({ id: "file-1", isPrivate: false }));
-    await files.save(createFile({ id: "file-2", isPrivate: false }));
-    await files.save(createFile({ id: "file-private", isPrivate: true }));
+    await files.save(createFile({ id: "file-1" }));
+    await files.save(createFile({ id: "file-2" }));
     const wy = weekYear ?? futureWeekYear();
     await schedules.save(createWeeklySchedule({ id: "ws-1", week: wy.week, year: wy.year, fileId: "file-1" }));
     const uc = new UpdateWeeklyScheduleUseCase(schedules, history, files, users, idGen, tx);
@@ -65,13 +64,13 @@ describe("UpdateWeeklyScheduleUseCase", () => {
     );
   });
 
-  test("unauthorized / not found / private file", async () => {
+  test("unauthorized / not found / missing file", async () => {
     const { users, uc } = await setup();
     await users.save(createUser({ id: "noperm" }));
     expectErr(await uc.execute("noperm", { id: "ws-1", title: "X" }), "weekly_schedule_not_authorized");
     expectErr(await uc.execute("admin", { id: "missing", title: "X" }), "weekly_schedule_not_found");
     expectErr(
-      await uc.execute("admin", { id: "ws-1", fileId: "file-private" }),
+      await uc.execute("admin", { id: "ws-1", fileId: "missing-file" }),
       "weekly_schedule_file_not_found",
     );
   });

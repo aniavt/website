@@ -13,7 +13,6 @@ describe("StoredMediaService", () => {
         contentType: "image/png",
         size: 100,
         body: new Uint8Array([1]),
-        isPrivate: false,
       }),
     ).rejects.toThrow("media_invalid_input");
     await expect(
@@ -22,7 +21,6 @@ describe("StoredMediaService", () => {
         contentType: "image/png",
         size: 0,
         body: new Uint8Array(),
-        isPrivate: false,
       }),
     ).rejects.toThrow("media_invalid_input");
   });
@@ -36,10 +34,8 @@ describe("StoredMediaService", () => {
       contentType: "image/png",
       size: 42,
       body: new Uint8Array([1, 2, 3]),
-      isPrivate: true,
     });
     expect(file.name).toBe("cover.png");
-    expect(file.isPrivate).toBe(true);
     expect(await files.findById(file.id)).not.toBeNull();
   });
 
