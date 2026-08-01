@@ -12,9 +12,9 @@ const userSchema = new mongoose.Schema({
     updatedAt: { type: Date, required: true },
     isActive: { type: Boolean, required: true, default: true },
     permissions: {
-        meta: { type: [Number], required: true },
-        user: { type: [Number], required: true },
-        faq: { type: [Number], required: true },
+        meta: { type: Number, required: true },
+        user: { type: Number, required: true },
+        faq: { type: Number, required: true },
         weekly_schedule: { type: Number, required: true, default: 0 },
         anime: { type: Number, required: true, default: 0 },
         nav_items: { type: Number, required: true, default: 0 },
@@ -108,10 +108,7 @@ export class MongoDbUserRepository implements UserRepository {
         if (existingUser) {
             await this.userModel.updateOne(
                 { id: user.id },
-                {
-                    $set: userToDocument(user),
-                    $unset: { "permissions.navItems": "" },
-                },
+                { $set: userToDocument(user) },
             );
         } else {
             await this.userModel.create(userToDocument(user));

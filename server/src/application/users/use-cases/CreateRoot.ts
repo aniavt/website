@@ -45,6 +45,8 @@ export class CreateRootUseCase {
             ManagePermission.MANAGE_USER,
             ManagePermission.MANAGE_FAQ,
             ManagePermission.MANAGE_WEEKLY_SCHEDULE,
+            ManagePermission.MANAGE_ANIME,
+            ManagePermission.MANAGE_NAVITEMS,
         );
         
         user.permissions.user = new UserPermission().add(UserPermission.MANAGE_USER);

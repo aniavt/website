@@ -16,6 +16,7 @@ import {
 } from "fastify-type-provider-zod";
 import { UPLOAD_MAX_FILE_BYTES } from "@ania/api-contract/media";
 
+import { registerDomainErrorHandler } from "./errors";
 import { startRequestLogging, endRequestLogging } from "./middlewares/logger";
 import { registerUserRoutes } from "./routes/user";
 import { registerFaqRoutes } from "./routes/faq";
@@ -55,6 +56,7 @@ export async function createFastifyServer(
     const app = Fastify({ bodyLimit: UPLOAD_MAX_FILE_BYTES }).withTypeProvider<ZodTypeProvider>();
     app.setValidatorCompiler(validatorCompiler);
     app.setSerializerCompiler(serializerCompiler);
+    registerDomainErrorHandler(app);
 
     const prefixUrl = (path: string) => path === "/" ? "" : path;
 

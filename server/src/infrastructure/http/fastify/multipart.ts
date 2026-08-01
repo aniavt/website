@@ -29,57 +29,64 @@ function isAllowedMime(mimetype: string): mimetype is UploadAllowedMimeType {
     return (UPLOAD_ALLOWED_MIME_TYPES as readonly string[]).includes(mimetype);
 }
 
-function fieldValues(fields: Record<string, unknown>): Record<string, unknown> {
-    const out: Record<string, unknown> = {};
-    for (const [key, part] of Object.entries(fields)) {
-        if (part && typeof part === "object" && "value" in part) {
-            out[key] = (part as { value: unknown }).value;
-        } else {
-            out[key] = part;
-        }
-    }
-    return out;
-}
-
-async function readValidatedFile(
+async function readValidatedMultipart(
     request: FastifyRequest,
 ): Promise<{ ok: true; file: MultipartFilePayload; rawFields: Record<string, unknown> } | ParseMultipartErr> {
-    const file = await request.file();
-    if (!file) {
-        return { ok: false, error: "media_invalid_input" };
-    }
+    // Iterate all parts so field order relative to the file does not matter,
+    // and so the file part is never mixed into schema field values (.strict()).
+    const rawFields: Record<string, unknown> = {};
+    let filePayload: MultipartFilePayload | null = null;
 
-    const name = file.filename?.trim() ?? "";
-    if (!name || name.length > UPLOAD_FILENAME_MAX) {
-        return { ok: false, error: "media_invalid_input" };
-    }
-
-    if (!isAllowedMime(file.mimetype)) {
-        return { ok: false, error: "media_invalid_input" };
-    }
-
-    let buffer: Buffer;
     try {
-        buffer = await file.toBuffer();
+        for await (const part of request.parts()) {
+            if (part.type === "file") {
+                if (filePayload) {
+                    // Drain extra file streams; only the first file is accepted.
+                    await part.toBuffer().catch(() => undefined);
+                    continue;
+                }
+
+                const name = part.filename?.trim() ?? "";
+                if (!name || name.length > UPLOAD_FILENAME_MAX) {
+                    return { ok: false, error: "media_invalid_input" };
+                }
+                if (!isAllowedMime(part.mimetype)) {
+                    return { ok: false, error: "media_invalid_input" };
+                }
+
+                let buffer: Buffer;
+                try {
+                    buffer = await part.toBuffer();
+                } catch (error) {
+                    console.error("media_invalid_input", error);
+                    return { ok: false, error: "media_invalid_input" };
+                }
+
+                if (buffer.length <= 0 || buffer.length > UPLOAD_MAX_FILE_BYTES) {
+                    return { ok: false, error: "media_invalid_input" };
+                }
+
+                filePayload = {
+                    name,
+                    contentType: part.mimetype,
+                    size: buffer.length,
+                    body: buffer,
+                };
+                continue;
+            }
+
+            rawFields[part.fieldname] = part.value;
+        }
     } catch (error) {
         console.error("media_invalid_input", error);
         return { ok: false, error: "media_invalid_input" };
     }
 
-    if (buffer.length <= 0 || buffer.length > UPLOAD_MAX_FILE_BYTES) {
+    if (!filePayload) {
         return { ok: false, error: "media_invalid_input" };
     }
 
-    return {
-        ok: true,
-        file: {
-            name,
-            contentType: file.mimetype,
-            size: buffer.length,
-            body: buffer,
-        },
-        rawFields: fieldValues(file.fields as Record<string, unknown>),
-    };
+    return { ok: true, file: filePayload, rawFields };
 }
 
 /** Read one multipart file; enforce size/MIME/filename. */
@@ -94,7 +101,7 @@ export async function parseMultipartFile<TFields>(
     request: FastifyRequest,
     options?: { fieldsSchema: ZodType<TFields> },
 ): Promise<ParseMultipartOk<TFields | undefined> | ParseMultipartErr> {
-    const validated = await readValidatedFile(request);
+    const validated = await readValidatedMultipart(request);
     if (!validated.ok) {
         return validated;
     }

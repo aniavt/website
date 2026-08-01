@@ -11,7 +11,7 @@ import { UpdatePasswordUseCase } from "@application/users/use-cases/UpdatePasswo
 import { IncrementSessionVersionUseCase } from "@application/users/use-cases/IncrementSessionVersion";
 import type { IUserUseCases } from "@application/users/IUserUseCases";
 import { registerUserAuthRoutes } from "@infrastructure/http/fastify/routes/user/auth";
-import { sendUserError } from "@infrastructure/http/fastify/errors";
+import { registerDomainErrorHandler, sendUserError } from "@infrastructure/http/fastify/errors";
 import { InMemoryUserRepository } from "../doubles/InMemoryUserRepository";
 import { FakeSecureHasher } from "../doubles/FakeSecureHasher";
 import { FakeIdGenerator } from "../doubles/FakeIdGenerator";
@@ -30,6 +30,7 @@ export async function buildAuthTestApp(users = new InMemoryUserRepository()) {
   const app = Fastify().withTypeProvider<ZodTypeProvider>();
   app.setValidatorCompiler(validatorCompiler);
   app.setSerializerCompiler(serializerCompiler);
+  registerDomainErrorHandler(app);
   await app.register(cookie);
   app.decorateRequest("user", null);
   app.decorateRequest("userEntity", null);

@@ -28,4 +28,19 @@ describe("sendDomainError / user error mapping", () => {
 
     await app.close();
   });
+
+  test("Zod validation errors unify to { error: invalid_input }", async () => {
+    const { app } = await buildAuthTestApp();
+
+    const res = await app.inject({
+      method: "POST",
+      url: "/login",
+      payload: { username: 1 },
+    });
+
+    expect(res.statusCode).toBe(400);
+    expect(res.json() as { error: string }).toEqual({ error: "invalid_input" });
+
+    await app.close();
+  });
 });

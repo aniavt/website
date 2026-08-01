@@ -1,4 +1,4 @@
-import type { FastifyReply } from "fastify";
+import type { FastifyError, FastifyInstance, FastifyReply } from "fastify";
 import type { AnimeError } from "@application/anime/errors";
 import type { ChapterError } from "@application/chapter/errors";
 import type { FaqError } from "@application/faq/errors";
@@ -13,6 +13,16 @@ export function mapErrorToHttpCode<E extends string>(
     fallback = 500,
 ): number {
     return statusByError[error] ?? fallback;
+}
+
+/** Map Zod/Fastify validation failures to domain `{ error: "invalid_input" }`. */
+export function registerDomainErrorHandler(app: FastifyInstance): void {
+    app.setErrorHandler((error: FastifyError, _request, reply) => {
+        if (error.code === "FST_ERR_VALIDATION" || error.validation) {
+            return reply.status(400).send({ error: "invalid_input" });
+        }
+        return reply.send(error);
+    });
 }
 
 export function sendDomainError<E extends string>(
