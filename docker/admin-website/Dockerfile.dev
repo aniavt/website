@@ -4,4 +4,4 @@ WORKDIR /workspace
 
 ENV NODE_ENV=development
 
-CMD ["sh", "-lc", "bun install && bun run --cwd admin-website dev"]
+CMD ["sh", "-lc", "apk add --no-cache nodejs npm && npm install -g pnpm@11.4.0 && pnpm install && bun run --cwd admin-website dev"]

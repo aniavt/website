@@ -4,4 +4,4 @@ WORKDIR /workspace
 
 ENV NODE_ENV=development
 
-CMD ["sh", "-lc", "bun install && bun run --cwd server --watch src/index.ts"]
+CMD ["sh", "-lc", "apk add --no-cache nodejs npm && npm install -g pnpm@11.4.0 && pnpm install && cd server && bun --preload ./src/bun-polyfills.ts --watch src/index.ts"]

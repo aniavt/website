@@ -1,6 +1,6 @@
 #!/usr/bin/env bash
-# Fail if a Bun app Dockerfile is missing COPY lines for:
-# - every root app workspace package.json (Bun requires them for install)
+# Fail if an app Dockerfile is missing COPY lines for:
+# - every root app workspace package.json (pnpm workspace install)
 # - package.json of every @ania/* workspace dep used by any app (sibling manifests)
 # - source of @ania/* deps used by that app only (selective)
 set -euo pipefail
@@ -20,8 +20,8 @@ errors=0
 
 ania_workspace_deps() {
   local pkg_json="$1"
-  bun -e "
-    const pkg = await Bun.file('${pkg_json}').json();
+  node -e "
+    const pkg = require('./${pkg_json}');
     const deps = { ...pkg.dependencies, ...pkg.devDependencies };
     for (const [name, version] of Object.entries(deps ?? {})) {
       if (version === 'workspace:*' && name.startsWith('@ania/')) {

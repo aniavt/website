@@ -1,5 +1,6 @@
 data/
 .env
+docker/mongo-keyfile
 node_modules/
 __pycache__/
 backup/

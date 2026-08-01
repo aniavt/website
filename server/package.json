@@ -21,13 +21,13 @@
     "fastify": "^5.8.1",
     "fastify-type-provider-zod": "^7.0.0",
     "jsonwebtoken": "^9.0.3",
-    "mongoose": "^9.2.4",
+    "mongoose": "9.8.1",
     "zod": "^4.4.3"
   },
   "scripts": {
-    "server": "bun run --watch src/index.ts",
-    "cli": "bun run src/index.ts --cli",
-    "cli:dev": "bun run --watch src/index.ts --cli --interactive",
+    "server": "bun --preload ./src/bun-polyfills.ts --watch src/index.ts",
+    "cli": "bun --preload ./src/bun-polyfills.ts src/index.ts --cli",
+    "cli:dev": "bun --preload ./src/bun-polyfills.ts --watch src/index.ts --cli --interactive",
     "test": "bun test tests",
     "test:domain": "bun test tests/domain",
     "test:application": "bun test tests/application",

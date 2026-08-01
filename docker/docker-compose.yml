@@ -29,7 +29,7 @@ services:
   db:
     image: mongo:8.0
     container_name: ania_db_mongo
-    command: ["--replSet", "rs0", "--bind_ip_all"]
+    entrypoint: ["/bin/sh", "/mongo-entrypoint.sh"]
     healthcheck:
       test:
         [
@@ -46,6 +46,8 @@ services:
       - "27017"
     volumes:
       - ../data/db:/data/db
+      - ./mongo-keyfile:/etc/mongo-keyfile-src:ro
+      - ./mongo-entrypoint.sh:/mongo-entrypoint.sh:ro
     environment:
       MONGO_INITDB_ROOT_USERNAME: ${MONGO_INITDB_ROOT_USERNAME}
       MONGO_INITDB_ROOT_PASSWORD: ${MONGO_INITDB_ROOT_PASSWORD}
